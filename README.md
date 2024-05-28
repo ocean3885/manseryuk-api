@@ -1,4 +1,5 @@
 # manseryuk-api
-test 2
 
-npx tailwindcss -i ./static/src/input.css -o ./static/src/output.css --watch
+uvicorn main:app --host 0.0.0.0 --port 80 --reload
+
+supervisord -c /etc/supervisord.conf
