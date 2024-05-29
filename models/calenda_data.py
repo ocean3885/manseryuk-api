@@ -4,6 +4,7 @@ from database import Base
 class CalendaData(Base):
     __tablename__ = "calenda_data"
     
+    cd_no = Column(Integer, primary_key=True, index=True)
     cd_sy = Column(Integer, primary_key=True, index=True)
     cd_sm = Column(String, primary_key=True, index=True)
     cd_sd = Column(String, primary_key=True, index=True)
