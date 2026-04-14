@@ -1,8 +1,8 @@
-from calculator import gan_to_hanja, ji_to_hanja
+from services.calculator import gan_to_hanja, ji_to_hanja
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from models.calenda_data import CalendaData
-from dependencies import get_db
+from core.dependencies import get_db
 
 
 def getDaewoon(gen, ygan, mgan, mji):

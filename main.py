@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import calenda_data
+from routers import root
 
 app = FastAPI()
 
@@ -14,4 +14,4 @@ app.add_middleware(
 )
 
 # 라우터 등록
-app.include_router(calenda_data.router)
+app.include_router(root.router)

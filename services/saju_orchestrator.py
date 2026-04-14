@@ -1,15 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from dependencies import get_db
 from models.calenda_data import CalendaData
-from daewoon import *
-from calculator import *
+from services.daewoon import getDaewoon, daewoonNum, get_time_gan, gankr_to_ch, jikr_to_ch
+from services.calculator import descending_tens, find_ten_god, find_stem_branch_ten_god, generate_future_cycles, generate_baby_cycles, determine_zodiac_hour_str
 
-router = APIRouter()
+def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl: str, gen: str, db: Session):
+    # sl 매핑 (sol -> 양력, lun -> 음력, lun_y -> 음력윤달)
+    if sl == "sol":
+        calendar_type_str = "양력"
+    elif sl == "lun":
+        calendar_type_str = "음력"
+    elif sl == "lun_y":
+        calendar_type_str = "음력윤달"
+    else:
+        raise HTTPException(status_code=400, detail="Invalid sl value. Use 'sol', 'lun', or 'lun_y'")
 
-@router.get("/calendadata/")
-def get_calenda_data(year: int, month: str, day: str, time: str, sl: str, gen: str, db: Session = Depends(get_db)):
-    if sl == "양력":
+    if calendar_type_str == "양력":
         birthdata = db.query(CalendaData).filter(
             CalendaData.cd_sy == year,
             CalendaData.cd_sm == month,
@@ -25,7 +31,7 @@ def get_calenda_data(year: int, month: str, day: str, time: str, sl: str, gen: s
     if not birthdata:
         raise HTTPException(status_code=404, detail="Data not found")
 
-    if sl == "음력윤달" and len(birthdata) > 1:
+    if calendar_type_str == "음력윤달" and len(birthdata) > 1:
         data = birthdata[1]
     else:
         data = birthdata[0]
@@ -53,7 +59,13 @@ def get_calenda_data(year: int, month: str, day: str, time: str, sl: str, gen: s
             "sol_plan": data.cd_sol_plan,
             "lunar_plan": data.cd_lun_plan,
     }
-    outdata["time_ji_kr"] = time
+    
+    # 시간 간지 변환 로직
+    time_zodiac = determine_zodiac_hour_str(str(hour), str(min))
+    if len(time_zodiac) > 1: # 에러 문자열이 오면 기본적으로 자(子)시 처리 혹은 예외 처리
+        time_zodiac = "자"
+        
+    outdata["time_ji_kr"] = time_zodiac
     outdata["time_gan_kr"] = get_time_gan(
         outdata["day_gan_kr"], outdata["time_ji_kr"]
     )
@@ -65,7 +77,7 @@ def get_calenda_data(year: int, month: str, day: str, time: str, sl: str, gen: s
         outdata["month_gan_kr"], outdata["month_ji_kr"]
     )
     outdata["daewoon_num"] = daewoonNum(
-        year, month, day, sl, outdata["daewoon"][0], db
+        year, month, day, calendar_type_str, outdata["daewoon"][0], db
     )
     outdata["daewoon_num_list"] = descending_tens(outdata["daewoon_num"])
     outdata["time_gan10"] = find_ten_god(outdata["day_gan_kr"],outdata["time_gan_kr"])

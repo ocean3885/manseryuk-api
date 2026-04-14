@@ -32,3 +32,45 @@ class CalendaDataResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+from typing import List, Any
+
+class SajuAnalysisResponse(BaseModel):
+    s_year: int
+    s_month: str
+    s_day: str
+    l_year: int
+    l_month: str
+    l_day: str
+    year_gan_ch: str
+    year_ji_ch: str
+    year_gan_kr: str
+    year_ji_kr: str
+    month_gan_ch: str
+    month_ji_ch: str
+    month_gan_kr: str
+    month_ji_kr: str
+    day_gan_ch: str
+    day_ji_ch: str
+    day_gan_kr: str
+    day_ji_kr: str
+    ddi_kor: Optional[str] = None
+    sol_plan: Optional[str] = None
+    lunar_plan: Optional[str] = None
+    time_ji_kr: str
+    time_gan_kr: str
+    time_gan_ch: str
+    time_ji_ch: str
+    gender: str
+    daewoon: List[Any]
+    daewoon_num: float
+    daewoon_num_list: List[float]
+    time_gan10: str
+    month_gan10: str
+    year_gan10: str
+    time_ji10: str
+    day_ji10: str
+    month_ji10: str
+    year_ji10: str
+    cycles_100: List[Any]
+    baby_10: List[Any]
