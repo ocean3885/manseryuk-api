@@ -31,35 +31,35 @@ def descending_tens(n):
     return result
 
 def find_ten_god(benchmark, other):
-    # 천간 배열
-    heavenly_stems = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계']
+    # 천간 배열 (갑을병정무기경신임계)
+    stems = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계']
     
-    # 천간 인덱스 찾기
-    index_b = heavenly_stems.index(benchmark)
-    index_o = heavenly_stems.index(other)
-    
-    # 십성 관계 정의
-    relationships = {
-        0: '비견',   # 같은 것
-        1: '겁재',   # 같은 것의 다른 측면 (긍정적/부정적)
-        2: '식신',   # 생성하는 것
-        3: '상관',   # 생성하려는 것을 제어
-        4: '편재',   # 제어하려는 것의 다른 형태
-        5: '정재',   # 제어하려는 것을 강화
-        6: '편관',   # 강화하려는 것을 제압
-        7: '정관',   # 제압하려는 것을 지원
-        8: '편인',   # 지원하려는 것의 다른 형태
-        9: '정인',   # 지원하려는 것을 생성
-        -1: '정재',  # 생성하려는 것의 다른 형태
-        -2: '편재',  # 강화하려는 것의 다른 형태
-        -3: '정관',  # 제압하려는 것의 다른 형태
+    if benchmark not in stems or other not in stems:
+        return "올바른 천간이 아닙니다."
+
+    # 인덱스 추출
+    idx_b = stems.index(benchmark)
+    idx_o = stems.index(other)
+
+    # 1. 오행 관계 계산 (0:아생, 1:식상, 2:재성, 3:관성, 4:인성)
+    # 각 천간의 오행 인덱스 (0:목, 1:화, 2:토, 3:금, 4:수)
+    elem_b = idx_b // 2
+    elem_o = idx_o // 2
+    relation_idx = (elem_o - elem_b) % 5
+
+    # 2. 음양 일치 여부 (True: 같음(편/비), False: 다름(정/겁))
+    same_polarity = (idx_b % 2 == idx_o % 2)
+
+    # 3. 십성 매핑
+    ten_god_map = {
+        0: {True: '비견', False: '겁재'},
+        1: {True: '식신', False: '상관'},
+        2: {True: '편재', False: '정재'},
+        3: {True: '편관', False: '정관'},
+        4: {True: '편인', False: '정인'}
     }
-    
-    # 인덱스 차이 계산
-    difference = (index_o - index_b) % 10
-    
-    # 십성 반환
-    return relationships.get(difference, "관계 없음")
+
+    return ten_god_map[relation_idx][same_polarity]
 
 
 def find_stem_branch_ten_god(stem, branch):

@@ -36,58 +36,74 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
     else:
         data = birthdata[0]
 
-    outdata = {
-            "s_year": data.cd_sy,
-            "s_month": data.cd_sm,
-            "s_day": data.cd_sd,
-            "l_year": data.cd_ly,
-            "l_month": data.cd_lm,
-            "l_day": data.cd_ld,
-            "year_gan_ch": data.cd_hyganjee[0],
-            "year_ji_ch": data.cd_hyganjee[1],
-            "year_gan_kr": data.cd_kyganjee[0],
-            "year_ji_kr": data.cd_kyganjee[1],
-            "month_gan_ch": data.cd_hmganjee[0],
-            "month_ji_ch": data.cd_hmganjee[1],
-            "month_gan_kr": data.cd_kmganjee[0],
-            "month_ji_kr": data.cd_kmganjee[1],
-            "day_gan_ch": data.cd_hdganjee[0],
-            "day_ji_ch": data.cd_hdganjee[1],
-            "day_gan_kr": data.cd_kdganjee[0],
-            "day_ji_kr": data.cd_kdganjee[1],
-            "ddi_kor": data.cd_ddi,
-            "sol_plan": data.cd_sol_plan,
-            "lunar_plan": data.cd_lun_plan,
-    }
-    
-    # 시간 간지 변환 로직
+    # ── 날짜 및 4주 기본값 추출 ──
+    year_gan_kr  = data.cd_kyganjee[0]
+    year_ji_kr   = data.cd_kyganjee[1]
+    month_gan_kr = data.cd_kmganjee[0]
+    month_ji_kr  = data.cd_kmganjee[1]
+    day_gan_kr   = data.cd_kdganjee[0]
+    day_ji_kr    = data.cd_kdganjee[1]
+
+    # ── 시간 간지 변환 ──
     time_zodiac = determine_zodiac_hour_str(str(hour), str(min))
-    if len(time_zodiac) > 1: # 에러 문자열이 오면 기본적으로 자(子)시 처리 혹은 예외 처리
+    if len(time_zodiac) > 1:  # 에러 문자열이면 기본값 자(子)시 처리
         time_zodiac = "자"
-        
-    outdata["time_ji_kr"] = time_zodiac
-    outdata["time_gan_kr"] = get_time_gan(
-        outdata["day_gan_kr"], outdata["time_ji_kr"]
-    )
-    outdata["time_gan_ch"] = gankr_to_ch(outdata["time_gan_kr"])
-    outdata["time_ji_ch"] = jikr_to_ch(outdata["time_ji_kr"])
-    outdata["gender"] = gen
-    outdata["daewoon"] = getDaewoon(
-        outdata["gender"], outdata["year_gan_kr"],
-        outdata["month_gan_kr"], outdata["month_ji_kr"]
-    )
-    outdata["daewoon_num"] = daewoonNum(
-        year, month, day, calendar_type_str, outdata["daewoon"][0], db
-    )
-    outdata["daewoon_num_list"] = descending_tens(outdata["daewoon_num"])
-    outdata["time_gan10"] = find_ten_god(outdata["day_gan_kr"],outdata["time_gan_kr"])
-    outdata["month_gan10"] = find_ten_god(outdata["day_gan_kr"],outdata["month_gan_kr"])
-    outdata["year_gan10"] = find_ten_god(outdata["day_gan_kr"],outdata["year_gan_kr"])
-    outdata["time_ji10"] = find_stem_branch_ten_god(outdata["day_gan_kr"],outdata["time_ji_kr"])
-    outdata["day_ji10"] = find_stem_branch_ten_god(outdata["day_gan_kr"],outdata["day_ji_kr"])
-    outdata["month_ji10"] = find_stem_branch_ten_god(outdata["day_gan_kr"],outdata["month_ji_kr"])
-    outdata["year_ji10"] = find_stem_branch_ten_god(outdata["day_gan_kr"],outdata["year_ji_kr"])    
-    outdata["cycles_100"] = generate_future_cycles(outdata["s_year"],outdata["daewoon_num"])
-    outdata["baby_10"] = generate_baby_cycles(outdata["s_year"])
-    
-    return outdata
+
+    time_ji_kr  = time_zodiac
+    time_gan_kr = get_time_gan(day_gan_kr, time_ji_kr)
+    time_gan_ch = gankr_to_ch(time_gan_kr)
+    time_ji_ch  = jikr_to_ch(time_ji_kr)
+
+    # ── 대운 계산 ──
+    daewoon         = getDaewoon(gen, year_gan_kr, month_gan_kr, month_ji_kr)
+    daewoon_num     = daewoonNum(year, month, day, calendar_type_str, daewoon[0], db)
+    daewoon_num_list = descending_tens(daewoon_num)
+
+    # ── 최종 결과 (도메인별 그룹화) ──
+    return {
+        # 1. 달력 정보
+        "calendar": {
+            "solar":       { "year": data.cd_sy, "month": data.cd_sm, "day": data.cd_sd },
+            "lunar":       { "year": data.cd_ly, "month": data.cd_lm, "day": data.cd_ld },
+            "solar_plan":  data.cd_sol_plan,
+            "lunar_plan":  data.cd_lun_plan,
+        },
+
+        # 2. 사주 4주 (년주 / 월주 / 일주 / 시주)
+        "four_pillars": {
+            "year":  { "gan": {"kr": year_gan_kr,  "ch": data.cd_hyganjee[0]}, "ji": {"kr": year_ji_kr,  "ch": data.cd_hyganjee[1]} },
+            "month": { "gan": {"kr": month_gan_kr, "ch": data.cd_hmganjee[0]}, "ji": {"kr": month_ji_kr, "ch": data.cd_hmganjee[1]} },
+            "day":   { "gan": {"kr": day_gan_kr,   "ch": data.cd_hdganjee[0]}, "ji": {"kr": day_ji_kr,   "ch": data.cd_hdganjee[1]} },
+            "time":  { "gan": {"kr": time_gan_kr,  "ch": time_gan_ch},          "ji": {"kr": time_ji_kr,  "ch": time_ji_ch} },
+        },
+
+        # 3. 십신
+        "ten_gods": {
+            "year_gan":  find_ten_god(day_gan_kr, year_gan_kr),
+            "year_ji":   find_stem_branch_ten_god(day_gan_kr, year_ji_kr),
+            "month_gan": find_ten_god(day_gan_kr, month_gan_kr),
+            "month_ji":  find_stem_branch_ten_god(day_gan_kr, month_ji_kr),
+            "day_ji":    find_stem_branch_ten_god(day_gan_kr, day_ji_kr),
+            "time_gan":  find_ten_god(day_gan_kr, time_gan_kr),
+            "time_ji":   find_stem_branch_ten_god(day_gan_kr, time_ji_kr),
+        },
+
+        # 4. 대운
+        "daewoon": {
+            "direction": daewoon,
+            "start_age": daewoon_num,
+            "age_list":  daewoon_num_list,
+        },
+
+        # 5. 운세 사이클
+        "cycles": {
+            "future_100": generate_future_cycles(data.cd_sy, daewoon_num),
+            "baby_10":    generate_baby_cycles(data.cd_sy),
+        },
+
+        # 6. 기타 메타
+        "meta": {
+            "gender": gen,
+            "ddi":    data.cd_ddi,
+        },
+    }
