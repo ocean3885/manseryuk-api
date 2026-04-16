@@ -1,5 +1,7 @@
 from services.constants import ROOT_STRENGTH, UNSEONG_DATA, JIJANGGAN
 from services.relations import get_relations_for_branch
+from services.constants import ZHI_ZANG
+from services.calculator import get_ten_star_stem
 
 def get_unseong(cheongan, jiji):
     return UNSEONG_DATA.get(cheongan, {}).get(jiji, "입력 오류")
@@ -7,6 +9,19 @@ def get_unseong(cheongan, jiji):
 def get_jijanggan(jiji_ch):
     return JIJANGGAN.get(jiji_ch, [])
 
+def get_transmitted_info(branch, all_stems, day_stem):
+    """해당 지지의 투간된 지장간 정보 리스트 반환"""
+    transmitted_list = []
+    for stem in ZHI_ZANG[branch]:
+        if stem in all_stems:
+            idx = all_stems.index(stem)  # 위치 인덱스 (0~3)
+            ten_star = get_ten_star_stem(day_stem, stem)
+            transmitted_list.append({
+                'stem': stem,
+                'index': idx,
+                'ten_star': ten_star
+            })
+    return transmitted_list
 
 def analyze_advanced_tonggeun(cheongans, jijis):
     # 1. 지지 위치별 가중치 (연, 월, 일, 시)
@@ -17,22 +32,34 @@ def analyze_advanced_tonggeun(cheongans, jijis):
 
     positions = ['연간', '월간', '일간', '시간']
     results = []
+    
+    day_stem = cheongans[2]  # 일간 (십성 계산 기준)
 
     for i in range(4):  # 천간 위치 순회
         target_kan = cheongans[i]
         total_score = 0
+        root_details = []  # 이 천간의 통근 상세 정보
         
         for j in range(4):  # 지지 위치 순회
             target_jiji = jijis[j]
             
-            # 뿌리가 있는지 확인
+            # 뿌리가 있는지 확인 (ROOT_STRENGTH는 미리 정의된 딕셔너리)
             base_power = ROOT_STRENGTH.get(target_kan, {}).get(target_jiji, 0)
             
             if base_power > 0:
                 distance = abs(i - j)
-                # 최종 점수 = 기본강도 * 지지가중치 * 거리감쇠
                 calc_score = base_power * pos_weights[j] * dist_decay[distance]
                 total_score += calc_score
+                
+                main_stem = ZHI_ZANG[target_jiji][0]  # 본기
+                ten_star = get_ten_star_stem(day_stem, main_stem)
+                
+                root_details.append({
+                    "지지글자": target_jiji,
+                    "위치": positions[j],
+                    "십성": ten_star,
+                    "기여점수": round(calc_score, 2)
+                })
         
         # 맹파식 허실 판정 (임계점 0.5 기준)
         status = "실(實)" if total_score >= 0.5 else "허(虛)"
@@ -41,7 +68,8 @@ def analyze_advanced_tonggeun(cheongans, jijis):
             "위치": positions[i],
             "글자": target_kan,
             "점수": round(total_score, 2),
-            "상태": status
+            "상태": status,
+            "통근정보": root_details   
         })
 
     return results
@@ -52,7 +80,7 @@ def analyze_palja_integrated(stems, branches):
     """
     사주 8글자를 통합 분석하여 천간/지지의 상호작용이 반영된 결과를 리턴합니다.
     """
-    
+    day_stem = stems[2]
     # 1. 내부 세부 로직 함수들 (별도 파일에서 import 했다고 가정)
     def _get_branch_relations(brs):
         # 예: [['연지-월지', '충'], ['월지-일지', '합']] 등 반환
@@ -86,14 +114,17 @@ def analyze_palja_integrated(stems, branches):
         result_data["pillars"][p] = {
             "stem": {
                 "char": stems[i],
+                "position": tonggeun_results[i]['위치'],
                 "score": tonggeun_results[i]['점수'],
+                "root_info": tonggeun_results[i]['통근정보'],
                 "status": tonggeun_results[i]['상태'],
                 "unseong": get_unseong(stems[i], branch_char)
             },
             "branch": {
                 "char": branch_char,
                 "jijanggan": get_jijanggan(branch_char),
-                "relations": get_relations_for_branch(branch_char, i, branches)
+                "transmitted": get_transmitted_info(branch_char, stems, day_stem),
+                "relations": get_relations_for_branch(branch_char, i, branches, stems)
             }
         }
 

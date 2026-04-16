@@ -1,6 +1,9 @@
 from services.constants import SIX_HAPS, CHUNGS, HARMS, BREAKS, THREE_HAPS, THREE_HAPS_BIRTH, THREE_HAPS_KING, THREE_HAPS_SUCCESS, SQUARE_HAPS, PUNISHMENTS
+from services.calculator import get_ten_star_branch
 
-def get_relations_for_branch(target_branch, target_index, all_branches):
+
+
+def get_relations_for_branch(target_branch, target_index, all_branches, all_stems):
     """
     특정 지지 기준으로 다른 지지들과의 관계를 모두 찾는다.
     
@@ -8,11 +11,12 @@ def get_relations_for_branch(target_branch, target_index, all_branches):
         target_branch: 관계를 구하려는 지지 (예: '戌')
         target_index: 해당 지지의 위치 (0:년, 1:월, 2:일, 3:시)
         all_branches: 전체 지지 리스트 [년지, 월지, 일지, 시지]
+        all_stems:    [년간, 월간, 일간, 시간]  # 일간은 all_stems[1]
     
     Returns:
         dict: 해당 지지의 모든 관계 정보
     """
-    
+    day_stem = all_stems[2]   # 일간
     relations = {
         'six_haps': None,
         'chungs': None,
@@ -26,36 +30,26 @@ def get_relations_for_branch(target_branch, target_index, all_branches):
     
     # ========== 1. 육합 (6合) ==========
     for i, other_branch in enumerate(all_branches):
-        if i == target_index:
+        if i == target_index or relations['six_haps'] is not None:
             continue
         
-        # 육합 체크
-        if (target_branch, other_branch) in SIX_HAPS:
-            pair = (target_branch, other_branch)
-            element = SIX_HAPS[pair]
+        sorted_pair = tuple(sorted([target_branch, other_branch]))
+        if sorted_pair in SIX_HAPS:
+            element = SIX_HAPS[sorted_pair]
             is_adjacent = (abs(i - target_index) == 1)
-            
             relations['six_haps'] = {
+                'my': target_branch,
+                'my_index': target_index,
+                'my_ten_star': get_ten_star_branch(day_stem, target_branch),
                 'with': other_branch,
                 'with_index': i,
+                'with_ten_star': get_ten_star_branch(day_stem, other_branch),
                 'element': element,
                 'type': '근합' if is_adjacent else '원합',
                 'strength': 1.0 if is_adjacent else 0.5,
                 'is_adjacent': is_adjacent
             }
-        elif (other_branch, target_branch) in SIX_HAPS:
-            pair = (other_branch, target_branch)
-            element = SIX_HAPS[pair]
-            is_adjacent = (abs(i - target_index) == 1)
-            
-            relations['six_haps'] = {
-                'with': other_branch,
-                'with_index': i,
-                'element': element,
-                'type': '근합' if is_adjacent else '원합',
-                'strength': 1.0 if is_adjacent else 0.5,
-                'is_adjacent': is_adjacent
-            }
+    
     
     # ========== 2. 충 (沖) ==========
     for i, other_branch in enumerate(all_branches):
