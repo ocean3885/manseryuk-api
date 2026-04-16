@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from models.calenda_data import CalendaData
 from services.daewoon import getDaewoon, daewoonNum, get_time_gan, gankr_to_ch, jikr_to_ch
 from services.calculator import descending_tens, find_ten_god, find_stem_branch_ten_god, generate_future_cycles, generate_baby_cycles, determine_zodiac_hour_str
+from services.analysis import analyze_palja_integrated
 
 def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl: str, gen: str, db: Session):
     # sl 매핑 (sol -> 양력, lun -> 음력, lun_y -> 음력윤달)
@@ -54,6 +55,10 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
     time_gan_ch = gankr_to_ch(time_gan_kr)
     time_ji_ch  = jikr_to_ch(time_ji_kr)
 
+    stems = [data.cd_hyganjee[0], data.cd_hmganjee[0], data.cd_hdganjee[0], time_gan_ch]
+    branches = [data.cd_hyganjee[1], data.cd_hmganjee[1], data.cd_hdganjee[1], time_ji_ch]
+    analysis_result = analyze_palja_integrated(stems, branches)
+
     # ── 대운 계산 ──
     daewoon         = getDaewoon(gen, year_gan_kr, month_gan_kr, month_ji_kr)
     daewoon_num     = daewoonNum(year, month, day, calendar_type_str, daewoon[0], db)
@@ -95,13 +100,19 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
             "age_list":  daewoon_num_list,
         },
 
-        # 5. 운세 사이클
+        # 5. 분석 결과 (신규 추가!) --------------------------------------
+        "analysis": {
+            "summary": analysis_result['summary'], # 합충 관계 등 요약
+            "details": analysis_result['pillars']  # 각 기둥별 통근, 점수, 허실, 12운성
+        },
+
+        # 6. 운세 사이클
         "cycles": {
             "future_100": generate_future_cycles(data.cd_sy, daewoon_num),
             "baby_10":    generate_baby_cycles(data.cd_sy),
         },
 
-        # 6. 기타 메타
+        # 7. 기타 메타
         "meta": {
             "gender": gen,
             "ddi":    data.cd_ddi,

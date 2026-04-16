@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from core.dependencies import get_db
 from services.saju_orchestrator import get_full_saju_data
-from schemas.calenda_data import SajuAnalysisResponse
+from schemas.saju_analysis import SajuAnalysisResponse
 
 router = APIRouter()
 
