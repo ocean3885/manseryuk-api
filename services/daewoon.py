@@ -32,8 +32,8 @@ def getDaewoon(gen, ygan, mgan, mji):
 
         data_gan = gan_to_hanja(data_gan)
         data_ji = ji_to_hanja(data_ji)
-        data.append(list(reversed(data_gan)))
-        data.append(list(reversed(data_ji)))
+        data.append(list(data_gan))
+        data.append(list(data_ji))
 
         return data
 

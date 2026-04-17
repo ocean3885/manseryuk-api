@@ -10,18 +10,33 @@ def get_jijanggan(jiji_ch):
     return JIJANGGAN.get(jiji_ch, [])
 
 def get_transmitted_info(branch, all_stems, day_stem):
-    """해당 지지의 투간된 지장간 정보 리스트 반환"""
-    transmitted_list = []
-    for stem in ZHI_ZANG[branch]:
+    """투간된 지장간과 그렇지 않은 지장간을 분리하여 반환"""
+    jijanggan_list = ZHI_ZANG[branch]
+    position_labels = ['본기', '중기', '말기']
+    
+    transmitted = []
+    hidden = []
+    
+    for idx, stem in enumerate(jijanggan_list):
+        pos_label = position_labels[idx] if idx < len(position_labels) else f'{idx+1}기'
+        ten_star = get_ten_star_stem(day_stem, stem)
+        
+        info = {
+            'stem': stem,
+            'position': pos_label,
+            'ten_star': ten_star
+        }
+        
         if stem in all_stems:
-            idx = all_stems.index(stem)  # 위치 인덱스 (0~3)
-            ten_star = get_ten_star_stem(day_stem, stem)
-            transmitted_list.append({
-                'stem': stem,
-                'index': idx,
-                'ten_star': ten_star
-            })
-    return transmitted_list
+            info['index'] = all_stems.index(stem)
+            transmitted.append(info)
+        else:
+            hidden.append(info)
+    
+    return {
+        'transmitted': transmitted,
+        'hidden': hidden
+    }
 
 def analyze_advanced_tonggeun(cheongans, jijis):
     # 1. 지지 위치별 가중치 (연, 월, 일, 시)
@@ -110,6 +125,7 @@ def analyze_palja_integrated(stems, branches):
 
     for i, p in enumerate(pillers):
         branch_char = branches[i]
+        transmitted_info = get_transmitted_info(branch_char, stems, day_stem)
         
         result_data["pillars"][p] = {
             "stem": {
@@ -123,7 +139,8 @@ def analyze_palja_integrated(stems, branches):
             "branch": {
                 "char": branch_char,
                 "jijanggan": get_jijanggan(branch_char),
-                "transmitted": get_transmitted_info(branch_char, stems, day_stem),
+                "transmitted": transmitted_info['transmitted'],
+                "hidden": transmitted_info['hidden'],
                 "relations": get_relations_for_branch(branch_char, i, branches, stems)
             }
         }

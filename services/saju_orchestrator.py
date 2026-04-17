@@ -95,7 +95,8 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
 
         # 4. 대운
         "daewoon": {
-            "direction": daewoon,
+            "direction": daewoon[0],
+            "daewoon_list": [daewoon[1],daewoon[2]],
             "start_age": daewoon_num,
             "age_list":  daewoon_num_list,
         },

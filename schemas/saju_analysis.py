@@ -54,7 +54,8 @@ class CalendarInfo(BaseModel):
 
 class DaewoonInfo(BaseModel):
     """대운 정보"""
-    direction: List[Any]   # 순행/역행 정보 (기존 daewoon 리스트)
+    direction: str   # 순행/역행 
+    daewoon_list: List[Any]   # [5, 15, 25, ...]
     start_age: float        # 대운 시작 나이
     age_list: List[float]   # [5, 15, 25, ...]
 
