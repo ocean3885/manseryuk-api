@@ -1,7 +1,9 @@
 from services.constants import ROOT_STRENGTH, UNSEONG_DATA, JIJANGGAN
-from services.relations import get_relations_for_branch
+from services.branch_relations import get_relations_for_branch
 from services.constants import ZHI_ZANG
-from services.calculator import get_ten_star_stem
+from services.calculator import get_ten_star_stem, get_ten_star_branch
+from services.stem_relations import get_relations_for_stem
+from services.relations import check_jahab
 
 def get_unseong(cheongan, jiji):
     return UNSEONG_DATA.get(cheongan, {}).get(jiji, "입력 오류")
@@ -9,7 +11,7 @@ def get_unseong(cheongan, jiji):
 def get_jijanggan(jiji_ch):
     return JIJANGGAN.get(jiji_ch, [])
 
-def get_transmitted_info(branch, all_stems, day_stem):
+def get_transmitted_info(branch, branch_idx, all_stems, day_stem):
     """투간된 지장간과 그렇지 않은 지장간을 분리하여 반환"""
     jijanggan_list = ZHI_ZANG[branch]
     position_labels = ['본기', '중기', '말기']
@@ -23,12 +25,15 @@ def get_transmitted_info(branch, all_stems, day_stem):
         
         info = {
             'stem': stem,
-            'position': pos_label,
-            'ten_star': ten_star
+            'stem_pos': pos_label,
+            'stem_ten_star': ten_star
         }
         
         if stem in all_stems:
-            info['index'] = all_stems.index(stem)
+            info['stem_idx'] = all_stems.index(stem)
+            info['from'] = branch
+            info['from_idx'] = branch_idx
+            info['from_ten_star'] = get_ten_star_branch(day_stem, branch)
             transmitted.append(info)
         else:
             hidden.append(info)
@@ -45,7 +50,7 @@ def analyze_advanced_tonggeun(cheongans, jijis):
     # 2. 거리별 감쇠 비율 (차이 0, 1, 2, 3)
     dist_decay = [1.0, 0.5, 0.2, 0.1]
 
-    positions = ['연간', '월간', '일간', '시간']
+    positions = ['년', '월', '일', '시']
     results = []
     
     day_stem = cheongans[2]  # 일간 (십성 계산 기준)
@@ -70,10 +75,10 @@ def analyze_advanced_tonggeun(cheongans, jijis):
                 ten_star = get_ten_star_stem(day_stem, main_stem)
                 
                 root_details.append({
-                    "지지글자": target_jiji,
-                    "위치": positions[j],
-                    "십성": ten_star,
-                    "기여점수": round(calc_score, 2)
+                    "branch_char": target_jiji,
+                    "position": positions[j],
+                    "ten_star": ten_star,
+                    "score": round(calc_score, 2)
                 })
         
         # 맹파식 허실 판정 (임계점 0.5 기준)
@@ -125,24 +130,34 @@ def analyze_palja_integrated(stems, branches):
 
     for i, p in enumerate(pillers):
         branch_char = branches[i]
-        transmitted_info = get_transmitted_info(branch_char, stems, day_stem)
+        stem_char = stems[i]
+        transmitted_info = get_transmitted_info(branch_char, i, stems, day_stem)
+        branch_relations = get_relations_for_branch(branch_char, i, branches, stems)
+        stem_relations = get_relations_for_stem(stem_char, i, branches, stems)
+        chungs = branch_relations.get('chungs', []) # 충 관계 리스트
+        punishments = branch_relations.get('punishments', [])  # 형 관계 리스트
+        
+        # 자합 계산
+        jahab_info = check_jahab(stem_char, branch_char, i, chungs, punishments)
         
         result_data["pillars"][p] = {
             "stem": {
-                "char": stems[i],
+                "char": stem_char,
                 "position": tonggeun_results[i]['위치'],
                 "score": tonggeun_results[i]['점수'],
                 "root_info": tonggeun_results[i]['통근정보'],
                 "status": tonggeun_results[i]['상태'],
-                "unseong": get_unseong(stems[i], branch_char)
+                "unseong": get_unseong(stem_char, branch_char),
+                "relations": stem_relations
             },
             "branch": {
                 "char": branch_char,
                 "jijanggan": get_jijanggan(branch_char),
                 "transmitted": transmitted_info['transmitted'],
                 "hidden": transmitted_info['hidden'],
-                "relations": get_relations_for_branch(branch_char, i, branches, stems)
-            }
+                "relations": branch_relations
+            },
+            "jahab": jahab_info
         }
 
     return result_data
