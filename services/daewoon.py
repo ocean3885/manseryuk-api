@@ -3,6 +3,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from models.calenda_data import CalendaData
 from core.dependencies import get_db
+from datetime import date
 
 
 def getDaewoon(gen, ygan, mgan, mji):
@@ -144,3 +145,76 @@ def jikr_to_ch(jikr):
     for i in range(len(JIJI)):
         if JIJI[i] == jikr:
             return JIJI_CH[i]
+
+
+
+def build_daewoon(
+    direction_data,
+    start_age,
+    birth_year,
+    current_year=None
+):
+    """
+    direction_data:
+    [
+        "순행",
+        ["壬","辛","庚","己","戊","丁","丙","乙","甲","癸"],
+        ["戌","酉","申","未","午","巳","辰","卯","寅","丑"]
+    ]
+    """
+
+    if current_year is None:
+        current_year = date.today().year
+
+    direction = direction_data[0]
+
+    # 기존 데이터는 역순이므로 reverse
+    gan_list = direction_data[1]
+    ji_list = direction_data[2]
+
+    daewoon_list = []
+
+    current_age = current_year - birth_year
+
+    current_daewoon = None
+
+    for i in range(len(gan_list)):
+
+        item_start_age = round(start_age + (i * 10), 1)
+        item_end_age = round(item_start_age + 9.9, 1)
+
+        start_year = birth_year + int(item_start_age)
+        end_year = birth_year + int(item_end_age)
+
+        item = {
+            "index": i,
+            "start_age": item_start_age,
+            "end_age": item_end_age,
+            "start_year": start_year,
+            "end_year": end_year,
+            "gan": gan_list[i],
+            "ji": ji_list[i]
+        }
+
+        daewoon_list.append(item)
+
+        # 현재 대운 계산
+        if item_start_age <= current_age <= item_end_age:
+            current_daewoon = {
+                "index": i,
+                "year": current_year,
+                "age": current_age,
+                "gan": gan_list[i],
+                "ji": ji_list[i],
+                "start_age": item_start_age,
+                "end_age": item_end_age,
+                "start_year": start_year,
+                "end_year": end_year
+            }
+
+    return {
+        "direction": direction,
+        "start_age": start_age,
+        "current": current_daewoon,
+        "list": daewoon_list
+    }

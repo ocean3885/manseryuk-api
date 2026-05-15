@@ -1,7 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from datetime import date
 from models.calenda_data import CalendaData
-from services.daewoon import getDaewoon, daewoonNum, get_time_gan, gankr_to_ch, jikr_to_ch
+from services.daewoon import getDaewoon, daewoonNum, get_time_gan, gankr_to_ch, jikr_to_ch, build_daewoon
 from services.calculator import descending_tens, find_ten_god, find_stem_branch_ten_god, generate_future_cycles, generate_baby_cycles, determine_zodiac_hour_str
 from services.analysis import analyze_palja_integrated
 
@@ -63,6 +64,11 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
     daewoon         = getDaewoon(gen, year_gan_kr, month_gan_kr, month_ji_kr)
     daewoon_num     = daewoonNum(year, month, day, calendar_type_str, daewoon[0], db)
     daewoon_num_list = descending_tens(daewoon_num)
+    daewoon_result = build_daewoon(
+    direction_data=daewoon,
+    start_age=daewoon_num,
+    birth_year=year
+)
 
     # ── 최종 결과 (도메인별 그룹화) ──
     return {
@@ -94,12 +100,7 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
         },
 
         # 4. 대운
-        "daewoon": {
-            "direction": daewoon[0],
-            "daewoon_list": [daewoon[1],daewoon[2]],
-            "start_age": daewoon_num,
-            "age_list":  daewoon_num_list,
-        },
+        "daewoon": daewoon_result,
 
         # 5. 분석 결과 (신규 추가!) --------------------------------------
         "analysis": {

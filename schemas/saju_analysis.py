@@ -51,13 +51,41 @@ class CalendarInfo(BaseModel):
     solar_plan: Optional[str] = None
     lunar_plan: Optional[str] = None
 
+class CurrentDaewoon(BaseModel):
+    index: int
+    year: int
+    age: int
 
-class DaewoonInfo(BaseModel):
-    """대운 정보"""
-    direction: str   # 순행/역행 
-    daewoon_list: List[Any]   # [5, 15, 25, ...]
-    start_age: float        # 대운 시작 나이
-    age_list: List[float]   # [5, 15, 25, ...]
+    gan: str
+    ji: str
+
+    start_age: float
+    end_age: float
+
+    start_year: int
+    end_year: int
+
+
+class DaewoonItem(BaseModel):
+    index: int
+
+    start_age: float
+    end_age: float
+
+    start_year: int
+    end_year: int
+
+    gan: str
+    ji: str
+
+
+class Daewoon(BaseModel):
+    direction: str
+    start_age: float
+
+    current: Optional[CurrentDaewoon]
+
+    list: List[DaewoonItem]
 
 
 class CyclesInfo(BaseModel):
@@ -90,7 +118,7 @@ class SajuAnalysisResponse(BaseModel):
     calendar: CalendarInfo
     four_pillars: FourPillars
     ten_gods: TenGods
-    daewoon: DaewoonInfo
+    daewoon: Daewoon
     cycles: CyclesInfo
     meta: MetaInfo
     analysis: AnalysisInfo
