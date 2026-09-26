@@ -283,3 +283,51 @@ ZHI_ZANG = {
     '午': ['丁', '己'], '未': ['己', '丁', '乙'], '申': ['庚', '壬', '戊'],
     '酉': ['辛'], '戌': ['戊', '辛', '丁'], '亥': ['壬', '甲']
 }
+
+# ==================== 9. 오행 및 음양 기본 메타데이터 (프론트엔드 최적화) ====================
+STEM_INFO = {
+    '甲': {'kr': '갑', 'ch': '甲', 'element': '목', 'element_ch': '木', 'yin_yang': '양', 'color': '#2E7D32'},
+    '乙': {'kr': '을', 'ch': '乙', 'element': '목', 'element_ch': '木', 'yin_yang': '음', 'color': '#2E7D32'},
+    '丙': {'kr': '병', 'ch': '丙', 'element': '화', 'element_ch': '火', 'yin_yang': '양', 'color': '#C62828'},
+    '丁': {'kr': '정', 'ch': '丁', 'element': '화', 'element_ch': '火', 'yin_yang': '음', 'color': '#C62828'},
+    '戊': {'kr': '무', 'ch': '戊', 'element': '토', 'element_ch': '土', 'yin_yang': '양', 'color': '#E65100'},
+    '己': {'kr': '기', 'ch': '己', 'element': '토', 'element_ch': '土', 'yin_yang': '음', 'color': '#E65100'},
+    '庚': {'kr': '경', 'ch': '庚', 'element': '금', 'element_ch': '金', 'yin_yang': '양', 'color': '#616161'},
+    '辛': {'kr': '신', 'ch': '辛', 'element': '금', 'element_ch': '金', 'yin_yang': '음', 'color': '#616161'},
+    '壬': {'kr': '임', 'ch': '壬', 'element': '수', 'element_ch': '水', 'yin_yang': '양', 'color': '#1565C0'},
+    '癸': {'kr': '계', 'ch': '癸', 'element': '수', 'element_ch': '水', 'yin_yang': '음', 'color': '#1565C0'},
+}
+
+STEM_KR_TO_CH = {v['kr']: k for k, v in STEM_INFO.items()}
+
+BRANCH_INFO = {
+    '子': {'kr': '자', 'ch': '子', 'element': '수', 'element_ch': '水', 'yin_yang': '양', 'color': '#1565C0'},
+    '丑': {'kr': '축', 'ch': '丑', 'element': '토', 'element_ch': '土', 'yin_yang': '음', 'color': '#E65100'},
+    '寅': {'kr': '인', 'ch': '寅', 'element': '목', 'element_ch': '木', 'yin_yang': '양', 'color': '#2E7D32'},
+    '卯': {'kr': '묘', 'ch': '卯', 'element': '목', 'element_ch': '木', 'yin_yang': '음', 'color': '#2E7D32'},
+    '辰': {'kr': '진', 'ch': '辰', 'element': '토', 'element_ch': '土', 'yin_yang': '양', 'color': '#E65100'},
+    '巳': {'kr': '사', 'ch': '巳', 'element': '화', 'element_ch': '火', 'yin_yang': '음', 'color': '#C62828'},
+    '午': {'kr': '오', 'ch': '午', 'element': '화', 'element_ch': '火', 'yin_yang': '양', 'color': '#C62828'},
+    '未': {'kr': '미', 'ch': '未', 'element': '토', 'element_ch': '土', 'yin_yang': '음', 'color': '#E65100'},
+    '申': {'kr': '신', 'ch': '申', 'element': '금', 'element_ch': '金', 'yin_yang': '양', 'color': '#616161'},
+    '酉': {'kr': '유', 'ch': '酉', 'element': '금', 'element_ch': '金', 'yin_yang': '음', 'color': '#616161'},
+    '戌': {'kr': '술', 'ch': '戌', 'element': '토', 'element_ch': '土', 'yin_yang': '양', 'color': '#E65100'},
+    '亥': {'kr': '해', 'ch': '亥', 'element': '수', 'element_ch': '水', 'yin_yang': '음', 'color': '#1565C0'},
+}
+
+BRANCH_KR_TO_CH = {v['kr']: k for k, v in BRANCH_INFO.items()}
+
+JIJANGGAN_DETAILED = {
+    '子': [{'char': '壬', 'type': '초기', 'ratio': '10/30'}, {'char': '癸', 'type': '정기', 'ratio': '20/30'}],
+    '丑': [{'char': '癸', 'type': '초기', 'ratio': '9/30'}, {'char': '辛', 'type': '중기', 'ratio': '3/30'}, {'char': '己', 'type': '정기', 'ratio': '18/30'}],
+    '寅': [{'char': '戊', 'type': '초기', 'ratio': '7/30'}, {'char': '丙', 'type': '중기', 'ratio': '7/30'}, {'char': '甲', 'type': '정기', 'ratio': '16/30'}],
+    '卯': [{'char': '甲', 'type': '초기', 'ratio': '10/30'}, {'char': '乙', 'type': '정기', 'ratio': '20/30'}],
+    '辰': [{'char': '乙', 'type': '초기', 'ratio': '9/30'}, {'char': '癸', 'type': '중기', 'ratio': '3/30'}, {'char': '戊', 'type': '정기', 'ratio': '18/30'}],
+    '巳': [{'char': '戊', 'type': '초기', 'ratio': '7/30'}, {'char': '庚', 'type': '중기', 'ratio': '7/30'}, {'char': '丙', 'type': '정기', 'ratio': '16/30'}],
+    '午': [{'char': '丙', 'type': '초기', 'ratio': '10/30'}, {'char': '己', 'type': '중기', 'ratio': '9/30'}, {'char': '丁', 'type': '정기', 'ratio': '11/30'}],
+    '未': [{'char': '丁', 'type': '초기', 'ratio': '9/30'}, {'char': '乙', 'type': '중기', 'ratio': '3/30'}, {'char': '己', 'type': '정기', 'ratio': '18/30'}],
+    '申': [{'char': '戊', 'type': '초기', 'ratio': '7/30'}, {'char': '壬', 'type': '중기', 'ratio': '7/30'}, {'char': '庚', 'type': '정기', 'ratio': '16/30'}],
+    '酉': [{'char': '庚', 'type': '초기', 'ratio': '10/30'}, {'char': '辛', 'type': '정기', 'ratio': '20/30'}],
+    '戌': [{'char': '辛', 'type': '초기', 'ratio': '9/30'}, {'char': '丁', 'type': '중기', 'ratio': '3/30'}, {'char': '戊', 'type': '정기', 'ratio': '18/30'}],
+    '亥': [{'char': '戊', 'type': '초기', 'ratio': '7/30'}, {'char': '甲', 'type': '중기', 'ratio': '7/30'}, {'char': '壬', 'type': '정기', 'ratio': '16/30'}]
+}

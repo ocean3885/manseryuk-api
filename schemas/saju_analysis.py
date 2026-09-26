@@ -2,25 +2,64 @@ from pydantic import BaseModel
 from typing import Optional, List, Any, Dict
 
 # ──────────────────────────────────────────
-# 사주 분석 응답용 중첩 스키마
+# 사주 분석 응답용 중첩 스키마 (프론트엔드 최적화)
 # ──────────────────────────────────────────
 
-class GanJi(BaseModel):
-    """천간(干)과 지지(支)를 한글/한자 쌍으로 표현"""
-    gan: dict  # {"kr": "갑", "ch": "甲"}
-    ji: dict   # {"kr": "자", "ch": "子"}
+class StemDetail(BaseModel):
+    """천간(干) 상세 정보 (한글/한자, 오행, 음양, 색상, 십신)"""
+    kr: str
+    ch: str
+    element: str
+    element_ch: str
+    yin_yang: str
+    color: str
+    ten_god: str
+
+
+class BranchDetail(BaseModel):
+    """지지(支) 상세 정보 (한글/한자, 오행, 음양, 색상, 십신)"""
+    kr: str
+    ch: str
+    element: str
+    element_ch: str
+    yin_yang: str
+    color: str
+    ten_god: str
+
+
+class JijangganDetail(BaseModel):
+    """지장간(地藏干) 상세 정보 (초기/중기/정기 및 십신)"""
+    kr: str
+    ch: str
+    element: str
+    element_ch: str
+    yin_yang: str
+    color: str
+    ten_god: str
+    type: str
+    ratio: Optional[str] = None
+
+
+class PillarDetail(BaseModel):
+    """기둥별 일원화 완성형 모델 (천간, 지지, 12운성, 지장간, 신살)"""
+    gan: StemDetail
+    ji: BranchDetail
+    unseong: Optional[str] = None
+    unseong_self: Optional[str] = None
+    jijanggan: List[JijangganDetail] = []
+    special_stars: List[str] = []
 
 
 class FourPillars(BaseModel):
-    """사주 4주 (년주/월주/일주/시주)"""
-    year: GanJi
-    month: GanJi
-    day: GanJi
-    hour: GanJi
+    """사주 4주 원국 (년주/월주/일주/시주)"""
+    year: PillarDetail
+    month: PillarDetail
+    day: PillarDetail
+    hour: PillarDetail
 
 
 class TenGods(BaseModel):
-    """십신 (천간 + 지지)"""
+    """십신 (천간 + 지지) - 기존 호환성 유지"""
     year_gan: str
     year_ji: str
     month_gan: str
@@ -29,7 +68,6 @@ class TenGods(BaseModel):
     day_ji: str
     time_gan: str
     time_ji: str
-
 
 
 class SolarDate(BaseModel):
@@ -53,6 +91,7 @@ class CalendarInfo(BaseModel):
     solar_plan: Optional[str] = None
     lunar_plan: Optional[str] = None
 
+
 class CurrentDaewoon(BaseModel):
     index: int
     year: int
@@ -60,6 +99,8 @@ class CurrentDaewoon(BaseModel):
 
     gan: str
     ji: str
+    gan_detail: Optional[StemDetail] = None
+    ji_detail: Optional[BranchDetail] = None
     gan_ten_god: Optional[str] = None
     ji_ten_god: Optional[str] = None
     unseong: Optional[str] = None
@@ -82,6 +123,8 @@ class DaewoonItem(BaseModel):
 
     gan: str
     ji: str
+    gan_detail: Optional[StemDetail] = None
+    ji_detail: Optional[BranchDetail] = None
     gan_ten_god: Optional[str] = None
     ji_ten_god: Optional[str] = None
     unseong: Optional[str] = None
@@ -96,17 +139,30 @@ class Daewoon(BaseModel):
     list: List[DaewoonItem]
 
 
+class CycleItem(BaseModel):
+    """세운 / 소운 단일 연도 상세 항목"""
+    year: int
+    age: int
+    gan: StemDetail
+    ji: BranchDetail
+    unseong: Optional[str] = None
+
 
 class CyclesInfo(BaseModel):
-    """운세 사이클"""
-    future_100: List[Any]  # 100년 운세
-    baby_10: List[Any]     # 소운 10년
+    """운세 사이클 (세운 100년, 소운 10년)"""
+    future_100: List[CycleItem]  # 100년 세운 객체 리스트
+    baby_10: List[CycleItem]     # 소운 10년 객체 리스트
 
 
 class MetaInfo(BaseModel):
-    """기타 기본 정보"""
+    """사용자 메타 정보"""
     gender: str
     ddi: Optional[str] = None  # 띠
+    birth_date_solar: Optional[str] = None  # YYYY-MM-DD
+    birth_time: Optional[str] = None        # HH:MM
+    age_man: Optional[int] = None           # 만 나이
+    age_korean: Optional[int] = None        # 세는 나이
+    birth_weekday: Optional[str] = None     # 태어난 요일
 
 
 class AnalysisSummary(BaseModel):
@@ -177,6 +233,8 @@ class BinZhuDynamics(BaseModel):
     guest_structure: dict
     host_structure: dict
     control_flow: ControlFlow
+
+
 class FiveElementsInfo(BaseModel):
     counts: Dict[str, int]
     percentages: Dict[str, float]
@@ -198,11 +256,11 @@ class SpecialStarItem(BaseModel):
 class AdvancedAnalysis(BaseModel):
     five_elements: Optional[FiveElementsInfo] = None
     special_stars: Optional[List[SpecialStarItem]] = None
+    special_stars_by_pillar: Optional[Dict[str, List[str]]] = None
     interactions: InteractionsInfo
     xu_shi_dynamics: XuShiDynamics
     bin_zhu_dynamics: BinZhuDynamics
     ai_consultation_prompts: List[str]
-
 
 
 class SajuAnalysisResponse(BaseModel):

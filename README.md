@@ -76,19 +76,30 @@ GET http://localhost:8000/?year=1995&month=5&day=12&hour=14&min=30&sl=sol&gen=�
 - `solar_plan`: 양력 절기/기념일 정보
 - `lunar_plan`: 음력 절기/기념일 정보
 
-### 2. `four_pillars` (사주 4주 원국)
-년주(`year`), 월주(`month`), 일주(`day`), 시주(`hour`)로 구성되며 각 기둥은 한글(`kr`)과 한자(`ch`)를 포함합니다.
+### 2. `four_pillars` (사주 4주 완성형 원국)
+년주(`year`), 월주(`month`), 일주(`day`), 시주(`hour`)로 구성되며 각 기둥은 프론트엔드 원국표 렌더링에 필요한 모든 메타데이터(천간/지지 오행·음양·색상·십신, 12운성, 지장간 상세, 기둥별 신살)를 일원화하여 포함합니다.
 ```json
 {
-  "year": { "gan": { "kr": "을", "ch": "乙" }, "ji": { "kr": "해", "ch": "亥" } },
-  "month": { "gan": { "kr": "신", "ch": "辛" }, "ji": { "kr": "사", "ch": "巳" } },
-  "day": { "gan": { "kr": "계", "ch": "癸" }, "ji": { "kr": "유", "ch": "酉" } },
-  "hour": { "gan": { "kr": "기", "ch": "己" }, "ji": { "kr": "미", "ch": "未" } }
+  "year": {
+    "gan": { "kr": "을", "ch": "乙", "element": "목", "element_ch": "木", "yin_yang": "음", "color": "#2E7D32", "ten_god": "식신" },
+    "ji": { "kr": "해", "ch": "亥", "element": "수", "element_ch": "水", "yin_yang": "음", "color": "#1565C0", "ten_god": "겁재" },
+    "unseong": "제왕",
+    "unseong_self": "사",
+    "jijanggan": [
+      { "kr": "무", "ch": "戊", "element": "토", "element_ch": "土", "yin_yang": "양", "color": "#E65100", "ten_god": "정관", "type": "초기", "ratio": "7/30" },
+      { "kr": "갑", "ch": "甲", "element": "목", "element_ch": "木", "yin_yang": "양", "color": "#2E7D32", "ten_god": "상관", "type": "중기", "ratio": "7/30" },
+      { "kr": "임", "ch": "壬", "element": "수", "element_ch": "水", "yin_yang": "양", "color": "#1565C0", "ten_god": "겁재", "type": "정기", "ratio": "16/30" }
+    ],
+    "special_stars": []
+  },
+  "month": { ... },
+  "day": { ... },
+  "hour": { ... }
 }
 ```
 
-### 3. `ten_gods` (십신/십이운성 정보)
-원국 8글자 각각의 십신(비견, 겁재, 식신, 상관, 편재, 정재, 편관, 정관, 편인, 정인) 및 일간(`day_gan`: "일간")을 제공합니다.
+### 3. `ten_gods` (십신 정보 - 하위 호환)
+원국 8글자 각각의 십신 및 일간(`day_gan`: "일간")을 제공합니다.
 - `year_gan`, `year_ji`, `month_gan`, `month_ji`, `day_gan`, `day_ji`, `time_gan`, `time_ji`
 
 ### 4. `daewoon` (대운 정보)
@@ -96,16 +107,22 @@ GET http://localhost:8000/?year=1995&month=5&day=12&hour=14&min=30&sl=sol&gen=�
 - `direction`: 대운 순행/역행 여부 (`"순행"` 또는 `"역행"`)
 - `start_age`: 대운 시작 나이 (대운수, 예: `2.3`)
 - `current`: 현재 나이에 해당하는 대운 객체
-  - `index`, `year`, `age`, `gan`, `ji`, `gan_ten_god` (천간 십신), `ji_ten_god` (지지 십신), `unseong` (12운성), `start_age`, `end_age`, `start_year`, `end_year`
+  - `index`, `year`, `age`, `gan`, `ji`, `gan_detail`, `ji_detail`, `gan_ten_god` (천간 십신), `ji_ten_god` (지지 십신), `unseong` (12운성), `start_age`, `end_age`, `start_year`, `end_year`
 - `list`: 10개 대운 항목 전체 배열
 
 ### 5. `cycles` (세운 및 소운)
-- `future_100`: 향후 100년간의 세운 데이터 리스트
-- `baby_10`: 1세부터 10세까지의 소운 리스트
+프론트엔드 타임라인/카드 UI에 최적화된 객체 리스트 형식으로 제공됩니다.
+- `future_100`: 향후 100년간의 세운 상세 리스트 (`year`, `age`, `gan`, `ji`, `unseong`)
+- `baby_10`: 1세부터 10세까지의 소운 리스트 (`year`, `age`, `gan`, `ji`, `unseong`)
 
 ### 6. `meta` (메타 정보)
 - `gender`: 성별 (`남` / `여`)
-- `ddi`: 십이지 띠 (예: `돼지띠`)
+- `ddi`: 십이지 띠 (예: `돼지`)
+- `birth_date_solar`: 양력 생년월일 (`YYYY-MM-DD`)
+- `birth_time`: 출생 시간 (`HH:MM`)
+- `age_man`: 만 나이
+- `age_korean`: 세는 나이
+- `birth_weekday`: 태어난 요일 (예: `금요일`)
 
 ### 7. `analysis` (전통 명리 분석 요약)
 - `summary`: 천간/지지 상호작용 및 오행 균형 요약 문장 리스트

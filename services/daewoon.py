@@ -98,7 +98,7 @@ def jikr_to_ch(jikr: str) -> str:
     return JI_KR_TO_CH_MAP.get(jikr, jikr)
 
 
-from services.calculator import get_ten_star_stem, get_ten_star_branch
+from services.calculator import get_ten_star_stem, get_ten_star_branch, get_stem_detail, get_branch_detail
 from services.constants import UNSEONG_DATA
 
 def build_daewoon(
@@ -130,8 +130,11 @@ def build_daewoon(
         gan_char = gan_list[i]
         ji_char = ji_list[i]
 
-        gan_tg = get_ten_star_stem(day_stem, gan_char) if day_stem else ""
-        ji_tg = get_ten_star_branch(day_stem, ji_char) if day_stem else ""
+        gan_detail = get_stem_detail(day_stem, gan_char)
+        ji_detail = get_branch_detail(day_stem, ji_char)
+
+        gan_tg = gan_detail["ten_god"]
+        ji_tg = ji_detail["ten_god"]
         unseong = UNSEONG_DATA.get(day_stem, {}).get(ji_char, "") if day_stem else ""
 
         item = {
@@ -142,6 +145,8 @@ def build_daewoon(
             "end_year": end_year,
             "gan": gan_char,
             "ji": ji_char,
+            "gan_detail": gan_detail,
+            "ji_detail": ji_detail,
             "gan_ten_god": gan_tg,
             "ji_ten_god": ji_tg,
             "unseong": unseong
@@ -156,6 +161,8 @@ def build_daewoon(
                 "age": current_age,
                 "gan": gan_char,
                 "ji": ji_char,
+                "gan_detail": gan_detail,
+                "ji_detail": ji_detail,
                 "gan_ten_god": gan_tg,
                 "ji_ten_god": ji_tg,
                 "unseong": unseong,

@@ -151,76 +151,142 @@ def determine_zodiac_hour_str(hour_str, minute_str):
     return "해당 시간에 대한 지지를 찾을 수 없음"
 
 
-def generate_future_cycles(year, daeun):
+from .constants import TEN_STAR_BRANCH, TEN_STAR_STEM, STEM_INFO, STEM_KR_TO_CH, BRANCH_INFO, BRANCH_KR_TO_CH, JIJANGGAN_DETAILED, UNSEONG_DATA
+
+
+def get_stem_detail(day_stem_ch: str, stem_input: str, is_day_gan: bool = False) -> dict:
+    """천간의 상세 정보(한글, 한자, 오행, 음양, 색상, 십신)를 반환"""
+    stem_ch = STEM_KR_TO_CH.get(stem_input, stem_input)
+    base_info = STEM_INFO.get(stem_ch, {
+        "kr": stem_input, "ch": stem_ch, "element": "", "element_ch": "", "yin_yang": "", "color": "#000000"
+    })
     
-    # 천간과 지지
+    if is_day_gan:
+        ten_god = "일간"
+    else:
+        ten_god = get_ten_star_stem(day_stem_ch, stem_ch) if day_stem_ch else ""
+
+    return {
+        "kr": base_info["kr"],
+        "ch": base_info["ch"],
+        "element": base_info["element"],
+        "element_ch": base_info["element_ch"],
+        "yin_yang": base_info["yin_yang"],
+        "color": base_info["color"],
+        "ten_god": ten_god
+    }
+
+
+def get_branch_detail(day_stem_ch: str, branch_input: str) -> dict:
+    """지지의 상세 정보(한글, 한자, 오행, 음양, 색상, 십신)를 반환"""
+    branch_ch = BRANCH_KR_TO_CH.get(branch_input, branch_input)
+    base_info = BRANCH_INFO.get(branch_ch, {
+        "kr": branch_input, "ch": branch_ch, "element": "", "element_ch": "", "yin_yang": "", "color": "#000000"
+    })
+    ten_god = get_ten_star_branch(day_stem_ch, branch_ch) if day_stem_ch else ""
+
+    return {
+        "kr": base_info["kr"],
+        "ch": base_info["ch"],
+        "element": base_info["element"],
+        "element_ch": base_info["element_ch"],
+        "yin_yang": base_info["yin_yang"],
+        "color": base_info["color"],
+        "ten_god": ten_god
+    }
+
+
+def get_jijanggan_details(day_stem_ch: str, branch_input: str) -> list:
+    """지지의 지장간 상세 목록(초기, 중기, 정기 및 십신/오행)을 반환"""
+    branch_ch = BRANCH_KR_TO_CH.get(branch_input, branch_input)
+    details = JIJANGGAN_DETAILED.get(branch_ch, [])
+    result = []
+    
+    for item in details:
+        stem_ch = item["char"]
+        stem_detail = get_stem_detail(day_stem_ch, stem_ch)
+        result.append({
+            "kr": stem_detail["kr"],
+            "ch": stem_detail["ch"],
+            "element": stem_detail["element"],
+            "element_ch": stem_detail["element_ch"],
+            "yin_yang": stem_detail["yin_yang"],
+            "color": stem_detail["color"],
+            "ten_god": stem_detail["ten_god"],
+            "type": item["type"],
+            "ratio": item.get("ratio", "")
+        })
+    return result
+
+
+def generate_future_cycles(birth_year: int, daeun: float, day_stem_ch: str = "") -> list:
+    """
+    100년간의 세운을 프론트엔드 렌더링에 최적화된 객체 리스트로 생성
+    """
     heavenly_stems = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
     earthly_branches = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
     
-    # 대운수 반올림 처리 및 시작년도 계산
-    rounded_daeun = round(daeun)
-    start_year = year + rounded_daeun - 1
+    base_year = 1984  # 1984년 갑자년
+    result = []
     
-    # 결과를 저장할 리스트 초기화
-    years = []
-    heavenly_cycles = []
-    earthly_cycles = []
-    
-    # 시작 년도의 육십갑자 천간과 지지 인덱스 찾기
-    base_year = 1984  # 갑자년 시작
-    offset = (start_year - base_year) % 60
-    heavenly_index = offset % 10
-    earthly_index = offset % 12
-
-    # 100개의 년도, 천간, 지지 계산
+    # 100년간의 세운 계산 (출생 연도부터 100년)
     for i in range(100):
-        years.append(start_year + i)
-        heavenly_cycles.append(heavenly_stems[(heavenly_index + i) % 10])
-        earthly_cycles.append(earthly_branches[(earthly_index + i) % 12])
-    years = list(reversed(years))
-    heavenly_cycles = list(reversed(heavenly_cycles))
-    earthly_cycles = list(reversed(earthly_cycles))
-    grouped_year = zip(years,heavenly_cycles,earthly_cycles)
-    grouped_list = list(grouped_year)
-    grouped_chunks = [grouped_list[i:i + 10] for i in range(0, len(grouped_list), 10)]
-    return grouped_chunks
+        cur_year = birth_year + i
+        cur_age = i + 1  # 한국식 세는 나이 기준
+        offset = (cur_year - base_year) % 60
+        stem_ch = heavenly_stems[offset % 10]
+        branch_ch = earthly_branches[offset % 12]
+        
+        gan_detail = get_stem_detail(day_stem_ch, stem_ch)
+        ji_detail = get_branch_detail(day_stem_ch, branch_ch)
+        unseong = UNSEONG_DATA.get(day_stem_ch, {}).get(branch_ch, "") if day_stem_ch else ""
+        
+        result.append({
+            "year": cur_year,
+            "age": cur_age,
+            "gan": gan_detail,
+            "ji": ji_detail,
+            "unseong": unseong
+        })
+        
+    return result
 
 
-def generate_baby_cycles(year):
-    # 천간과 지지
+def generate_baby_cycles(birth_year: int, day_stem_ch: str = "") -> list:
+    """
+    1세부터 10세까지의 소운(아기 운세)을 객체 리스트로 생성
+    """
     heavenly_stems = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
     earthly_branches = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
-    years = []
-    heavenly_cycles = []
-    earthly_cycles = []
-    # 시작 년도의 육십갑자 천간과 지지 인덱스 찾기
-    base_year = 1984  # 갑자년 시작
-    offset = (year - base_year) % 60
-    heavenly_index = offset % 10
-    earthly_index = offset % 12
-     # 10개의 년도, 천간, 지지 계산
+    
+    base_year = 1984
+    result = []
+    
     for i in range(10):
-        years.append(year + i)
-        heavenly_cycles.append(heavenly_stems[(heavenly_index + i) % 10])
-        earthly_cycles.append(earthly_branches[(earthly_index + i) % 12])
-    years = list(reversed(years))
-    heavenly_cycles = list(reversed(heavenly_cycles))
-    earthly_cycles = list(reversed(earthly_cycles))
-    grouped_year = list(zip(years,heavenly_cycles,earthly_cycles))
-    return grouped_year
+        cur_year = birth_year + i
+        cur_age = i + 1
+        offset = (cur_year - base_year) % 60
+        stem_ch = heavenly_stems[offset % 10]
+        branch_ch = earthly_branches[offset % 12]
+        
+        gan_detail = get_stem_detail(day_stem_ch, stem_ch)
+        ji_detail = get_branch_detail(day_stem_ch, branch_ch)
+        unseong = UNSEONG_DATA.get(day_stem_ch, {}).get(branch_ch, "") if day_stem_ch else ""
+        
+        result.append({
+            "year": cur_year,
+            "age": cur_age,
+            "gan": gan_detail,
+            "ji": ji_detail,
+            "unseong": unseong
+        })
+        
+    return result
 
 
 def get_ten_star_stem(day_stem: str, stem: str) -> str:
     """
     일간(day_stem) 기준으로 다른 천간(stem)의 십성을 반환한다.
-    
-    Args:
-        day_stem: 일간 (예: '甲', '乙', ...)
-        stem: 다른 천간 (예: '丙', '辛', ...)
-    
-    Returns:
-        십성 문자열 (예: '비견', '정관', ...). 
-        키가 없으면 빈 문자열 반환.
     """
     if day_stem not in TEN_STAR_STEM:
         return ''
@@ -231,15 +297,6 @@ def get_ten_star_stem(day_stem: str, stem: str) -> str:
 def get_ten_star_branch(day_stem: str, branch: str) -> str:
     """
     일간(day_stem) 기준으로 지지(branch)의 십성을 반환한다.
-    (지지의 지장간 중 본기 기준으로 십성을 판단)
-    
-    Args:
-        day_stem: 일간 (예: '甲', '乙', ...)
-        branch: 지지 (예: '寅', '午', ...)
-    
-    Returns:
-        십성 문자열 (예: '식신', '편관', ...).
-        키가 없으면 빈 문자열 반환.
     """
     if day_stem not in TEN_STAR_BRANCH:
         return ''
