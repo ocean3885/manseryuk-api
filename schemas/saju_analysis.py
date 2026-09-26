@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict
 
 # ──────────────────────────────────────────
 # 사주 분석 응답용 중첩 스키마
@@ -16,7 +16,7 @@ class FourPillars(BaseModel):
     year: GanJi
     month: GanJi
     day: GanJi
-    time: GanJi
+    hour: GanJi
 
 
 class TenGods(BaseModel):
@@ -25,9 +25,11 @@ class TenGods(BaseModel):
     year_ji: str
     month_gan: str
     month_ji: str
+    day_gan: str = "일간"
     day_ji: str
     time_gan: str
     time_ji: str
+
 
 
 class SolarDate(BaseModel):
@@ -58,6 +60,9 @@ class CurrentDaewoon(BaseModel):
 
     gan: str
     ji: str
+    gan_ten_god: Optional[str] = None
+    ji_ten_god: Optional[str] = None
+    unseong: Optional[str] = None
 
     start_age: float
     end_age: float
@@ -77,6 +82,9 @@ class DaewoonItem(BaseModel):
 
     gan: str
     ji: str
+    gan_ten_god: Optional[str] = None
+    ji_ten_god: Optional[str] = None
+    unseong: Optional[str] = None
 
 
 class Daewoon(BaseModel):
@@ -86,6 +94,7 @@ class Daewoon(BaseModel):
     current: Optional[CurrentDaewoon]
 
     list: List[DaewoonItem]
+
 
 
 class CyclesInfo(BaseModel):
@@ -113,6 +122,89 @@ class AnalysisInfo(BaseModel):
     details: dict  # 개발 단계에서는 유연함을 위해 dict 사용
 
 
+# ──────────────────────────────────────────
+# 고급 명리학 AI 분석 스키마 (합충형해파, 허실, 빈주)
+# ──────────────────────────────────────────
+
+class InteractionItem(BaseModel):
+    category: str
+    type: str
+    name: str
+    from_pillar: str
+    to_pillar: str
+    is_adjacent: bool
+    weight: float
+    score: float
+    transformed_element: Optional[str] = None
+    description: str
+
+
+class InteractionsInfo(BaseModel):
+    summary_list: List[str]
+    matrix: List[InteractionItem]
+    tension_score: float
+    harmony_score: float
+    climate: str
+
+
+class PillarXuShi(BaseModel):
+    position: str
+    char: str
+    ten_star: str
+    score: float
+    original_status: str
+    current_status: str
+    is_transformed: bool
+    reason: str
+    meaning: str
+
+
+class XuShiDynamics(BaseModel):
+    pillars: dict
+    real_count: int
+    transformed_empty_count: int
+    hollow_penetrate_count: int
+    overall_status: str
+
+
+class ControlFlow(BaseModel):
+    direction: str
+    summary_meaning: str
+    career_advice: str
+
+
+class BinZhuDynamics(BaseModel):
+    guest_structure: dict
+    host_structure: dict
+    control_flow: ControlFlow
+class FiveElementsInfo(BaseModel):
+    counts: Dict[str, int]
+    percentages: Dict[str, float]
+    scores: Dict[str, float]
+    dominant: List[str]
+    deficient: List[str]
+    summary: str
+
+
+class SpecialStarItem(BaseModel):
+    name: str
+    pillar: str
+    position: str
+    char: str
+    type: str
+    description: str
+
+
+class AdvancedAnalysis(BaseModel):
+    five_elements: Optional[FiveElementsInfo] = None
+    special_stars: Optional[List[SpecialStarItem]] = None
+    interactions: InteractionsInfo
+    xu_shi_dynamics: XuShiDynamics
+    bin_zhu_dynamics: BinZhuDynamics
+    ai_consultation_prompts: List[str]
+
+
+
 class SajuAnalysisResponse(BaseModel):
     """사주 분석 최종 응답 (도메인별 그룹화)"""
     calendar: CalendarInfo
@@ -122,3 +214,5 @@ class SajuAnalysisResponse(BaseModel):
     cycles: CyclesInfo
     meta: MetaInfo
     analysis: AnalysisInfo
+    advanced_analysis: Optional[AdvancedAnalysis] = None
+

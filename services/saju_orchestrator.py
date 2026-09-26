@@ -4,7 +4,13 @@ from datetime import date
 from models.calenda_data import CalendaData
 from services.daewoon import getDaewoon, daewoonNum, get_time_gan, gankr_to_ch, jikr_to_ch, build_daewoon
 from services.calculator import descending_tens, find_ten_god, find_stem_branch_ten_god, generate_future_cycles, generate_baby_cycles, determine_zodiac_hour_str
-from services.analysis import analyze_palja_integrated
+from services.analysis import analyze_palja_integrated, analyze_advanced_tonggeun
+from services.interaction_matrix import build_interaction_matrix
+from services.xu_shi import analyze_xu_shi_dynamics
+from services.bin_zhu import analyze_bin_zhu_dynamics
+from services.five_elements import analyze_five_elements
+from services.special_stars import analyze_special_stars
+
 
 def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl: str, gen: str, db: Session):
     # sl 매핑 (sol -> 양력, lun -> 음력, lun_y -> 음력윤달)
@@ -60,15 +66,37 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
     branches = [data.cd_hyganjee[1], data.cd_hmganjee[1], data.cd_hdganjee[1], time_ji_ch]
     analysis_result = analyze_palja_integrated(stems, branches)
 
+    # ── 고급 명리학 AI 분석 (오행, 신살, 합충형해파, 허실, 빈주) ──
+    day_stem_ch = stems[2]
+    tonggeun_results = analyze_advanced_tonggeun(stems, branches)
+    five_elements_data = analyze_five_elements(stems, branches, tonggeun_results)
+    special_stars_data = analyze_special_stars(stems, branches)
+    interaction_data = build_interaction_matrix(stems, branches, day_stem_ch)
+    xu_shi_data = analyze_xu_shi_dynamics(stems, branches, day_stem_ch, tonggeun_results, interaction_data['matrix'])
+    bin_zhu_data = analyze_bin_zhu_dynamics(stems, branches, day_stem_ch, interaction_data['matrix'])
+
+    # AI 상담 프롬프트 전용 핵심 가이드 생성
+    ai_consultation_prompts = []
+    ai_consultation_prompts.append(f"【오행 분포】 {five_elements_data['summary']}")
+    if special_stars_data:
+        stars_summary = ", ".join([f"{st['name']}({st['position']})" for st in special_stars_data[:3]])
+        ai_consultation_prompts.append(f"【주요 신살 및 길신】 {stars_summary}")
+    ai_consultation_prompts.append(f"【사주 기후】 {interaction_data['climate']} (긴장도: {interaction_data['tension_score']}, 조화도: {interaction_data['harmony_score']})")
+    ai_consultation_prompts.append(f"【허실 변화】 {xu_shi_data['overall_status']}")
+    ai_consultation_prompts.extend(bin_zhu_data['ai_prompt_bullets'])
+    for sm in interaction_data['summary_list'][:3]:
+        ai_consultation_prompts.append(f"【주요 상호작용】 {sm}")
+
     # ── 대운 계산 ──
     daewoon         = getDaewoon(gen, year_gan_kr, month_gan_kr, month_ji_kr)
-    daewoon_num     = daewoonNum(year, month, day, calendar_type_str, daewoon[0], db)
+    daewoon_num     = daewoonNum(data.cd_no, daewoon[0], db)
     daewoon_num_list = descending_tens(daewoon_num)
     daewoon_result = build_daewoon(
-    direction_data=daewoon,
-    start_age=daewoon_num,
-    birth_year=year
-)
+        direction_data=daewoon,
+        start_age=daewoon_num,
+        birth_year=year,
+        day_stem=day_stem_ch
+    )
 
     # ── 최종 결과 (도메인별 그룹화) ──
     return {
@@ -85,7 +113,7 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
             "year":  { "gan": {"kr": year_gan_kr,  "ch": data.cd_hyganjee[0]}, "ji": {"kr": year_ji_kr,  "ch": data.cd_hyganjee[1]} },
             "month": { "gan": {"kr": month_gan_kr, "ch": data.cd_hmganjee[0]}, "ji": {"kr": month_ji_kr, "ch": data.cd_hmganjee[1]} },
             "day":   { "gan": {"kr": day_gan_kr,   "ch": data.cd_hdganjee[0]}, "ji": {"kr": day_ji_kr,   "ch": data.cd_hdganjee[1]} },
-            "time":  { "gan": {"kr": time_gan_kr,  "ch": time_gan_ch},          "ji": {"kr": time_ji_kr,  "ch": time_ji_ch} },
+            "hour":  { "gan": {"kr": time_gan_kr,  "ch": time_gan_ch},          "ji": {"kr": time_ji_kr,  "ch": time_ji_ch} },
         },
 
         # 3. 십신
@@ -94,6 +122,7 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
             "year_ji":   find_stem_branch_ten_god(day_gan_kr, year_ji_kr),
             "month_gan": find_ten_god(day_gan_kr, month_gan_kr),
             "month_ji":  find_stem_branch_ten_god(day_gan_kr, month_ji_kr),
+            "day_gan":   "일간",
             "day_ji":    find_stem_branch_ten_god(day_gan_kr, day_ji_kr),
             "time_gan":  find_ten_god(day_gan_kr, time_gan_kr),
             "time_ji":   find_stem_branch_ten_god(day_gan_kr, time_ji_kr),
@@ -102,21 +131,33 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
         # 4. 대운
         "daewoon": daewoon_result,
 
-        # 5. 분석 결과 (신규 추가!) --------------------------------------
+        # 5. 분석 결과 --------------------------------------
         "analysis": {
-            "summary": analysis_result['summary'], # 합충 관계 등 요약
-            "details": analysis_result['pillars']  # 각 기둥별 통근, 점수, 허실, 12운성
+            "summary": analysis_result['summary'],
+            "details": analysis_result['pillars']
         },
 
-        # 6. 운세 사이클
+        # 6. 고급 명리학 AI 상담 분석 (신규 확장!) ----------------
+        "advanced_analysis": {
+            "five_elements": five_elements_data,
+            "special_stars": special_stars_data,
+            "interactions": interaction_data,
+            "xu_shi_dynamics": xu_shi_data,
+            "bin_zhu_dynamics": bin_zhu_data,
+            "ai_consultation_prompts": ai_consultation_prompts
+        },
+
+        # 7. 운세 사이클
         "cycles": {
             "future_100": generate_future_cycles(data.cd_sy, daewoon_num),
             "baby_10":    generate_baby_cycles(data.cd_sy),
         },
 
-        # 7. 기타 메타
+        # 8. 기타 메타
         "meta": {
             "gender": gen,
             "ddi":    data.cd_ddi,
         },
     }
+
+

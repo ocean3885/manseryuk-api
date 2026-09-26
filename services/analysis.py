@@ -101,32 +101,14 @@ def analyze_palja_integrated(stems, branches):
     사주 8글자를 통합 분석하여 천간/지지의 상호작용이 반영된 결과를 리턴합니다.
     """
     day_stem = stems[2]
-    # 1. 내부 세부 로직 함수들 (별도 파일에서 import 했다고 가정)
-    def _get_branch_relations(brs):
-        # 예: [['연지-월지', '충'], ['월지-일지', '합']] 등 반환
-        return ["월지-일지 육합", "연지-시지 충"] 
-
-    def _get_stem_relations(sts):
-        # 예: [['연간-월간', '합']] 등 반환
-        return ["연간-월간 합화목"]
-
-    # 2. 핵심 분석 실행
-    branch_rels = _get_branch_relations(branches)
-    stem_rels = _get_stem_relations(stems)
-    
-    # 앞서 만든 정밀 통근 점수 계산 (지지의 합충 결과가 가중치로 반영되게 설계 가능)
     tonggeun_results = analyze_advanced_tonggeun(stems, branches)
     
-    # 3. 데이터 통합 조립
     pillers = ['year', 'month', 'day', 'hour']
-    result_data = {
-        "summary": {
-            "branch_interactions": branch_rels,
-            "stem_interactions": stem_rels,
-            "total_energy_balance": "목화통명(木火通明) 기세"
-        },
-        "pillars": {}
-    }
+    position_names = ['년', '월', '일', '시']
+    
+    pillars_data = {}
+    collected_branch_rels = []
+    collected_stem_rels = []
 
     for i, p in enumerate(pillers):
         branch_char = branches[i]
@@ -134,13 +116,32 @@ def analyze_palja_integrated(stems, branches):
         transmitted_info = get_transmitted_info(branch_char, i, stems, day_stem)
         branch_relations = get_relations_for_branch(branch_char, i, branches, stems)
         stem_relations = get_relations_for_stem(stem_char, i, branches, stems)
-        chungs = branch_relations.get('chungs', []) # 충 관계 리스트
-        punishments = branch_relations.get('punishments', [])  # 형 관계 리스트
+        chungs = branch_relations.get('chungs', [])
+        punishments = branch_relations.get('punishments', [])
         
-        # 자합 계산
+        # 지지 주요 형충회합 요약 추출
+        for rel_key, rel_val in branch_relations.items():
+            if rel_val and isinstance(rel_val, dict):
+                target_char = rel_val.get('with', '')
+                rel_type = rel_val.get('type', rel_key)
+                collected_branch_rels.append(f"{position_names[i]}지 {rel_key}({target_char}, {rel_type})")
+            elif rel_val and isinstance(rel_val, list):
+                for item in rel_val:
+                    if isinstance(item, dict):
+                        target_char = item.get('with', '')
+                        collected_branch_rels.append(f"{position_names[i]}지 {rel_key}({target_char})")
+
+        # 천간 주요 관계 요약 추출
+        for rel_key, rel_val in stem_relations.items():
+            if rel_val and isinstance(rel_val, list):
+                for item in rel_val:
+                    if isinstance(item, dict):
+                        target_char = item.get('with', '')
+                        collected_stem_rels.append(f"{position_names[i]}간 {rel_key}({target_char})")
+
         jahab_info = check_jahab(stem_char, branch_char, i, chungs, punishments)
         
-        result_data["pillars"][p] = {
+        pillars_data[p] = {
             "stem": {
                 "char": stem_char,
                 "position": tonggeun_results[i]['위치'],
@@ -160,4 +161,20 @@ def analyze_palja_integrated(stems, branches):
             "jahab": jahab_info
         }
 
-    return result_data
+    # 전체 통근 점수/상태 바탕 세력 요약
+    sil_count = sum(1 for t in tonggeun_results if t['상태'] == '실(實)')
+    if sil_count >= 3:
+        energy_balance = "신강(身強) 세력 우세"
+    elif sil_count == 2:
+        energy_balance = "중화(中和) 균형 기세"
+    else:
+        energy_balance = "신약(身弱) 세력 약화"
+
+    return {
+        "summary": {
+            "branch_interactions": list(dict.fromkeys(collected_branch_rels)),
+            "stem_interactions": list(dict.fromkeys(collected_stem_rels)),
+            "total_energy_balance": energy_balance
+        },
+        "pillars": pillars_data
+    }
