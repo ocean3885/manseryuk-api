@@ -8,9 +8,8 @@ def check_six_hap(target_branch, target_index, all_branches, day_stem):
         if i == target_index:
             continue
         
-        sorted_pair = tuple(sorted([target_branch, other_branch]))
-        if sorted_pair in SIX_HAPS:
-            element = SIX_HAPS[sorted_pair]
+        element = SIX_HAPS.get((target_branch, other_branch)) or SIX_HAPS.get((other_branch, target_branch))
+        if element:
             is_adjacent = (abs(i - target_index) == 1)
             return {
                 'my': target_branch,

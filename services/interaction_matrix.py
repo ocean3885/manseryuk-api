@@ -152,6 +152,31 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "description": desc
                         })
 
+            # (6) 반합 (半合)
+            _, half_haps = check_three_hap(b1, i, branches, day_stem)
+            if half_haps:
+                for hh in half_haps:
+                    if hh.get('with_index') == j:
+                        h_type = hh.get('type', '반합')
+                        h_elem = hh.get('element', '')
+                        base_score = 1.3 if '전반합' in h_type else (1.1 if '후반합' in h_type else 0.6)
+                        score = round(base_score * weight, 2)
+                        harmony_score += score
+                        desc = f"{name_from}지({b1})-{name_to}지({b2}) {h_type}({h_elem}): 협력 및 발전적 결합"
+                        summary_list.append(desc)
+                        matrix.append({
+                            "category": "지지",
+                            "type": "반합(半合)",
+                            "name": f"{b1}{b2}반합",
+                            "from_pillar": pos_from,
+                            "to_pillar": pos_to,
+                            "is_adjacent": (dist == 1),
+                            "weight": weight,
+                            "score": score,
+                            "transformed_element": h_elem,
+                            "description": desc
+                        })
+
     # 2. 천간 간 조합 분석
     for i in range(4):
         for j in range(i + 1, 4):
@@ -207,22 +232,54 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "description": desc
                         })
 
-    # 삼합 / 방합 확인
+    # 3. 삼합 / 방합 확인 (국 및 방위 세력)
+    seen_three_haps = set()
     for i in range(4):
-        three_haps, half_haps = check_three_hap(branches[i], i, branches, day_stem)
+        three_haps, _ = check_three_hap(branches[i], i, branches, day_stem)
         for th in three_haps:
-            desc = f"지지 삼합({th.get('element', '')}): 강력한 국(局) 형성"
-            if desc not in summary_list:
+            elem = th.get('element', '')
+            if elem not in seen_three_haps:
+                seen_three_haps.add(elem)
+                desc = f"지지 삼합({elem}국): 강력한 연대 및 국(局) 형성"
                 summary_list.append(desc)
                 harmony_score += 3.0
+                matrix.append({
+                    "category": "지지",
+                    "type": "삼합(三合)",
+                    "name": f"삼합 {elem}국",
+                    "from_pillar": "all",
+                    "to_pillar": "all",
+                    "is_adjacent": th.get('is_adjacent', True),
+                    "weight": 1.0,
+                    "score": 3.0,
+                    "transformed_element": elem,
+                    "description": desc
+                })
 
+    seen_square_haps = set()
+    for i in range(4):
         square_haps = check_square_hap(branches[i], i, branches, day_stem)
         if square_haps and isinstance(square_haps, list):
             for sq in square_haps:
-                desc = f"지지 방합({sq.get('element', '')}): 강력한 방위 계절 세력 형성"
-                if desc not in summary_list:
+                elem = sq.get('element', '')
+                season = sq.get('season', '')
+                if elem not in seen_square_haps:
+                    seen_square_haps.add(elem)
+                    desc = f"지지 방합({season} {elem}방): 강력한 방위 계절 세력 형성"
                     summary_list.append(desc)
                     harmony_score += 3.5
+                    matrix.append({
+                        "category": "지지",
+                        "type": "방합(方合)",
+                        "name": f"방합 {season}{elem}",
+                        "from_pillar": "all",
+                        "to_pillar": "all",
+                        "is_adjacent": sq.get('is_adjacent', True),
+                        "weight": 1.0,
+                        "score": 3.5,
+                        "transformed_element": elem,
+                        "description": desc
+                    })
 
 
     return {

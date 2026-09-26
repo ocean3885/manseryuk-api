@@ -120,24 +120,53 @@ def analyze_palja_integrated(stems, branches):
         punishments = branch_relations.get('punishments', [])
         
         # 지지 주요 형충회합 요약 추출
+        branch_label_map = {
+            'six_haps': '육합',
+            'chungs': '충',
+            'cheons': '천(해)',
+            'breaks': '파',
+            'three_haps': '삼합',
+            'half_haps': '반합',
+            'square_haps': '방합',
+            'punishments': '형'
+        }
         for rel_key, rel_val in branch_relations.items():
+            label = branch_label_map.get(rel_key, rel_key)
             if rel_val and isinstance(rel_val, dict):
                 target_char = rel_val.get('with', '')
-                rel_type = rel_val.get('type', rel_key)
-                collected_branch_rels.append(f"{position_names[i]}지 {rel_key}({target_char}, {rel_type})")
+                rel_type = rel_val.get('type', '')
+                type_str = f", {rel_type}" if rel_type else ""
+                collected_branch_rels.append(f"{position_names[i]}지 {label}({target_char}{type_str})")
             elif rel_val and isinstance(rel_val, list):
                 for item in rel_val:
                     if isinstance(item, dict):
                         target_char = item.get('with', '')
-                        collected_branch_rels.append(f"{position_names[i]}지 {rel_key}({target_char})")
+                        rel_type = item.get('type', '')
+                        if not target_char and 'branches' in item:
+                            target_char = "".join(item['branches'])
+                        type_str = f", {rel_type}" if rel_type else ""
+                        collected_branch_rels.append(f"{position_names[i]}지 {label}({target_char}{type_str})")
 
         # 천간 주요 관계 요약 추출
+        stem_label_map = {
+            'combinations': '천간합',
+            'conflict': '천간충',
+            'restrain': '천간극'
+        }
         for rel_key, rel_val in stem_relations.items():
+            label = stem_label_map.get(rel_key, rel_key)
             if rel_val and isinstance(rel_val, list):
                 for item in rel_val:
                     if isinstance(item, dict):
                         target_char = item.get('with', '')
-                        collected_stem_rels.append(f"{position_names[i]}간 {rel_key}({target_char})")
+                        collected_stem_rels.append(f"{position_names[i]}간 {label}({target_char})")
+            elif rel_val and isinstance(rel_val, dict):
+                for sub_key in ['restrain_to', 'restrain_me']:
+                    for item in rel_val.get(sub_key, []):
+                        if isinstance(item, dict):
+                            target_char = item.get('with', '')
+                            direction = '극함' if sub_key == 'restrain_to' else '극당함'
+                            collected_stem_rels.append(f"{position_names[i]}간 {label}({target_char} {direction})")
 
         jahab_info = check_jahab(stem_char, branch_char, i, chungs, punishments)
         
