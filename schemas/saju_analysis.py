@@ -216,7 +216,7 @@ class PillarXuShi(BaseModel):
 
 
 class XuShiDynamics(BaseModel):
-    pillars: dict
+    pillars: Dict[str, PillarXuShi]
     real_count: int
     transformed_empty_count: int
     hollow_penetrate_count: int
