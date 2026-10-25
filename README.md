@@ -159,22 +159,177 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 - `tension_score`: 충/형/파/해로 인한 긴장·변동 지수
 - `harmony_score`: 육합/삼합/방합으로 인한 결속·안정 지수
 - `matrix`: 각 상호작용 항목의 세부 정보 (가중치, 합화 오행, 설명)
+- `rule_version`: `"1.1.0"`. 반복 지지의 육합·반합·형 누락을 위치 기준으로 수정한 버전입니다.
+
+각 `matrix[]` 항목에는 다음 참조 정보가 포함됩니다.
+
+| 필드 | 의미 |
+| --- | --- |
+| `relation_id` | 같은 원국·규칙 버전에서 관계 종류·이름·참여 위치로 결정되는 식별자. 목록 순서나 점수에 의존하지 않음 |
+| `relation_scope` | 두 기둥 관계는 `pairwise`, 삼합·방합은 `group` |
+| `participants` | 실제 참여 기둥을 년·월·일·시 순서로 나열 |
+| `formations` | 다자 관계를 성립시키는 서로 다른 세 지지의 위치 조합. 쌍별 관계는 빈 목록 |
+
+예를 들어 지지가 `亥卯未亥`인 삼합의 참여 정보는 다음과 같습니다(발췌).
+
+```json
+{
+  "relation_scope": "group",
+  "from_pillar": "all",
+  "to_pillar": "all",
+  "participants": ["year", "month", "day", "hour"],
+  "formations": [
+    ["year", "month", "day"],
+    ["month", "day", "hour"]
+  ]
+}
+```
+
+기존 `from_pillar`/`to_pillar`의 `all`은 호환용으로 유지합니다. 참여 위치는 `participants`로 확인합니다. 성립 조합이 여러 개여도 동일 삼합·방합의 조화 점수는 한 번만 가산합니다. 기존 다자 관계의 `is_adjacent`는 참여 위치 전체의 범위가 2 이내인지를 뜻하며, 개별 성립 조합의 인접성을 뜻하지 않습니다.
+
+반복 지지는 글자가 같아도 위치별로 별도 관계입니다. `寅午午酉`의 년–월·년–일 반합, `子丑丑子`의 네 육합 쌍, 반복 상대의 형을 모두 반환합니다. 기존 상세 분석의 단일 `six_haps`는 유지하고 전체 육합 목록은 `six_haps_all`로 제공합니다. 충·해·파와 천간 합·충은 기존에도 상대 위치를 순회하므로 해당 수집 규칙을 유지했습니다.
+
+**누락 수정에 따른 결과 변경:** 관계 점수와 이를 사용하는 허실·빈주 결과가 일부 달라질 수 있습니다. 수정 전 합성 입력 200건과 비교했을 때 31건의 긴장/조화 점수가 변했고, 2건에서 천간 3개의 허실 판정이 바뀌었습니다. 아래 변경은 누락된 형 복원에 따른 것으로, 허실 감점 계수나 임계값 변경이 아닙니다.
+
+| 천간 / 지지(년·월·일·시 순) | 위치 | 수정 전 → 후 |
+| --- | --- | --- |
+| 癸甲乙丁 / 巳申巳子 | 시간 | 실 → 변허 |
+| 丁庚丙丁 / 巳午午午 | 일간·시간 | 실 → 변허 |
 
 #### 4. `xu_shi_dynamics` (허와 실 및 실자변허 實者變虛)
-맹파명리의 핵심 이론인 원국의 실(實)과 허(虛), 충·해에 의한 상태 전이(실자변허), 천간 허투(虛透) 분석:
-- `pillars`: 각 기둥 글자별 실/허 상태 및 십신 해석 (`original_status`, `current_status`, `is_transformed`, `reason`, `meaning`)
-- `real_count`: 실(實) 상태 글자 수
-- `transformed_empty_count`: 충·해로 변허된 글자 수
-- `overall_status`: 현실적 자산 기반 vs 지식/아이디어/유동성 기반의 라이프스타일 가이드
+원국의 통근 점수와 지지 충·형·해 관계를 이용한 규칙 기반 분석입니다. `original_status`와 `current_status`는 **같은 원국의 관계 반영 전후**를 뜻하며, 대운·세운에 따른 시기별 변화가 아닙니다.
+
+| 필드 | 의미 |
+| --- | --- |
+| `analysis_scope` | `"natal"`: 원국 분석 |
+| `rule_version` | `"1.0.0"`: 기존 판정 규칙을 최초로 명시한 버전 |
+| `pillars` | `year`, `month`, `day`, `hour` 천간별 분석 |
+| `shared_roots` | 둘 이상의 천간이 공유하는 지지별 뿌리와 각 천간의 기여도·최종 상태 |
+| `impact_groups` | 충·형·해 관계별로 기여도가 제외된 뿌리 위치와 영향을 받은 천간 목록 |
+| `real_count` | 관계 반영 후 실(實)인 천간 수 |
+| `transformed_empty_count` | 실에서 변허(變虛)로 분류된 천간 수 |
+| `hollow_penetrate_count` | 허투(虛透)인 천간 수 |
+| `weak_count` | 허(虛)인 천간 수. 네 종류의 개수 합은 4 |
+| `overall_status` | 실제 상태 분포와 통근에 영향을 준 관계 요약 |
+
+`pillars.*`의 기존 `position`, `char`, `ten_star`, `score`, `original_status`, `current_status`, `is_transformed`, `reason`, `meaning` 필드는 유지합니다. 동일한 통근·관계 입력에서 허실 점수와 판정 규칙은 기존과 동일하며, 설명 문구는 구조와 근거 중심으로 변경했습니다. 관계 수집의 누락 수정으로 입력 근거가 달라지는 경우는 위 변경 내역을 참고하세요.
+
+- `score`: 관계 반영 **전** 통근 총점. 확률이나 정규화된 0~1 점수가 아닙니다.
+- `effective_score`: 관계에 연결된 뿌리를 제외하고 남은 개별 통근 점수의 합.
+- `root_evidence`: 뿌리별 `pillar`, `position`, `branch_char`, `score`, `is_affected`, `effective_score`, `interactions`.
+- `root_evidence[].interactions`: 해당 뿌리에 영향을 준 충·형·해의 `type`, `name`, `from_pillar`, `to_pillar`, `weight`, `is_adjacent`. 가중치와 인접성은 근거로 공개하지만 v1 감점에는 사용하지 않습니다. 동일 항목은 중복 표시하지 않습니다.
+- `root_evidence[].interactions[].relation_id`: 원본 `interactions.matrix`를 참조합니다. 관계 ID가 없는 직접 함수 입력에서는 `null`입니다. `impact_groups[].interaction`도 같은 ID를 제공합니다.
+- `transition_reasons`: 최초 분류, 영향 관계, 최종 분류의 이유 목록. 기존 `reason`은 이 목록을 연결한 문장입니다.
+- `meaning`: 계산 결과와 구분된 **전통적 상징 해석 참고**. 실제 능력·성과·재정 상태·직업 적합성을 예측하지 않습니다.
+- `transition_code`: `maintained`(기존 분류 유지) 또는 `real_to_empty`(실 → 변허). `is_transformed`와 같은 상태 전이 정보를 코드로 제공합니다.
+- `root_structure.primary_root_pillars`: 관계 반영 전 개별 기여도가 가장 큰 뿌리 위치. 동점이면 모두 포함하고 뿌리가 없으면 빈 목록입니다.
+- `root_structure.remaining_root_pillars`: 관계 반영 후 양의 기여도가 남은 뿌리 위치.
+- `root_structure.excluded_root_pillars`: 충·형·해로 기여도가 제외된 뿌리 위치.
+- `root_structure.remaining_support`: 잔여 점수만으로 분류한 `none`(0), `below_threshold`(0 초과 0.5 미만), `meets_threshold`(0.5 이상). 변화 이력을 포함하는 `current_status`와 구별합니다.
+
+`shared_roots[]`는 `root_pillar`, `branch_char`, `is_affected`, `interactions`, `dependents`를 제공합니다. `dependents[]`의 `stem_pillar`, `score`, `effective_score`, `current_status`로 같은 뿌리가 각 천간에 기여한 정도와 최종 결과를 확인합니다. 같은 지지 글자가 반복되어도 **위치가 다르면 다른 뿌리**입니다.
+
+`impact_groups[]`는 `interaction`, `affected_root_pillars`, `affected_stem_pillars`를 제공합니다. 같은 관계의 양쪽에 뿌리가 있거나 여러 천간이 연결돼도 위치 목록은 중복 집계하지 않습니다. 이는 기존 근거의 영향 범위를 모은 것으로, 특정 관계 하나가 단독으로 변허를 일으켰다는 판정이나 새로운 감점이 아닙니다.
+
+예를 들어 년간·월간이 월지 뿌리를 공유하고 해당 뿌리가 제외되었을 때, 년간은 일지에 잔여 점수 `0.6`이 있어 실을 유지하고 월간은 시지에 `0.3`만 남아 변허로 분류될 수 있습니다. `overall_status`는 공통 뿌리를 먼저 설명하고 각 천간의 잔존 기반과 결과를 이어서 요약합니다.
+
+**v1 판정 규칙과 한계**
+
+1. 원점수가 `0.5` 이상이면 실, `0`이면 허투, 그 사이이면 허입니다.
+2. 지지 충·형·해에 참여한 양쪽 지지의 뿌리 기여도를 모두 `0`으로 취급합니다. 관계 유형별 손상률, 거리별 감점, 합에 따른 회복, 파는 반영하지 않습니다.
+3. 원래 실이고 영향을 받은 뿌리가 있을 때만 잔여 점수를 검사합니다. `0.5` 미만이면 변허, 이상이면 실을 유지합니다.
+4. 원래 허·허투는 분류를 유지합니다. 따라서 원래 허인 천간의 잔여 점수가 `0`이어도 허투나 변허로 바뀌지 않습니다.
+5. 원점수와 개별 뿌리 점수는 상위 통근 계산기에서 각각 소수 둘째 자리로 반올림합니다. 이 때문에 뿌리 점수 합과 원점수가 미세하게 다를 수 있습니다. 기존 판정 호환성을 위해 잔여 합산값은 추가 반올림 없이 비교·반환합니다.
+
+**수치·상태 계약 (`rule_version: "1.0.0"` 유지)**
+
+내부 통근 계산은 Python `float`를 사용합니다. 총점은 반올림 전 개별 기여도를 합친 뒤 `round(total, 2)`로 반환하고, 뿌리별 점수는 각각 `round(contribution, 2)`로 반환합니다. 허실의 최초 분류는 반환된 총점으로 판정하고, 잔여 점수는 반환된 개별 점수를 년·월·일·시 순서로 합산합니다. epsilon 보정이나 판정 직전 반올림은 적용하지 않습니다. 예를 들어 계산값 `0.49999999999999994`는 `0.5` 미만입니다. 화면에서 소수 자릿수를 줄여 표시하더라도 상태를 표시값으로 재계산하지 않습니다.
+
+| 최초 상태 | 관계 반영 조건 | 최종 상태 | `transition_code` |
+| --- | --- | --- | --- |
+| 실 | 제외된 뿌리 없음 | 실 유지(잔여 점수로 재분류하지 않음) | `maintained` |
+| 실 | 제외된 뿌리 있음, 잔여 점수 ≥ 0.5 | 실 | `maintained` |
+| 실 | 제외된 뿌리 있음, 잔여 점수 < 0.5 | 변허 | `real_to_empty` |
+| 허 | 관계 유무·잔여 점수와 무관 | 허 | `maintained` |
+| 허투 | 관계 유무·잔여 점수와 무관 | 허투 | `maintained` |
+
+`remaining_support`는 위 전이표와 독립적으로 잔여 점수를 나타냅니다. 따라서 `current_status: "허(虛)"`와 `remaining_support: "none"`이 함께 나올 수 있습니다. 점수 정밀도, 임계값 또는 전이 규칙 변경은 향후 판정 버전 변경으로 다루며, 이번 구조 정보 추가는 기존 판정 버전을 유지합니다.
+
+가상 통근 입력에 대한 `pillars.year`의 점수·근거 예시(일부 필드 발췌):
+
+```json
+{
+  "score": 1.1,
+  "effective_score": 0.3,
+  "original_status": "실(實)",
+  "current_status": "변허(變虛)",
+  "is_transformed": true,
+  "transition_code": "real_to_empty",
+  "root_structure": {
+    "primary_root_pillars": ["month"],
+    "remaining_root_pillars": ["hour"],
+    "excluded_root_pillars": ["month"],
+    "remaining_support": "below_threshold"
+  },
+  "root_evidence": [
+    {
+      "pillar": "month",
+      "position": "월",
+      "branch_char": "午",
+      "score": 0.8,
+      "is_affected": true,
+      "effective_score": 0.0,
+      "interactions": [
+        {
+          "type": "충(沖)",
+          "name": "子午충",
+          "from_pillar": "year",
+          "to_pillar": "month",
+          "weight": 1.0,
+          "is_adjacent": true
+        }
+      ]
+    },
+    {
+      "pillar": "hour",
+      "position": "시",
+      "branch_char": "卯",
+      "score": 0.3,
+      "is_affected": false,
+      "effective_score": 0.3,
+      "interactions": []
+    }
+  ]
+}
+```
+
+허실 회귀 테스트는 프로젝트 루트에서 실행합니다(의존성이 설치된 Python 3.12 환경):
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+`tests/fixtures/xu_shi_v1.json`은 변경 전 함수로 확보한 합성 간지 입력 16건의 점수·상태·개수 기준값입니다. 테스트는 이 기준값 외에도 허투·허·실, 잔여 점수 `0.5` 및 인접 float 경계, 총점과 뿌리별 반올림 차이, 공통 뿌리와 서로 다른 잔존 기반, 동점 주요 뿌리, 중첩 관계, 반복 지지, 응답 스키마를 검증합니다. 통합 테스트는 달력 DB를 읽기 전용으로 열어 `1990-01-01 12:00`, 기존 빈주 오류 사례 `1995-05-12 14:30`의 라우터 결과·응답 스키마·상담 프롬프트를 검증합니다.
 
 #### 5. `bin_zhu_dynamics` (빈주 이론 賓主理論)
-사회적 환경(년/월: 賓)과 개인/내면(일/시: 主) 간의 에너지 흐름 및 제어/획득 방식 분석:
+사회적 환경(년/월: 賓)과 개인 영역(일/시: 主) 사이의 관계 유형과 참여 구조를 집계합니다.
+
+- `rule_version`: `"2.0.0"`. 제어 방향·자원 취용을 단정하던 문구를 실제 관계 집계에 맞춘 버전입니다.
+- `interaction_scope`: `"pairwise"`. **점수 계산**은 기둥 쌍별 관계에 한정됩니다.
+- `pairwise_scores`: `combination`(빈-주를 연결하는 육합·반합·천간합마다 2점), `conflict`(빈-주를 연결하는 충·해/천·천간충마다 1.5점). 기존 가산값을 유지하며 거리·십성에 따른 추가 가중치는 없습니다. 형·파·극과 빈 내부/주 내부 관계는 가산하지 않습니다.
+- `guest_host_links`: 점수에 반영한 쌍별 관계의 `relation_id`, `type`, `detail`, `target_guest`, `source_host`. 위치와 십성을 함께 기술하며, `target_guest`/`source_host`라는 기존 키가 취득·제어 방향을 뜻하지는 않습니다.
+- `excluded_interactions`: 점수에서 제외한 다자 관계 또는 유효하지 않은 위치 항목의 `relation_id`, `participants`, `category`, `type`, `name`, `from_pillar`, `to_pillar`, `reason_code`. 삼합·방합 또는 `all` 위치는 `group_relation_unsupported`, 누락·알 수 없는 위치는 `invalid_endpoint`입니다. 모든 미가산 유형의 목록은 아닙니다.
+- `group_connections`: 참여 정보가 있는 다자 관계의 `relation_id`, `type`, `participants`, `guest_participants`, `host_participants`, `included_in_score: false`, `description`. 참여 정보 없는 `all` 입력에서는 기둥을 추측하지 않습니다.
 - `guest_structure`: 빈(외계/사회)의 주요 세력 및 십신
 - `host_structure`: 주(자아/가정)의 주요 수단 및 십신
 - `control_flow`:
-  - `direction`: 관계 유형 (`주가 빈을 제압/획득`, `빈이 주를 통제`, `주-빈 균형 교류형`)
-  - `summary_meaning`: 사회적 관계 및 성과 달성 메커니즘
-  - `career_advice`: 적합한 직업군 및 비즈니스 모델 권장사항
+  - `direction`: `합 관계 우세`, `충·해 관계 우세`, `관계 점수 동률`, `평가 가능한 빈-주 통로 없음`
+  - `summary_meaning`: 어떤 관계 점수가 높은지 설명. 동률을 생활의 균형으로 해석하지 않음
+  - `career_advice`: 키는 호환용으로 유지하되, 직업 추천 대신 빈·주의 전통적 상징과 해석 범위를 기술
+
+삼합·방합은 전체 `interactions.matrix`에 보존되며 `group_connections`와 `【빈주 다자 관계】`에서 빈·주의 공동 참여 구조를 설명합니다. 쌍별 점수에는 가산하지 않고, 점수 제외 범위는 `【빈주 계산 범위】`에도 명시합니다. 합이 있다는 사실만으로 재관의 취용·재물 취득을 판정하지 않습니다. 실제 반영된 빈-주 통로가 없으면 방향을 판정하지 않습니다. 다자 관계의 점수화와 허실 부분 감점 모델은 후속 범위입니다.
+
+응답 키는 유지했지만 `direction` 값과 상담 프롬프트의 빈주 제목·문구는 변경되었습니다. 기존 문구를 비교하는 클라이언트는 새 값으로 갱신해야 합니다. 허실의 `rule_version: "1.0.0"`은 유지되며, 관계 수집 수정은 `interactions.rule_version`으로 구분합니다.
 
 #### 6. `ai_consultation_prompts` (AI 즉시 주입용 상담 스크립트)
 LLM 시스템 프롬프트 또는 RAG 컨텍스트에 그대로 주입할 수 있는 핵심 요약 불릿 리스트를 한국어로 생성하여 반환합니다.
@@ -184,9 +339,11 @@ LLM 시스템 프롬프트 또는 RAG 컨텍스트에 그대로 주입할 수 �
   "【오행 분포】 목화토금수 5개 오행이 사주에 골고루 갖추어진 원만한 오행구족(五行具足) 구조입니다.",
   "【주요 신살 및 길신】 천을귀인(월지), 역마살(월지), 천을귀인(일지)",
   "【사주 기후】 긴장과 조화가 공존하는 복합형 (긴장도: 3.5, 조화도: 3.0)",
-  "【허실 변화】 충·해로 인해 1개 글자가 실자변허(實者變虛) 상태로 전이되어, 실물 고정 자산보다 유동적/지식 기반 대처가 유리합니다.",
-  "【빈주 이론】 주-빈 균형 교류형: 개인의 자율성과 사회적 네트워크가 상호 보완적으로 작동하는 구조입니다.",
-  "【진로/재물 권장】 파트너십, 협업, 유연한 프리랜서/조직 겸업 형태에서 최적의 시너지를 낼 수 있습니다.",
+  "【원국 허실】 원국 천간 4자의 관계 반영 후 분포는 실(實) 3개, 변허(變虛) 1개입니다. (뿌리별 근거 요약 생략) 원국의 관계 반영 전후 비교이며, 대운·세운에 따른 시기별 변화가 아닙니다. 십성의 상징 해석은 참고로 구분하고, 능력·성과·직업 적합성으로 단정하지 마세요.",
+  "【빈주 관계】 합 관계 우세: 현재 쌍별 규칙에서 빈-주 간 합 관계 점수가 충·해/천 관계 점수보다 높습니다.",
+  "【빈주 해석 참고】 전통적 해석 참고: 빈은 사회적 환경, 주는 개인 영역의 상징입니다. 관계 집계만으로 직업 적합성·재물 취득·성과를 판단하지 않습니다.",
+  "【빈주 계산 범위】 쌍별 관계만 점수에 반영했습니다. 다자 관계 또는 위치를 확인할 수 없는 관계 1건은 계산에서 제외했으므로 빈주 점수의 근거로 사용하지 마세요.",
+  "【빈주 다자 관계】 삼합(三合) 참여 위치: 년, 일, 시. 빈과 주가 함께 참여하는 다자 관계입니다. 쌍별 점수와 취용 판정에는 반영하지 않습니다.",
   "【주요 상호작용】 년지(亥)-월지(巳) 육충: 기반 변동 및 마찰",
   "【주요 상호작용】 지지 삼합(木): 강력한 국(局) 형성"
 ]

@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from services.branch_relations import (
-    check_six_hap,
+    check_six_haps,
     check_three_hap,
     check_square_hap,
     check_chung,
@@ -70,7 +70,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                         })
 
             # (2) 육합 (六合)
-            six_hap = check_six_hap(b1, i, branches, day_stem)
+            six_hap = next((hap for hap in check_six_haps(b1, i, branches, day_stem)
+                            if hap['with_index'] == j), None)
             if six_hap and six_hap.get('with_index') == j:
                 score = 1.5 * weight
                 harmony_score += score
@@ -247,6 +248,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     "category": "지지",
                     "type": "삼합(三合)",
                     "name": f"삼합 {elem}국",
+                    "participants": [PILLAR_KEYS[p] for p in th["participant_indices"]],
+                    "formations": [[PILLAR_KEYS[p] for p in formation] for formation in th["formation_indices"]],
                     "from_pillar": "all",
                     "to_pillar": "all",
                     "is_adjacent": th.get('is_adjacent', True),
@@ -272,6 +275,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                         "category": "지지",
                         "type": "방합(方合)",
                         "name": f"방합 {season}{elem}",
+                        "participants": [PILLAR_KEYS[p] for p in sq["participant_indices"]],
+                        "formations": [[PILLAR_KEYS[p] for p in formation] for formation in sq["formation_indices"]],
                         "from_pillar": "all",
                         "to_pillar": "all",
                         "is_adjacent": sq.get('is_adjacent', True),
@@ -282,7 +287,18 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     })
 
 
+    # IDs depend on relation identity and positions, never list order or scores.
+    for item in matrix:
+        is_group = item['from_pillar'] == 'all'
+        item['relation_scope'] = 'group' if is_group else 'pairwise'
+        if not is_group:
+            item['participants'] = [item['from_pillar'], item['to_pillar']]
+            item['formations'] = []
+        item['relation_id'] = ':'.join((item['category'], item['type'], item['name'],
+                                        ','.join(item['participants'])))
+
     return {
+        "rule_version": "1.1.0",
         "summary_list": list(dict.fromkeys(summary_list)),
         "matrix": matrix,
         "tension_score": round(tension_score, 1),

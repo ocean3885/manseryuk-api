@@ -3,127 +3,117 @@ from services.calculator import get_ten_star_stem, get_ten_star_branch
 
 PILLAR_KEYS = ['year', 'month', 'day', 'hour']
 POSITION_NAMES = ['년', '월', '일', '시']
+COMBINATION_TYPES = {'육합(六合)', '반합(半合)', '천간합(天干合)'}
+CONFLICT_TYPES = {'충(沖)', '해/천(穿/害)', '천간충(天干沖)'}
+
 
 def analyze_bin_zhu_dynamics(
-    stems: List[str],
-    branches: List[str],
-    day_stem: str,
+    stems: List[str], branches: List[str], day_stem: str,
     interaction_matrix: List[Dict[str, Any]]
 ) -> Dict[str, Any]:
-    """
-    맹파명리 빈주(賓主: 손님과 주인) 분석 엔진:
-    - 주(主: 주인/나의 영역) = 일주(2) + 시주(3)
-    - 빈(賓: 손님/사회 영역) = 년주(0) + 월주(1)
-    
-    주와 빈 사이의 상호작용 통로(합, 충, 극)를 추적하여 재관의 취용(내 것으로 만듦) 여부와
-    사회적 성취 경로를 판정합니다.
-    """
-    # 1. 십성 매핑
-    stem_ten_gods = [
-        "일간(본인)" if i == 2 else get_ten_star_stem(day_stem, stems[i])
-        for i in range(4)
-    ]
-    branch_ten_gods = [
-        get_ten_star_branch(day_stem, branches[i])
-        for i in range(4)
-    ]
+    """빈(년·월)과 주(일·시)의 관계를 집계한다.
 
-    # 주(Host) & 빈(Guest) 구성 분석
-    guest_elements = {
-        "year": {"stem": f"{stems[0]}({stem_ten_gods[0]})", "branch": f"{branches[0]}({branch_ten_gods[0]})"},
-        "month": {"stem": f"{stems[1]}({stem_ten_gods[1]})", "branch": f"{branches[1]}({branch_ten_gods[1]})"}
+    합 2점, 충·해/천 1.5점의 기존 쌍별 가산을 유지한다. 이는 관계 유형의
+    비교이며 자원 취득이나 제어 방향 판정이 아니다. 다자 관계는 구조만 기술한다.
+    """
+    stem_ten_gods = ['일간(본인)' if i == 2 else get_ten_star_stem(day_stem, stems[i]) for i in range(4)]
+    branch_ten_gods = [get_ten_star_branch(day_stem, branch) for branch in branches]
+    elements = {
+        key: {'stem': f'{stems[i]}({stem_ten_gods[i]})',
+              'branch': f'{branches[i]}({branch_ten_gods[i]})'}
+        for i, key in enumerate(PILLAR_KEYS)
     }
-    host_elements = {
-        "day": {"stem": f"{stems[2]}({stem_ten_gods[2]})", "branch": f"{branches[2]}({branch_ten_gods[2]})"},
-        "hour": {"stem": f"{stems[3]}({stem_ten_gods[3]})", "branch": f"{branches[3]}({branch_ten_gods[3]})"}
-    }
-
-    # 2. 빈-주 간 연결 통로(Interactions between Host and Guest) 분석
-    # Guest indices: {0, 1}, Host indices: {2, 3}
     guest_host_links = []
-    host_takes_guest_score = 0
-    guest_pressures_host_score = 0
-
+    excluded_interactions = []
+    group_connections = []
+    combination_score = 0.0
+    conflict_score = 0.0
     for item in interaction_matrix:
-        from_idx = PILLAR_KEYS.index(item['from_pillar'])
-        to_idx = PILLAR_KEYS.index(item['to_pillar'])
+        from_pillar, to_pillar = item.get('from_pillar'), item.get('to_pillar')
+        is_group = (item.get('relation_scope') == 'group'
+                    or 'all' in (from_pillar, to_pillar)
+                    or item.get('type') in ('삼합(三合)', '방합(方合)'))
+        if is_group or from_pillar not in PILLAR_KEYS or to_pillar not in PILLAR_KEYS:
+            participants = [p for p in PILLAR_KEYS if p in item.get('participants', [])]
+            excluded = {
+                'relation_id': item.get('relation_id'),
+                'category': item.get('category', ''), 'type': item.get('type', ''),
+                'name': item.get('name', ''), 'from_pillar': from_pillar, 'to_pillar': to_pillar,
+                'participants': participants,
+                'reason_code': 'group_relation_unsupported' if is_group else 'invalid_endpoint',
+            }
+            if excluded not in excluded_interactions:
+                excluded_interactions.append(excluded)
+            # all만 있는 입력에서 참여 기둥을 추측하지 않는다.
+            if is_group and len(participants) >= 3:
+                group = {
+                    'relation_id': item.get('relation_id'), 'type': item['type'],
+                    'participants': participants,
+                    'guest_participants': [p for p in participants if p in PILLAR_KEYS[:2]],
+                    'host_participants': [p for p in participants if p in PILLAR_KEYS[2:]],
+                    'included_in_score': False,
+                    'description': '빈과 주가 함께 참여하는 다자 관계입니다. 쌍별 점수와 취용 판정에는 반영하지 않습니다.',
+                }
+                if group not in group_connections:
+                    group_connections.append(group)
+            continue
 
-        # 한쪽은 빈(0, 1)이고 다른 쪽은 주(2, 3)인 경우 탐색
-        is_guest_from = from_idx in [0, 1]
-        is_host_from = from_idx in [2, 3]
-        is_guest_to = to_idx in [0, 1]
-        is_host_to = to_idx in [2, 3]
+        from_idx, to_idx = PILLAR_KEYS.index(from_pillar), PILLAR_KEYS.index(to_pillar)
+        if (from_idx < 2) == (to_idx < 2):
+            continue
+        g_idx, h_idx = (from_idx, to_idx) if from_idx < 2 else (to_idx, from_idx)
+        rel_type = item.get('type')
+        if rel_type in COMBINATION_TYPES:
+            combination_score += 2.0
+            link_type = '합(관계)'
+        elif rel_type in CONFLICT_TYPES:
+            conflict_score += 1.5
+            link_type = '충/해(관계)'
+        else:
+            continue  # 형·파·극 등은 현재 쌍별 점수 규칙에 포함하지 않는다.
+        ten_gods = branch_ten_gods if item['category'] == '지지' else stem_ten_gods
+        g_pos, h_pos = POSITION_NAMES[g_idx], POSITION_NAMES[h_idx]
+        desc = f'빈({g_pos} {ten_gods[g_idx]})과 주({h_pos} {ten_gods[h_idx]}) 사이에 {rel_type} 관계가 있습니다.'
+        guest_host_links.append({
+            'relation_id': item.get('relation_id'), 'type': link_type, 'detail': desc,
+            'target_guest': f'{g_pos}({ten_gods[g_idx]})', 'source_host': f'{h_pos}({ten_gods[h_idx]})',
+        })
 
-        if (is_guest_from and is_host_to) or (is_host_from and is_guest_to):
-            g_idx = from_idx if is_guest_from else to_idx
-            h_idx = to_idx if is_guest_from else from_idx
-            
-            g_pos = POSITION_NAMES[g_idx]
-            h_pos = POSITION_NAMES[h_idx]
-            g_char = branches[g_idx] if item['category'] == '지지' else stems[g_idx]
-            h_char = branches[h_idx] if item['category'] == '지지' else stems[h_idx]
-            g_tg = branch_ten_gods[g_idx] if item['category'] == '지지' else stem_ten_gods[g_idx]
-            h_tg = branch_ten_gods[h_idx] if item['category'] == '지지' else stem_ten_gods[h_idx]
-
-            rel_type = item.get('type')
-            
-            # (1) 합(合) 관계: 주(Host)가 빈(Guest)의 재/관을 취함
-            if '합' in rel_type:
-                host_takes_guest_score += 2
-                desc = f"주({h_pos} {h_tg})가 빈({g_pos} {g_tg})과 {rel_type}하여 사회적 자원/관계를 내 영역으로 견인함"
-                guest_host_links.append({
-                    "type": "합(취용)",
-                    "detail": desc,
-                    "target_guest": f"{g_pos}({g_tg})",
-                    "source_host": f"{h_pos}({h_tg})"
-                })
-            # (2) 충(沖) / 천(穿) 관계: 주와 빈의 대립 및 변동
-            elif '충' in rel_type or '해' in rel_type or '천' in rel_type:
-                guest_pressures_host_score += 1.5
-                desc = f"빈({g_pos} {g_tg})과 주({h_pos} {h_tg}) 간의 {rel_type}으로 인한 외부 환경과의 마찰 및 이동수"
-                guest_host_links.append({
-                    "type": "충/해(마찰)",
-                    "detail": desc,
-                    "target_guest": f"{g_pos}({g_tg})",
-                    "source_host": f"{h_pos}({h_tg})"
-                })
-
-    # 3. 빈주 제어 방향성(Control Flow) 판정
-    if host_takes_guest_score > guest_pressures_host_score:
-        direction = "주 ➔ 빈 (주통빈/자원취용형)"
-        summary_meaning = "자신의 역량과 수단(일/시주)으로 사회와 시장(년/월주)의 기회와 자원을 적극적으로 내 것으로 만드는 구조입니다."
-        career_advice = "전문성이나 독자적인 수단을 무기로 독립 사업, 전문직, 성과형 프로젝트에서 큰 성취를 이룰 수 있습니다."
-    elif guest_pressures_host_score > host_takes_guest_score:
-        direction = "빈 ➔ 주 (빈통주/환경적응형)"
-        summary_meaning = "외부 사회 조직이나 국가적 규율(년/월주)의 흐름에 맞춰 협력하고 적응하는 과정에서 성장하는 구조입니다."
-        career_advice = "탄탄한 공공기관, 대기업, 대형 플랫폼 등 안정적인 시스템의 우산 아래에서 역량을 펼치는 것이 안전합니다."
+    if not guest_host_links:
+        direction = '평가 가능한 빈-주 통로 없음'
+        summary = '현재 쌍별 계산에 반영된 빈-주 통로가 없어 관계 유형의 우세를 판정하지 않습니다.'
+    elif combination_score > conflict_score:
+        direction = '합 관계 우세'
+        summary = '현재 쌍별 규칙에서 빈-주 간 합 관계 점수가 충·해/천 관계 점수보다 높습니다.'
+    elif conflict_score > combination_score:
+        direction = '충·해 관계 우세'
+        summary = '현재 쌍별 규칙에서 빈-주 간 충·해/천 관계 점수가 합 관계 점수보다 높습니다.'
     else:
-        direction = "주-빈 균형 교류형"
-        summary_meaning = "개인의 자율성과 사회적 네트워크가 상호 보완적으로 작동하는 구조입니다."
-        career_advice = "파트너십, 협업, 유연한 프리랜서/조직 겸업 형태에서 최적의 시너지를 낼 수 있습니다."
-
-    # 4. AI 상담 프롬프트 전용 핵심 가이드 생성
-    ai_prompt_bullets = [
-        f"【빈주 이론】 {direction}: {summary_meaning}",
-        f"【진로/재물 권장】 {career_advice}"
-    ]
+        direction = '관계 점수 동률'
+        summary = '현재 쌍별 규칙에서 두 관계 점수가 같습니다. 생활이나 관계의 균형을 뜻하지 않습니다.'
+    career_advice = '전통적 해석 참고: 빈은 사회적 환경, 주는 개인 영역의 상징입니다. 관계 집계만으로 직업 적합성·재물 취득·성과를 판단하지 않습니다.'
+    prompts = [f'【빈주 관계】 {direction}: {summary}', f'【빈주 해석 참고】 {career_advice}']
+    if excluded_interactions:
+        prompts.append(
+            f'【빈주 계산 범위】 쌍별 관계만 점수에 반영했습니다. 다자 관계 또는 위치를 확인할 수 없는 '
+            f'관계 {len(excluded_interactions)}건은 계산에서 제외했으므로 빈주 점수의 근거로 사용하지 마세요.'
+        )
+    for group in group_connections:
+        positions = ', '.join(POSITION_NAMES[PILLAR_KEYS.index(p)] for p in group['participants'])
+        prompts.append(f"【빈주 다자 관계】 {group['type']} 참여 위치: {positions}. {group['description']}")
     for link in guest_host_links[:2]:
-        ai_prompt_bullets.append(f"【주-빈 통로】 {link['detail']}")
-
+        prompts.append(f"【주-빈 통로】 {link['detail']}")
     return {
-        "guest_structure": {
-            "scope": "년주(국가/원거리시장) + 월주(직장/사회환경)",
-            "elements": guest_elements
-        },
-        "host_structure": {
-            "scope": "일주(나/배우자) + 시주(수단/소유처/말년)",
-            "elements": host_elements
-        },
-        "control_flow": {
-            "direction": direction,
-            "summary_meaning": summary_meaning,
-            "career_advice": career_advice
-        },
-        "guest_host_links": guest_host_links,
-        "ai_prompt_bullets": ai_prompt_bullets
+        'rule_version': '2.0.0',
+        'interaction_scope': 'pairwise',
+        'pairwise_scores': {'combination': combination_score, 'conflict': conflict_score},
+        'excluded_interactions': excluded_interactions,
+        'group_connections': group_connections,
+        'guest_structure': {'scope': '년주(사회적 환경) + 월주(사회적 환경)',
+                            'elements': {p: elements[p] for p in PILLAR_KEYS[:2]}},
+        'host_structure': {'scope': '일주(개인 영역) + 시주(개인 영역)',
+                           'elements': {p: elements[p] for p in PILLAR_KEYS[2:]}},
+        'control_flow': {'direction': direction, 'summary_meaning': summary, 'career_advice': career_advice},
+        'guest_host_links': guest_host_links,
+        'ai_prompt_bullets': prompts,
     }

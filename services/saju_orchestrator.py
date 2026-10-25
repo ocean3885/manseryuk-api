@@ -103,7 +103,11 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
         stars_summary = ", ".join([f"{st['name']}({st['position']})" for st in special_stars_data[:3]])
         ai_consultation_prompts.append(f"【주요 신살 및 길신】 {stars_summary}")
     ai_consultation_prompts.append(f"【사주 기후】 {interaction_data['climate']} (긴장도: {interaction_data['tension_score']}, 조화도: {interaction_data['harmony_score']})")
-    ai_consultation_prompts.append(f"【허실 변화】 {xu_shi_data['overall_status']}")
+    ai_consultation_prompts.append(
+        f"【원국 허실】 {xu_shi_data['overall_status']} "
+        "원국의 관계 반영 전후 비교이며, 대운·세운에 따른 시기별 변화가 아닙니다. "
+        "십성의 상징 해석은 참고로 구분하고, 능력·성과·직업 적합성으로 단정하지 마세요."
+    )
     ai_consultation_prompts.extend(bin_zhu_data['ai_prompt_bullets'])
     for sm in interaction_data['summary_list'][:3]:
         ai_consultation_prompts.append(f"【주요 상호작용】 {sm}")
@@ -226,5 +230,4 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
             "birth_weekday": birth_weekday,
         },
     }
-
 

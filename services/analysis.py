@@ -121,7 +121,7 @@ def analyze_palja_integrated(stems, branches):
         
         # 지지 주요 형충회합 요약 추출
         branch_label_map = {
-            'six_haps': '육합',
+            'six_haps_all': '육합',
             'chungs': '충',
             'cheons': '천(해)',
             'breaks': '파',
@@ -131,6 +131,8 @@ def analyze_palja_integrated(stems, branches):
             'punishments': '형'
         }
         for rel_key, rel_val in branch_relations.items():
+            if rel_key == 'six_haps':  # 단일 결과는 호환용, 요약은 전체 목록 사용
+                continue
             label = branch_label_map.get(rel_key, rel_key)
             if rel_val and isinstance(rel_val, dict):
                 target_char = rel_val.get('with', '')

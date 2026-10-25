@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List, Any, Dict
+from typing import Optional, List, Any, Dict, Literal
 
 # ──────────────────────────────────────────
 # 사주 분석 응답용 중첩 스키마 (프론트엔드 최적화)
@@ -183,6 +183,10 @@ class AnalysisInfo(BaseModel):
 # ──────────────────────────────────────────
 
 class InteractionItem(BaseModel):
+    relation_id: str
+    relation_scope: Literal['pairwise', 'group']
+    participants: List[str]
+    formations: List[List[str]]
     category: str
     type: str
     name: str
@@ -196,6 +200,7 @@ class InteractionItem(BaseModel):
 
 
 class InteractionsInfo(BaseModel):
+    rule_version: str
     summary_list: List[str]
     matrix: List[InteractionItem]
     tension_score: float
@@ -203,23 +208,81 @@ class InteractionsInfo(BaseModel):
     climate: str
 
 
+class XuShiInteraction(BaseModel):
+    relation_id: Optional[str] = None
+    type: str
+    name: str
+    from_pillar: str
+    to_pillar: str
+    weight: Optional[float] = None
+    is_adjacent: Optional[bool] = None
+
+
+class XuShiRootEvidence(BaseModel):
+    pillar: str
+    position: str
+    branch_char: str
+    score: float
+    is_affected: bool
+    effective_score: float
+    interactions: List[XuShiInteraction]
+
+
+class XuShiRootStructure(BaseModel):
+    primary_root_pillars: List[str]
+    remaining_root_pillars: List[str]
+    excluded_root_pillars: List[str]
+    remaining_support: Literal['none', 'below_threshold', 'meets_threshold']
+
+
+class XuShiRootDependent(BaseModel):
+    stem_pillar: str
+    score: float
+    effective_score: float
+    current_status: str
+
+
+class XuShiSharedRoot(BaseModel):
+    root_pillar: str
+    branch_char: str
+    is_affected: bool
+    interactions: List[XuShiInteraction]
+    dependents: List[XuShiRootDependent]
+
+
+class XuShiImpactGroup(BaseModel):
+    interaction: XuShiInteraction
+    affected_root_pillars: List[str]
+    affected_stem_pillars: List[str]
+
+
 class PillarXuShi(BaseModel):
     position: str
     char: str
     ten_star: str
     score: float
+    effective_score: float
+    root_evidence: List[XuShiRootEvidence]
+    transition_reasons: List[str]
     original_status: str
     current_status: str
     is_transformed: bool
+    transition_code: Literal['maintained', 'real_to_empty']
+    root_structure: XuShiRootStructure
     reason: str
     meaning: str
 
 
 class XuShiDynamics(BaseModel):
+    analysis_scope: Literal['natal']
+    rule_version: str
     pillars: Dict[str, PillarXuShi]
+    shared_roots: List[XuShiSharedRoot]
+    impact_groups: List[XuShiImpactGroup]
     real_count: int
     transformed_empty_count: int
     hollow_penetrate_count: int
+    weak_count: int
     overall_status: str
 
 
@@ -229,7 +292,47 @@ class ControlFlow(BaseModel):
     career_advice: str
 
 
+class BinZhuExcludedInteraction(BaseModel):
+    relation_id: Optional[str] = None
+    participants: List[str]
+    category: str
+    type: str
+    name: str
+    from_pillar: Optional[str] = None
+    to_pillar: Optional[str] = None
+    reason_code: Literal['group_relation_unsupported', 'invalid_endpoint']
+
+
+class BinZhuGroupConnection(BaseModel):
+    relation_id: Optional[str] = None
+    type: str
+    participants: List[str]
+    guest_participants: List[str]
+    host_participants: List[str]
+    included_in_score: Literal[False]
+    description: str
+
+
+class BinZhuLink(BaseModel):
+    relation_id: Optional[str] = None
+    type: str
+    detail: str
+    target_guest: str
+    source_host: str
+
+
+class BinZhuScores(BaseModel):
+    combination: float
+    conflict: float
+
+
 class BinZhuDynamics(BaseModel):
+    rule_version: str
+    pairwise_scores: BinZhuScores
+    group_connections: List[BinZhuGroupConnection]
+    guest_host_links: List[BinZhuLink]
+    interaction_scope: Literal['pairwise']
+    excluded_interactions: List[BinZhuExcludedInteraction]
     guest_structure: dict
     host_structure: dict
     control_flow: ControlFlow
@@ -273,4 +376,3 @@ class SajuAnalysisResponse(BaseModel):
     meta: MetaInfo
     analysis: AnalysisInfo
     advanced_analysis: Optional[AdvancedAnalysis] = None
-

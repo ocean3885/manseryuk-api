@@ -1,9 +1,11 @@
+from itertools import combinations
 from services.constants import SIX_HAPS, CHUNGS, CHEONS, BREAKS, THREE_HAPS, THREE_HAPS_BIRTH, THREE_HAPS_KING, THREE_HAPS_SUCCESS, SQUARE_HAPS, PUNISHMENTS
 from services.calculator import get_ten_star_branch
 
 
-def check_six_hap(target_branch, target_index, all_branches, day_stem):
-    """육합 (6合) 관계 확인"""
+def check_six_haps(target_branch, target_index, all_branches, day_stem):
+    """위치별 육합 전체를 반환한다. 같은 글자도 위치가 다르면 별개 관계다."""
+    results = []
     for i, other_branch in enumerate(all_branches):
         if i == target_index:
             continue
@@ -11,7 +13,7 @@ def check_six_hap(target_branch, target_index, all_branches, day_stem):
         element = SIX_HAPS.get((target_branch, other_branch)) or SIX_HAPS.get((other_branch, target_branch))
         if element:
             is_adjacent = (abs(i - target_index) == 1)
-            return {
+            results.append({
                 'my': target_branch,
                 'my_index': target_index,
                 'my_ten_star': get_ten_star_branch(day_stem, target_branch),
@@ -22,8 +24,24 @@ def check_six_hap(target_branch, target_index, all_branches, day_stem):
                 'type': '근합' if is_adjacent else '원합',
                 'strength': 1.0 if is_adjacent else 0.5,
                 'is_adjacent': is_adjacent
-            }
-    return None
+            })
+    return results
+
+
+def check_six_hap(target_branch, target_index, all_branches, day_stem):
+    """기존 단일 육합 응답 호환용. 전체 결과는 check_six_haps 사용."""
+    results = check_six_haps(target_branch, target_index, all_branches, day_stem)
+    return results[0] if results else None
+
+
+def _group_members(group_branches, target_index, all_branches, day_stem):
+    positions = [i for i, branch in enumerate(all_branches) if branch in group_branches]
+    formations = [list(indices) for indices in combinations(positions, 3)
+                  if {all_branches[i] for i in indices} == set(group_branches)]
+    others = [{"char": all_branches[i], "index": i,
+               "ten_star": get_ten_star_branch(day_stem, all_branches[i])}
+              for i in positions if i != target_index]
+    return positions, formations, others
 
 
 def check_chung(target_branch, target_index, all_branches, day_stem):
@@ -135,20 +153,17 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
                             positions[2] - positions[1] == 1 and 
                             positions[1] - positions[0] == 1)
             
-            with_branches = []
-            for other in others_exist:
-                other_idx = all_branches.index(other)
-                with_branches.append({
-                    'char': other,
-                    'index': other_idx,
-                    'ten_star': get_ten_star_branch(day_stem, other)
-                })
+            participant_indices, formation_indices, with_branches = _group_members(
+                (b1, b2, b3), target_index, all_branches, day_stem
+            )
             
             three_haps.append({
                 'my': target_branch,
                 'my_index': target_index,
                 'my_ten_star': my_ten_star,
                 'branches': [b1, b2, b3],
+                'participant_indices': participant_indices,
+                'formation_indices': formation_indices,
                 'with_branches': with_branches,
                 'element': element,
                 'strength': 1.0 if is_continuous else (0.8 if is_adjacent else 0.6),
@@ -162,8 +177,6 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
             third_exists = third_branch in all_branches
             
             if not third_exists:
-                other_pos = [i for i, b in enumerate(all_branches) if b == others_exist[0]][0]
-                is_adjacent = (abs(target_index - other_pos) == 1)
                 
                 # 생지/왕지/성지 판단
                 b_set = {b1, b2, b3}
@@ -187,19 +200,22 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
                     hab_type = '암합 (생+성)'
                     strength = 0.3
                 
-                half_haps.append({
-                    'my': target_branch,
-                    'my_index': target_index,
-                    'my_ten_star': my_ten_star,
-                    'with': others_exist[0],
-                    'with_index': other_pos,
-                    'with_ten_star': get_ten_star_branch(day_stem, others_exist[0]),
-                    'missing': third_branch,
-                    'element': element,
-                    'type': hab_type,
-                    'strength': strength,
-                    'is_adjacent': is_adjacent
-                })
+                for other_pos, other in enumerate(all_branches):
+                    if other != others_exist[0]:
+                        continue
+                    half_haps.append({
+                        'my': target_branch,
+                        'my_index': target_index,
+                        'my_ten_star': my_ten_star,
+                        'with': others_exist[0],
+                        'with_index': other_pos,
+                        'with_ten_star': get_ten_star_branch(day_stem, others_exist[0]),
+                        'missing': third_branch,
+                        'element': element,
+                        'type': hab_type,
+                        'strength': strength,
+                        'is_adjacent': (abs(target_index - other_pos) == 1)
+                    })
     
     return three_haps, half_haps
 
@@ -232,20 +248,17 @@ def check_square_hap(target_branch, target_index, all_branches, day_stem):
             strength = info['power_boost'] if is_adjacent else info['power_boost'] * 0.6
             
             # with_branches 리스트 생성
-            with_branches = []
-            for other in others_exist:
-                other_idx = all_branches.index(other)
-                with_branches.append({
-                    'char': other,
-                    'index': other_idx,
-                    'ten_star': get_ten_star_branch(day_stem, other)
-                })
+            participant_indices, formation_indices, with_branches = _group_members(
+                (b1, b2, b3), target_index, all_branches, day_stem
+            )
             
             results.append({
                 'my': target_branch,
                 'my_index': target_index,
                 'my_ten_star': my_ten_star,
                 'branches': [b1, b2, b3],          # 전체 방합 지지
+                'participant_indices': participant_indices,
+                'formation_indices': formation_indices,
                 'with_branches': with_branches,    # 상대 두 지지 상세 정보
                 'element': info['element'],
                 'season': info['season'],
@@ -350,7 +363,7 @@ def check_punishment(target_branch, target_index, all_branches, day_stem):
     seen = set()
     unique_punishments = []
     for p in punishments:
-        key = (p['with'], p['type'])
+        key = (p['with_index'], p['type'])
         if key not in seen:
             seen.add(key)
             unique_punishments.append(p)
@@ -376,6 +389,7 @@ def get_relations_for_branch(target_branch, target_index, all_branches, all_stem
     
     relations = {
         'six_haps': check_six_hap(target_branch, target_index, all_branches, day_stem),
+        'six_haps_all': check_six_haps(target_branch, target_index, all_branches, day_stem),
         'chungs': check_chung(target_branch, target_index, all_branches, day_stem),
         'cheons': check_cheon(target_branch, target_index, all_branches, day_stem),
         'breaks': check_break(target_branch, target_index, all_branches, day_stem),
