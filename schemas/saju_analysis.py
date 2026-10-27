@@ -288,8 +288,13 @@ class XuShiDynamics(BaseModel):
 
 class ControlFlow(BaseModel):
     direction: str
+    dominant_interaction: Optional[str] = None
     summary_meaning: str
     career_advice: str
+    interpretation_notes: Optional[str] = None
+    vector: Optional[str] = None
+    vector_code: Optional[str] = None
+    acquisition_summary: Optional[str] = None
 
 
 class BinZhuExcludedInteraction(BaseModel):
@@ -300,7 +305,7 @@ class BinZhuExcludedInteraction(BaseModel):
     name: str
     from_pillar: Optional[str] = None
     to_pillar: Optional[str] = None
-    reason_code: Literal['group_relation_unsupported', 'invalid_endpoint']
+    reason_code: Literal['group_relation_unsupported', 'invalid_endpoint', 'unsupported_relation_type']
 
 
 class BinZhuGroupConnection(BaseModel):
@@ -309,7 +314,8 @@ class BinZhuGroupConnection(BaseModel):
     participants: List[str]
     guest_participants: List[str]
     host_participants: List[str]
-    included_in_score: Literal[False]
+    included_in_score: bool = False
+    cohesion_score: Optional[float] = None
     description: str
 
 
@@ -319,16 +325,22 @@ class BinZhuLink(BaseModel):
     detail: str
     target_guest: str
     source_host: str
+    mechanism: Optional[str] = None
+    flow_direction: Optional[str] = None
+    weight: Optional[float] = None
 
 
 class BinZhuScores(BaseModel):
     combination: float
     conflict: float
+    unweighted_combination: Optional[float] = None
+    unweighted_conflict: Optional[float] = None
 
 
 class BinZhuDynamics(BaseModel):
     rule_version: str
     pairwise_scores: BinZhuScores
+    group_cohesion_score: Optional[float] = 0.0
     group_connections: List[BinZhuGroupConnection]
     guest_host_links: List[BinZhuLink]
     interaction_scope: Literal['pairwise']

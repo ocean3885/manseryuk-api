@@ -312,24 +312,38 @@ python -m unittest discover -s tests -v
 `tests/fixtures/xu_shi_v1.json`은 변경 전 함수로 확보한 합성 간지 입력 16건의 점수·상태·개수 기준값입니다. 테스트는 이 기준값 외에도 허투·허·실, 잔여 점수 `0.5` 및 인접 float 경계, 총점과 뿌리별 반올림 차이, 공통 뿌리와 서로 다른 잔존 기반, 동점 주요 뿌리, 중첩 관계, 반복 지지, 응답 스키마를 검증합니다. 통합 테스트는 달력 DB를 읽기 전용으로 열어 `1990-01-01 12:00`, 기존 빈주 오류 사례 `1995-05-12 14:30`의 라우터 결과·응답 스키마·상담 프롬프트를 검증합니다.
 
 #### 5. `bin_zhu_dynamics` (빈주 이론 賓主理論)
-사회적 환경(년/월: 賓)과 개인 영역(일/시: 主) 사이의 관계 유형과 참여 구조를 집계합니다.
+사회적 환경(년/월: 賓)과 개인 영역(일/시: 主) 사이의 관계 유형, 참여 구조 및 체용(體用)·취용(取用) 역학을 분석합니다.
 
-- `rule_version`: `"2.0.0"`. 제어 방향·자원 취용을 단정하던 문구를 실제 관계 집계에 맞춘 버전입니다.
+- `rule_version`: `"3.0.0"`. 맹파명리 체용·취용 원리에 기반한 십성별 취용 메커니즘(`일간합재`, `합취`, `제용`, `환경압박`, `군겁쟁재` 등) 및 역학 벡터(`host_takes_guest`, `guest_pressures_host`, `mutual_cooperation`, `independent_parallel`), 거리 가중치 및 다자 결합도 연동이 완비된 버전입니다.
 - `interaction_scope`: `"pairwise"`. **점수 계산**은 기둥 쌍별 관계에 한정됩니다.
-- `pairwise_scores`: `combination`(빈-주를 연결하는 육합·반합·천간합마다 2점), `conflict`(빈-주를 연결하는 충·해/천·천간충마다 1.5점). 기존 가산값을 유지하며 거리·십성에 따른 추가 가중치는 없습니다. 형·파·극과 빈 내부/주 내부 관계는 가산하지 않습니다.
-- `guest_host_links`: 점수에 반영한 쌍별 관계의 `relation_id`, `type`, `detail`, `target_guest`, `source_host`. 위치와 십성을 함께 기술하며, `target_guest`/`source_host`라는 기존 키가 취득·제어 방향을 뜻하지는 않습니다.
-- `excluded_interactions`: 점수에서 제외한 다자 관계 또는 유효하지 않은 위치 항목의 `relation_id`, `participants`, `category`, `type`, `name`, `from_pillar`, `to_pillar`, `reason_code`. 삼합·방합 또는 `all` 위치는 `group_relation_unsupported`, 누락·알 수 없는 위치는 `invalid_endpoint`입니다. 모든 미가산 유형의 목록은 아닙니다.
-- `group_connections`: 참여 정보가 있는 다자 관계의 `relation_id`, `type`, `participants`, `guest_participants`, `host_participants`, `included_in_score: false`, `description`. 참여 정보 없는 `all` 입력에서는 기둥을 추측하지 않습니다.
-- `guest_structure`: 빈(외계/사회)의 주요 세력 및 십신
-- `host_structure`: 주(자아/가정)의 주요 수단 및 십신
+- `pairwise_scores`: 
+  - `combination`: 거리 가중치가 반영된 합 관계 점수 (천간합 1.8, 육합 1.5, 반합 1.2 등 × 가중치)
+  - `conflict`: 거리 가중치가 반영된 대립 관계 점수 (충 2.0, 천간충 1.5, 형 1.5, 해/천 1.5 등 × 가중치)
+  - `unweighted_combination`: 가중치 없는 기본 합 점수 (합마다 2.0점)
+  - `unweighted_conflict`: 가중치 없는 기본 대립 점수 (충·형·해마다 1.5점)
+- `group_cohesion_score`: 빈-주를 연계하는 삼합·방합의 다자 결합 점수 합계. 기둥 참여도 기반 공식 산출 ($$\text{Base} \times \frac{|G| \times |H|}{|P|}$$)
+- `guest_host_links`: 점수에 반영한 쌍별 관계의 `relation_id`, `type`, `detail`, `target_guest`, `source_host`, `mechanism`, `flow_direction`, `weight`.
+  - `mechanism`: `일간합재(合財)`, `합취(合取)`, `제용(制用)`, `환경압박(沖破)`, `군겁쟁재(爭財)`, `재관마찰`, `대립조율`, `상호유대(有情)` 등
+  - `flow_direction`: `host_takes_guest` (주➔빈), `guest_pressures_host` (빈➔주), `mutual_cooperation` (상호협력), `neutral` (중립)
+- `excluded_interactions`: 점수에서 제외한 다자 관계, 미가산 쌍별 관계(파 등) 또는 유효하지 않은 위치 항목의 `relation_id`, `participants`, `category`, `type`, `name`, `from_pillar`, `to_pillar`, `reason_code`.
+- `group_connections`: 참여 정보가 있는 다자 관계의 `relation_id`, `type`, `participants`, `guest_participants`, `host_participants`, `cohesion_score`, `included_in_score: false`, `description`.
+- `guest_structure`: 빈(외계/사회)의 주요 세력 및 십신. 
+  - `scope`: `"년주(국가/조상/대외환경) + 월주(직장/사회활동/사회환경)"`
+  - `dominant_forces`: 빈 영역에 포진한 주요 십신 세력 목록 (재관, 인성, 식상 등)
+- `host_structure`: 주(자아/가정)의 주요 수단 및 십신. 
+  - `scope`: `"일주(자아/배우자/개인영역) + 시주(수단/도구/말년/귀숙처)"`
+  - `dominant_means`: 주 영역에 위치한 주요 수단·도구 십신 목록 (식상, 비겁, 인성 등)
 - `control_flow`:
-  - `direction`: `합 관계 우세`, `충·해 관계 우세`, `관계 점수 동률`, `평가 가능한 빈-주 통로 없음`
-  - `summary_meaning`: 어떤 관계 점수가 높은지 설명. 동률을 생활의 균형으로 해석하지 않음
-  - `career_advice`: 키는 호환용으로 유지하되, 직업 추천 대신 빈·주의 전통적 상징과 해석 범위를 기술
+  - `direction`: `합 관계 우세`, `충·형·해 관계 우세`, `다자 합 결합(삼합/방합) 형성`, `다자 합 결합 및 대립(충·형·해) 공존`, `합 관계 우세 (다자 합 결합 포함)`, `다자 합 결합 및 동률 관계`, `관계 점수 동률`, `평가 가능한 빈-주 통로 없음`
+  - `dominant_interaction`: 기계 판독용 관계 식별자 (`combination_dominant`, `conflict_dominant`, `group_bridging`, `group_bridging_with_conflict`, `group_bridging_with_combination`, `group_bridging_balanced`, `balanced`, `none`)
+  - `vector`: 한국어 역학 벡터 명칭 (`주 ➔ 빈 (자원 취용/주도형)`, `빈 ➔ 주 (환경 조율/적응형)`, `주 ⇄ 빈 (상호 연대/협력형)`, `주 ∥ 빈 (독립 영역 유지형)`)
+  - `vector_code`: 기계 판독용 벡터 코드 (`host_takes_guest`, `guest_pressures_host`, `mutual_cooperation`, `independent_parallel`)
+  - `acquisition_summary`: 체용 및 취용 관점에서의 동력 요약 해설
+  - `summary_meaning`: 어떤 관계가 형성/우세한지 가중치 점수 및 결합도를 포함하여 상세 설명
+  - `career_advice`: 호환용 키 (전통적 상징 및 한계 기술)
+  - `interpretation_notes`: 신규 권장 안내 필드 (기둥 간 거리와 결합 구조의 상징적 의미 및 판정 주의사항 기술)
 
-삼합·방합은 전체 `interactions.matrix`에 보존되며 `group_connections`와 `【빈주 다자 관계】`에서 빈·주의 공동 참여 구조를 설명합니다. 쌍별 점수에는 가산하지 않고, 점수 제외 범위는 `【빈주 계산 범위】`에도 명시합니다. 합이 있다는 사실만으로 재관의 취용·재물 취득을 판정하지 않습니다. 실제 반영된 빈-주 통로가 없으면 방향을 판정하지 않습니다. 다자 관계의 점수화와 허실 부분 감점 모델은 후속 범위입니다.
-
-응답 키는 유지했지만 `direction` 값과 상담 프롬프트의 빈주 제목·문구는 변경되었습니다. 기존 문구를 비교하는 클라이언트는 새 값으로 갱신해야 합니다. 허실의 `rule_version: "1.0.0"`은 유지되며, 관계 수집 수정은 `interactions.rule_version`으로 구분합니다.
+삼합·방합은 전체 `interactions.matrix`에 보존되며 `group_connections`와 `group_cohesion_score`를 통해 빈·주의 공동 결합도를 명확히 정량화합니다. 또한 십성 역학에 따른 `vector`와 `mechanism`을 제공하여 맹파명리의 핵심인 "내가 사회의 재관을 취하는가(주➔빈), 외부 환경의 규율과 압박에 적응하는가(빈➔주), 상호 협력하는가"를 명확히 판별합니다.
 
 #### 6. `ai_consultation_prompts` (AI 즉시 주입용 상담 스크립트)
 LLM 시스템 프롬프트 또는 RAG 컨텍스트에 그대로 주입할 수 있는 핵심 요약 불릿 리스트를 한국어로 생성하여 반환합니다.
@@ -340,12 +354,12 @@ LLM 시스템 프롬프트 또는 RAG 컨텍스트에 그대로 주입할 수 �
   "【주요 신살 및 길신】 천을귀인(월지), 역마살(월지), 천을귀인(일지)",
   "【사주 기후】 긴장과 조화가 공존하는 복합형 (긴장도: 3.5, 조화도: 3.0)",
   "【원국 허실】 원국 천간 4자의 관계 반영 후 분포는 실(實) 3개, 변허(變虛) 1개입니다. (뿌리별 근거 요약 생략) 원국의 관계 반영 전후 비교이며, 대운·세운에 따른 시기별 변화가 아닙니다. 십성의 상징 해석은 참고로 구분하고, 능력·성과·직업 적합성으로 단정하지 마세요.",
-  "【빈주 관계】 합 관계 우세: 현재 쌍별 규칙에서 빈-주 간 합 관계 점수가 충·해/천 관계 점수보다 높습니다.",
-  "【빈주 해석 참고】 전통적 해석 참고: 빈은 사회적 환경, 주는 개인 영역의 상징입니다. 관계 집계만으로 직업 적합성·재물 취득·성과를 판단하지 않습니다.",
-  "【빈주 계산 범위】 쌍별 관계만 점수에 반영했습니다. 다자 관계 또는 위치를 확인할 수 없는 관계 1건은 계산에서 제외했으므로 빈주 점수의 근거로 사용하지 마세요.",
-  "【빈주 다자 관계】 삼합(三合) 참여 위치: 년, 일, 시. 빈과 주가 함께 참여하는 다자 관계입니다. 쌍별 점수와 취용 판정에는 반영하지 않습니다.",
-  "【주요 상호작용】 년지(亥)-월지(巳) 육충: 기반 변동 및 마찰",
-  "【주요 상호작용】 지지 삼합(木): 강력한 국(局) 형성"
+  "【빈주 관계】 다자 합 결합 및 대립(충·형·해) 공존: 빈과 주를 잇는 다자 합(결합도: 3.0점)이 형성되어 있으며, 동시에 쌍별 대립 점수(1.2점)가 합 점수(0.0점)보다 높은 상태로 공존합니다.",
+  "【빈주 역학 흐름】 주 ➔ 빈 (자원 취용/주도형): 개인의 역량과 수단(일·시주)을 바탕으로 외부 사회의 기회와 재관(년·월주)을 내 영역으로 견인·취용하는 동력이 우세합니다.",
+  "【빈주 해석 참고】 빈은 사회적 환경(국가·직장), 주는 개인 영역(자아·수단)의 상징입니다. 관계 집계는 기둥 간 거리와 결합 구조를 나타내며, 직업 적합성이나 성과를 단정하지 않습니다.",
+  "【빈주 계산 범위】 쌍별 관계만 점수에 반영했습니다. 다자 관계 또는 위치를 확인할 수 없거나 미가산된 관계 1건은 계산에서 제외했으므로 빈주 점수의 근거로 사용하지 마세요.",
+  "【빈주 다자 관계】 삼합(三合) 참여 위치: 년, 월, 일. 빈과 주가 함께 참여하는 다자 관계입니다. (삼합 木국, 결합도: 3.0점)",
+  "【주-빈 통로】 빈(년 편관)과 주(시 식신) 사이에 천간충(天干沖) 관계가 있습니다. (작용: 제용(制用))"
 ]
 ```
 
