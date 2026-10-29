@@ -140,6 +140,8 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 
 삼합·방합의 `formation_evidence[]`에는 성립 조합별 참여 지지의 관계 전 세력(`power_before`), 상대 비중(`capacity_share`), 구조적 자리, 겹치는 육합·반합의 참조가 들어갑니다. 비중은 참여 지지 간 비교값이며 실제 합 작용량이나 세력 증가분은 아닙니다. 그룹의 `status`는 작용 계수를 확정하기 전까지 `not_scored`입니다.
 
+삼합의 `directional_candidates`는 중신을 향한 구조상 방향 후보입니다. 방합은 개별 방향을 `undetermined`로 표시합니다. 두 경우 모두 세력 비중만으로 실제 견인 방향·합화 성립을 확정하지 않습니다. 조합별 후보와 중첩 처리는 [관계 규칙표](docs/mangpa_relation_rulebook.md)에 설명합니다.
+
 `branch_strengths[].ambient_evidence`와 `pairwise[].context_evidence`에는 주변 지지의 생·극 보정과 같은 쌍의 합·충·형 등 관계 상태를 별도 근거로 기록합니다. 생·극 규칙에 명시된 억제는 보정량 0으로 반영합니다. 합이 조건부라는 이유만으로 별개의 생·극 보정을 자동 제거하지 않습니다.
 
 합·충·형·파·해, 천간 관계, 동주 자합 후보와 실험적 작용 계수의 실행 규칙은 [단일 관계 규칙 모듈](services/relation_rules.py)에서 관리합니다. 맹파 해석상의 성립 조건과 검토 상태는 [관계 규칙표](docs/mangpa_relation_rulebook.md)에 기록합니다.

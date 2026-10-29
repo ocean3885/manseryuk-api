@@ -11,7 +11,7 @@ from services.relation_rules import (
     STEM_ADJUSTMENTS, AMBIENT_RATES, ATTRACTION_TYPES, PRESSURE_TYPES,
     RELATION_COEFFICIENTS, RULE_PROFILE, RULE_VERSION, PAIR_ACTION_RULES,
     THREE_HAPS, SQUARE_HAPS, GROUP_ROLE_ORDER, HARMONY_GROUP_COVERS_PAIR,
-    get_pair_action_rule,
+    get_pair_action_rule, get_group_action_rule,
 )
 
 
@@ -216,6 +216,11 @@ def _group_formations(group, branches, strengths, matrix_by_pair):
         canonical = next(members for members in definitions
                          if set(members) == formation_branches)
         role_by_branch = dict(zip(canonical, role_order))
+        role_to_pillar = {role_by_branch[branches[index]]: pillar
+                          for pillar, index in zip(formation, indices)}
+        action_rule = get_group_action_rule(group['type'], canonical)
+        candidate_status = ('candidate_only' if group['activation_status'] == 'potential'
+                            else group['activation_status'])
         power = {}
         context = {}
         for pillar, index in zip(formation, indices):
@@ -238,6 +243,18 @@ def _group_formations(group, branches, strengths, matrix_by_pair):
             'capacity_share': {pillar: round(value / total, 4) if total else 0.0
                                for pillar, value in power.items()},
             'overlapping_pairs': overlapping,
+            'directional_candidates': [
+                {'from_pillar': role_to_pillar[source_role],
+                 'to_pillar': role_to_pillar[target_role],
+                 'mechanism': 'gathers_toward_center',
+                 'activation_status': candidate_status}
+                for source_role, target_role in action_rule['direction_candidates']
+            ],
+            'role_effect_candidates': [
+                {'pillar': role_to_pillar[role], 'effect': effect,
+                 'activation_status': candidate_status}
+                for role, effect in action_rule['role_effect_candidates'].items()
+            ],
         })
     return result
 
@@ -345,6 +362,20 @@ def analyze_branch_dynamics(stems, branches, interaction_matrix):
         strengths[pillar]['effective_power'] = power
         strengths[pillar]['ambient_evidence'] = evidence
     for group in groups:
+        if group['formations'] and group['type'] in GROUP_ROLE_ORDER:
+            first_formation = group['formations'][0]
+            action_rule = get_group_action_rule(
+                group['type'], [branches[PILLARS.index(pillar)]
+                                for pillar in first_formation])
+            group['action_rule_id'] = action_rule['rule_id']
+            group['direction_status'] = (group['activation_status']
+                                         if group['activation_status'] in ('conditional', 'suppressed')
+                                         else action_rule['direction_status'])
+            group['pair_overlap_policy'] = action_rule['pair_overlap_policy']
+        else:
+            group['action_rule_id'] = None
+            group['direction_status'] = 'undetermined'
+            group['pair_overlap_policy'] = None
         group['formation_evidence'] = _group_formations(
             group, branches, strengths, matrix_by_pair)
 

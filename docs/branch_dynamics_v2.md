@@ -8,7 +8,7 @@
 
 원국의 네 지지가 서로 맺는 합·충·형·파·해와 오행의 생·극을 식별하고, **각 관계에서 어느 지지가 얼마나 작용하고 영향을 받는지** 근거와 함께 반환한다. 빈(년·월)과 주(일·시)는 결과를 읽는 보조 분류다. 계산의 중심은 빈주 점수나 길흉 예측이 아니다.
 
-이 문서는 초기 구현의 계산 계약과 한계를 기록한다. 숫자는 명리학적 절대량이 아니라 **버전 2.10.0의 미보정 상대 지표**다. 규칙 계수를 바꾸면 버전도 변경한다.
+이 문서는 초기 구현의 계산 계약과 한계를 기록한다. 숫자는 명리학적 절대량이 아니라 **버전 2.11.0의 미보정 상대 지표**다. 규칙 계수를 바꾸면 버전도 변경한다.
 
 ## 먼저 구분할 개념
 
@@ -37,7 +37,7 @@
 ```json
 {
   "rule_profile": "mangpa_project_provisional",
-  "rule_version": "2.10.0",
+  "rule_version": "2.11.0",
   "scope": "natal",
   "score_meaning": "uncalibrated_relative_model_index",
   "branch_strengths": {
@@ -106,6 +106,7 @@
 - `force_dominance`는 해당 관계의 양방향 `force`를 같은 10% 허용치로 비교한다. 두 방향 모두 0이면 `undetermined`이고 비슷하면 `tie`다. 예를 들어 `子寅午辰`의 子→寅 생에서는 월지 寅의 관계 전 세력이 더 커 `dominance=month`이지만, 생 작용 방향은 년지 子에서 월지 寅으로만 향하므로 `force_dominance=year`다. 이 값은 관계별 작용의 방향 우세이며 지지 자체의 우열이나 실제 사건의 승패가 아니다.
 - `roles`는 **관계별 잠재 작용량을 읽기 위한 분류**다. 합은 작용량이 큰 쪽을 `leads_attraction`, 상대를 `drawn_more`로, 충·형·파·해는 `delivers_more_pressure`와 `receives_more_pressure`로 표시한다. 생·극은 오행상 정해진 방향을 따라 `supports`/`receives_support`, `controls`/`receives_control`로 구분한다. 양방향 힘이 비슷하면 합은 `mutual_attraction`, 압박 관계는 `mutual_pressure`이며, 작용량이 모두 0이면 양쪽 모두 `inactive`다. 강도 비교와 역할 분류는 이 프로젝트의 잠정 규칙이며 실제 피해·합화·길흉을 확정하지 않는다.
 - 삼합·방합의 `formation_evidence[]`는 **실제 성립 조합별** 참여 위치(`pillars`), 글자의 구조적 자리(`structural_roles`), `power_before`, 조합 내부 상대를 제외한 `context_evidence`, 조합 안에서의 상대 세력 비중(`capacity_share`), 포함된 육합·반합(`overlapping_pairs`)을 반환한다. `power_before`는 지장간·월령·동주 천간과 조합 **밖** 지지의 배경 보정을 반영한다. `capacity_share`는 이 세력값을 한 조합 안에서 나눈 비율이며 그룹의 실제 견인력이나 지지별 세력 증가분이 아니다. 같은 글자가 다른 위치에 반복되어 성립 조합이 여럿이면 비중도 조합별로 각각 계산한다. `overlapping_pairs[].covered_in_harmony_score`는 기존 조화 점수의 중복 집계 여부를 설명할 뿐 지지별 작용량 차감 규칙은 아니다. 그룹 `status`는 아직 `not_scored`이며, 조합별 비중을 쌍별 `force`나 `effective_power`에 더하지 않는다. 억제된 삼합의 잔존 반합은 별도 쌍 관계로 유지한다.
+- 그룹의 `action_rule_id`는 조합별 방향 후보 규칙을 가리킨다. 삼합의 `directional_candidates`는 생지·묘고에서 중신으로 모이는 **구조상 경로**이고, 寅午戌 묘고의 `center_generates_storage_candidate`와 다른 삼합 묘고의 `transformation_candidate`는 별도 효과 후보다. `candidate_only`는 방향별 힘을 계산했다는 뜻이 아니다. 방합은 `direction_status: undetermined`와 빈 방향 후보 목록을 낸다. 그룹이 억제·유보되면 그 상태가 후보에도 붙는다. `pair_overlap_policy: preserve_pair_do_not_sum_group_force`는 탐지된 육합·반합의 쌍별 힘을 유지하고 그룹 힘을 합산하지 않는 정책이다. 완성 삼합의 내부 반합은 별도 사건·힘으로 출력하지 않고 구성 근거로만 취급하며, 삼합이 깨져 남은 반합은 독립 쌍 관계로 출력한다. 방합에도 독립 힘을 부여하지 않는다. 따라서 그룹 `status`는 `not_scored`이고 실제 견인·합화는 확정하지 않는다.
 
 이 계수는 해석 모델의 첫 가정이며 경험적 피해량이나 길흉 확률로 검증된 값이 아니다. 관계 유형별 피해·견인 계수, 다자 관계의 작용량, 천간의 사주 전체 세력에 따른 동주 작용 보정은 다음 단계의 검증 대상이다.
 

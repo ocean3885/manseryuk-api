@@ -59,7 +59,7 @@ class BranchDynamicsTests(unittest.TestCase):
 
     def test_strength_and_relation_force_leads_are_distinct(self):
         result = analyze(list('甲甲甲甲'), list('子寅午辰'))
-        self.assertEqual(result['rule_version'], '2.10.0')
+        self.assertEqual(result['rule_version'], '2.11.0')
         generation = next(r for r in pair(result, 'year', 'month')['relations']
                           if r['type'] == '생')
         self.assertEqual(generation['dominance'], 'month')
@@ -233,6 +233,10 @@ class BranchDynamicsTests(unittest.TestCase):
             analyze(list('甲甲甲甲'), list('巳午未寅'))).model_dump()
         group = next(g for g in result['groups'] if g['type'] == '방합(方合)')
         self.assertEqual(group['status'], 'not_scored')
+        self.assertEqual(group['activation_status'], 'potential')
+        self.assertNotIn('force', group)
+        self.assertEqual(group['action_rule_id'], 'group:방합:巳午未')
+        self.assertEqual(group['direction_status'], 'undetermined')
         self.assertEqual(len(group['formation_evidence']), 1)
         formation = group['formation_evidence'][0]
         self.assertEqual(formation['pillars'], ['year', 'month', 'day'])
@@ -249,10 +253,14 @@ class BranchDynamicsTests(unittest.TestCase):
         six_hap = next(r for r in pair(result, 'month', 'day')['relations']
                        if r['type'] == '육합(六合)')
         self.assertGreater(six_hap['force']['month_to_day'], 0)
+        self.assertGreater(six_hap['force']['day_to_month'], 0)
         self.assertEqual(formation['overlapping_pairs'], [{
             'relation_id': six_hap['relation_id'],
             'covered_in_harmony_score': True,
         }])
+        self.assertEqual(formation['directional_candidates'], [])
+        self.assertEqual(group['pair_overlap_policy'],
+                         'preserve_pair_do_not_sum_group_force')
 
     def test_repeated_group_formations_keep_position_specific_shares(self):
         result = analyze(list('甲甲甲甲'), list('亥子丑子'))
@@ -270,6 +278,8 @@ class BranchDynamicsTests(unittest.TestCase):
         result = analyze(list('甲甲甲甲'), list('巳亥卯未'))
         group = next(g for g in result['groups'] if g['type'] == '삼합(三合)')
         self.assertEqual(group['activation_status'], 'suppressed')
+        self.assertEqual(group['status'], 'not_scored')
+        self.assertNotIn('force', group)
         formation = group['formation_evidence'][0]
         self.assertEqual(formation['structural_roles'], {
             'month': 'birth', 'day': 'center', 'hour': 'storage',
@@ -280,6 +290,45 @@ class BranchDynamicsTests(unittest.TestCase):
         self.assertEqual(formation['overlapping_pairs'], [{
             'relation_id': half['relation_id'],
             'covered_in_harmony_score': False,
+        }])
+        self.assertEqual(group['direction_status'], 'suppressed')
+        self.assertTrue(all(candidate['activation_status'] == 'suppressed'
+                            for candidate in formation['directional_candidates']))
+
+    def test_three_hap_direction_candidates_follow_center_position(self):
+        result = BranchDynamics.model_validate(
+            analyze(list('甲甲甲甲'), list('亥卯未亥'))).model_dump()
+        group = next(g for g in result['groups'] if g['type'] == '삼합(三合)')
+        self.assertEqual(group['action_rule_id'], 'group:삼합:亥卯未')
+        self.assertEqual(group['direction_status'], 'candidate_only')
+        self.assertEqual(group['activation_status'], 'potential')
+        self.assertEqual(group['status'], 'not_scored')
+        self.assertNotIn('force', group)
+        first, second = group['formation_evidence']
+        self.assertEqual([f['pillars'] for f in (first, second)],
+                         [['year', 'month', 'day'], ['month', 'day', 'hour']])
+        self.assertEqual(len(result['pairwise']), 6)
+        self.assertFalse(any(r['type'] == '반합(半合)'
+                             for p in result['pairwise'] for r in p['relations']))
+        self.assertTrue(all(not formation['overlapping_pairs']
+                            for formation in (first, second)))
+        self.assertEqual({(c['from_pillar'], c['to_pillar'])
+                          for c in first['directional_candidates']},
+                         {('year', 'month'), ('day', 'month')})
+        self.assertEqual({(c['from_pillar'], c['to_pillar'])
+                          for c in second['directional_candidates']},
+                         {('hour', 'month'), ('day', 'month')})
+        self.assertTrue(all(c['activation_status'] == 'candidate_only'
+                            for formation in (first, second)
+                            for c in formation['directional_candidates']))
+        self.assertEqual(first['role_effect_candidates'][0]['effect'],
+                         'transformation_candidate')
+
+        fire = analyze(list('甲甲甲甲'), list('寅午戌子'))
+        group = next(g for g in fire['groups'] if g['type'] == '삼합(三合)')
+        self.assertEqual(group['formation_evidence'][0]['role_effect_candidates'], [{
+            'pillar': 'day', 'effect': 'center_generates_storage_candidate',
+            'activation_status': 'candidate_only',
         }])
 
 

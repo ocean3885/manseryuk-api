@@ -23,7 +23,7 @@ class XuShiIntegrationTests(unittest.TestCase):
             branch_dynamics = advanced['branch_dynamics']
             self.assertEqual(branch_dynamics['scope'], 'natal')
             self.assertEqual(branch_dynamics['score_meaning'], 'uncalibrated_relative_model_index')
-            self.assertEqual(branch_dynamics['rule_version'], '2.10.0')
+            self.assertEqual(branch_dynamics['rule_version'], '2.11.0')
             self.assertEqual(set(branch_dynamics['branch_strengths']), {'year', 'month', 'day', 'hour'})
             self.assertEqual(len(branch_dynamics['pairwise']), 6)
             self.assertTrue(all('force_dominance' in relation

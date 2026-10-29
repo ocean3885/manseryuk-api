@@ -446,6 +446,19 @@ class BranchGroupPairOverlap(BaseModel):
     covered_in_harmony_score: bool
 
 
+class BranchGroupDirectionCandidate(BaseModel):
+    from_pillar: str
+    to_pillar: str
+    mechanism: str
+    activation_status: Literal['candidate_only', 'conditional', 'suppressed']
+
+
+class BranchGroupRoleEffectCandidate(BaseModel):
+    pillar: str
+    effect: str
+    activation_status: Literal['candidate_only', 'conditional', 'suppressed']
+
+
 class BranchGroupFormationEvidence(BaseModel):
     pillars: List[str]
     structural_roles: Dict[str, str]
@@ -453,11 +466,16 @@ class BranchGroupFormationEvidence(BaseModel):
     context_evidence: Dict[str, List[Dict[str, Any]]]
     capacity_share: Dict[str, float]
     overlapping_pairs: List[BranchGroupPairOverlap]
+    directional_candidates: List[BranchGroupDirectionCandidate]
+    role_effect_candidates: List[BranchGroupRoleEffectCandidate]
 
 
 class BranchGroupDynamics(BaseModel):
     relation_id: str
     type: str
+    action_rule_id: Optional[str] = None
+    direction_status: Literal['candidate_only', 'conditional', 'suppressed', 'undetermined']
+    pair_overlap_policy: Optional[str] = None
     participants: List[str]
     formations: List[List[str]]
     element: Optional[str] = None

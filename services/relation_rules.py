@@ -5,7 +5,7 @@
 """
 
 RULE_PROFILE = 'mangpa_project_provisional'
-RULE_VERSION = '2.10.0'
+RULE_VERSION = '2.11.0'
 
 # 천간끼리의 관계 후보와 기존 극 강도.
 STEM_COMBINATIONS = {
@@ -288,6 +288,69 @@ GROUP_ROLE_ORDER = {
     '삼합(三合)': ('birth', 'center', 'storage'),
     '방합(方合)': ('season_start', 'season_center', 'season_end'),
 }
+# 다자 합의 방향은 힘의 우세가 아니라 구조상 작용 후보이다. 실제 견인량과
+# 합화 성립을 정할 계수가 없으므로 그룹 작용량은 계산하지 않는다.
+# 삼합은 중신으로 모이는 구조 후보만 표시한다. 방합의 개별 방향은 미정이다.
+GROUP_ACTION_RULES = {
+    ('삼합(三合)', frozenset(('寅', '午', '戌'))): {
+        'rule_id': 'group:삼합:寅午戌', 'center_branch': '午',
+        'direction_candidates': (('birth', 'center'), ('storage', 'center')),
+        'role_effect_candidates': {'storage': 'center_generates_storage_candidate'},
+        'direction_status': 'candidate_only',
+        'pair_overlap_policy': 'preserve_pair_do_not_sum_group_force',
+    },
+    ('삼합(三合)', frozenset(('亥', '卯', '未'))): {
+        'rule_id': 'group:삼합:亥卯未', 'center_branch': '卯',
+        'direction_candidates': (('birth', 'center'), ('storage', 'center')),
+        'role_effect_candidates': {'storage': 'transformation_candidate'},
+        'direction_status': 'candidate_only',
+        'pair_overlap_policy': 'preserve_pair_do_not_sum_group_force',
+    },
+    ('삼합(三合)', frozenset(('申', '子', '辰'))): {
+        'rule_id': 'group:삼합:申子辰', 'center_branch': '子',
+        'direction_candidates': (('birth', 'center'), ('storage', 'center')),
+        'role_effect_candidates': {'storage': 'transformation_candidate'},
+        'direction_status': 'candidate_only',
+        'pair_overlap_policy': 'preserve_pair_do_not_sum_group_force',
+    },
+    ('삼합(三合)', frozenset(('巳', '酉', '丑'))): {
+        'rule_id': 'group:삼합:巳酉丑', 'center_branch': '酉',
+        'direction_candidates': (('birth', 'center'), ('storage', 'center')),
+        'role_effect_candidates': {'storage': 'transformation_candidate'},
+        'direction_status': 'candidate_only',
+        'pair_overlap_policy': 'preserve_pair_do_not_sum_group_force',
+    },
+    ('방합(方合)', frozenset(('寅', '卯', '辰'))): {
+        'rule_id': 'group:방합:寅卯辰', 'center_branch': None,
+        'direction_candidates': (), 'role_effect_candidates': {},
+        'direction_status': 'undetermined',
+        'pair_overlap_policy': 'preserve_pair_do_not_sum_group_force',
+    },
+    ('방합(方合)', frozenset(('巳', '午', '未'))): {
+        'rule_id': 'group:방합:巳午未', 'center_branch': None,
+        'direction_candidates': (), 'role_effect_candidates': {},
+        'direction_status': 'undetermined',
+        'pair_overlap_policy': 'preserve_pair_do_not_sum_group_force',
+    },
+    ('방합(方合)', frozenset(('申', '酉', '戌'))): {
+        'rule_id': 'group:방합:申酉戌', 'center_branch': None,
+        'direction_candidates': (), 'role_effect_candidates': {},
+        'direction_status': 'undetermined',
+        'pair_overlap_policy': 'preserve_pair_do_not_sum_group_force',
+    },
+    ('방합(方合)', frozenset(('亥', '子', '丑'))): {
+        'rule_id': 'group:방합:亥子丑', 'center_branch': None,
+        'direction_candidates': (), 'role_effect_candidates': {},
+        'direction_status': 'undetermined',
+        'pair_overlap_policy': 'preserve_pair_do_not_sum_group_force',
+    },
+}
+
+
+def get_group_action_rule(group_type, branches):
+    """글자 위치 순서와 무관하게 다자 관계의 방향 후보 규칙을 찾는다."""
+    return GROUP_ACTION_RULES.get((group_type, frozenset(branches)))
+
 CHUNG_BREAK_CONDITION = {
     '육합': True, '반합': True, '삼합': False, '방합': False,
 }

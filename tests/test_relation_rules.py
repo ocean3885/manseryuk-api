@@ -9,13 +9,34 @@ from services.branch_dynamics import analyze_branch_dynamics
 from services.interaction_matrix import build_interaction_matrix
 from services.relation_rules import (BREAKS, SIX_HAPS, JAHAB_MAP, STEM_COMBINATIONS,
                                     THREE_PUNISHMENTS, GONG_HAPS, HIDDEN_STEM_HAPS,
-                                    THREE_HAPS, THREE_HAPS_KING,
-                                    THREE_HAP_CONDITIONS)
+                                    THREE_HAPS, THREE_HAPS_KING, SQUARE_HAPS,
+                                    THREE_HAP_CONDITIONS, GROUP_ACTION_RULES,
+                                    get_group_action_rule)
 from services.relations import check_jahab
 from services.stem_relations import check_stem_combination
 
 
 class RelationRulesTests(unittest.TestCase):
+    def test_group_action_rules_cover_every_triple_without_forced_square_direction(self):
+        expected = ({('삼합(三合)', frozenset(members)) for members in THREE_HAPS} |
+                    {('방합(方合)', frozenset(members)) for members in SQUARE_HAPS})
+        self.assertEqual(set(GROUP_ACTION_RULES), expected)
+        for (kind, members), rule in GROUP_ACTION_RULES.items():
+            with self.subTest(kind=kind, members=members):
+                self.assertIs(get_group_action_rule(kind, tuple(reversed(tuple(members)))),
+                              rule)
+                self.assertEqual(rule['pair_overlap_policy'],
+                                 'preserve_pair_do_not_sum_group_force')
+                if kind == '삼합(三合)':
+                    self.assertEqual(rule['direction_candidates'],
+                                     (('birth', 'center'), ('storage', 'center')))
+                    self.assertIn(rule['center_branch'], members)
+                    self.assertEqual(rule['direction_status'], 'candidate_only')
+                else:
+                    self.assertEqual(rule['direction_candidates'], ())
+                    self.assertEqual(rule['direction_status'], 'undetermined')
+                    self.assertIsNone(rule['center_branch'])
+
     def test_wu_wei_six_hap_uses_earth_candidate(self):
         branches = list('午未申亥')
         self.assertEqual(SIX_HAPS[('午', '未')], '土')
