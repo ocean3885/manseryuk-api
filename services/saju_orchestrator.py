@@ -13,6 +13,7 @@ from services.analysis import analyze_palja_integrated, analyze_advanced_tonggeu
 from services.interaction_matrix import build_interaction_matrix
 from services.xu_shi import analyze_xu_shi_dynamics
 from services.bin_zhu import analyze_bin_zhu_dynamics
+from services.branch_dynamics import analyze_branch_dynamics
 from services.five_elements import analyze_five_elements
 from services.special_stars import analyze_special_stars
 
@@ -85,6 +86,7 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
     five_elements_data = analyze_five_elements(stems, branches, tonggeun_results)
     special_stars_data = analyze_special_stars(stems, branches)
     interaction_data = build_interaction_matrix(stems, branches, day_stem_ch)
+    branch_dynamics_data = analyze_branch_dynamics(stems, branches, interaction_data['matrix'])
     xu_shi_data = analyze_xu_shi_dynamics(stems, branches, day_stem_ch, tonggeun_results, interaction_data['matrix'])
     bin_zhu_data = analyze_bin_zhu_dynamics(stems, branches, day_stem_ch, interaction_data['matrix'])
 
@@ -208,6 +210,7 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
             "special_stars": special_stars_data,
             "special_stars_by_pillar": special_stars_by_pillar,
             "interactions": interaction_data,
+            "branch_dynamics": branch_dynamics_data,
             "xu_shi_dynamics": xu_shi_data,
             "bin_zhu_dynamics": bin_zhu_data,
             "ai_consultation_prompts": ai_consultation_prompts

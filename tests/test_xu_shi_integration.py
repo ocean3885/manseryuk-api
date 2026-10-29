@@ -20,6 +20,20 @@ class XuShiIntegrationTests(unittest.TestCase):
                 result = get_calenda_data(1995, '5', '12', 14, 30, 'sol', '남', session)
                 response = SajuAnalysisResponse.model_validate(result).model_dump(mode='json')
             advanced = response['advanced_analysis']
+            branch_dynamics = advanced['branch_dynamics']
+            self.assertEqual(branch_dynamics['scope'], 'natal')
+            self.assertEqual(branch_dynamics['score_meaning'], 'uncalibrated_relative_model_index')
+            self.assertEqual(branch_dynamics['rule_version'], '2.10.0')
+            self.assertEqual(set(branch_dynamics['branch_strengths']), {'year', 'month', 'day', 'hour'})
+            self.assertEqual(len(branch_dynamics['pairwise']), 6)
+            self.assertTrue(all('force_dominance' in relation
+                                for pair in branch_dynamics['pairwise']
+                                for relation in pair['relations']))
+            self.assertTrue(all('roles' in relation
+                                for pair in branch_dynamics['pairwise']
+                                for relation in pair['relations']))
+            self.assertEqual(branch_dynamics['branch_strengths']['month']['branch'], '巳')
+            self.assertEqual(branch_dynamics['branch_strengths']['month']['stem_branch_relation']['stem'], '辛')
             bin_zhu = advanced['bin_zhu_dynamics']
             self.assertEqual(bin_zhu['interaction_scope'], 'pairwise')
             self.assertTrue(bin_zhu['excluded_interactions'])
@@ -29,7 +43,7 @@ class XuShiIntegrationTests(unittest.TestCase):
             self.assertTrue(bin_zhu['group_connections'])
             self.assertEqual(bin_zhu['rule_version'], '3.0.0')
             interactions = advanced['interactions']
-            self.assertEqual(interactions['rule_version'], '1.1.0')
+            self.assertEqual(interactions['rule_version'], '1.3.0')
             relation_ids = {r['relation_id'] for r in interactions['matrix']}
             for group in bin_zhu['group_connections']:
                 self.assertIn(group['relation_id'], relation_ids)

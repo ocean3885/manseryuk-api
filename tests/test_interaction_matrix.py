@@ -2,12 +2,11 @@
 from itertools import combinations, permutations
 import unittest
 
-from schemas.saju_analysis import InteractionsInfo
+from schemas.saju_analysis import BranchDynamics, InteractionsInfo
+from services.branch_dynamics import analyze_branch_dynamics
 from services.branch_relations import check_six_hap, check_six_haps, check_three_hap, check_square_hap, get_relations_for_branch
 from services.constants import SIX_HAPS
 from services.interaction_matrix import build_interaction_matrix
-from services.analysis import analyze_advanced_tonggeun
-from services.xu_shi import analyze_xu_shi_dynamics
 
 PILLARS = ['year', 'month', 'day', 'hour']
 
@@ -31,12 +30,91 @@ class InteractionMatrixTests(unittest.TestCase):
         self.assertEqual(relations['six_haps_all'], all_haps)
         self.assertEqual(matrix(branches)['harmony_score'], 5.1)
 
+    def test_six_hap_hidden_stem_candidates_survive_schema(self):
+        result = matrix('午未子丑')
+        encoded = InteractionsInfo.model_validate(result).model_dump()
+        item = next(r for r in encoded['matrix']
+                    if r['type'] == '육합(六合)' and
+                    r['participants'] == ['year', 'month'])
+        self.assertEqual(item['candidate_element'], '土')
+        self.assertIsNone(item['transformed_element'])
+        self.assertEqual(item['candidate_hidden_stem_effects'], [{
+            'pillar': 'month', 'branch': '未', 'stem': '乙',
+            'effect': 'closure', 'activation_status': 'candidate_only',
+        }])
+
+    def test_combination_elements_are_candidates_until_transformation_is_checked(self):
+        cases = (
+            ('천간합(天干合)', '甲己丙辛', '寅午戌子', {'土', '水'}),
+            ('반합(半合)', '甲甲甲甲', '寅午子丑', {'火'}),
+            ('삼합(三合)', '甲甲甲甲', '寅午戌子', {'火'}),
+            ('방합(方合)', '甲甲甲甲', '巳午未子', {'火'}),
+        )
+        for kind, stems, branches, expected_elements in cases:
+            with self.subTest(kind=kind):
+                result = matrix(branches, stems)
+                self.assertEqual(result['rule_version'], '1.3.0')
+                encoded = InteractionsInfo.model_validate(result).model_dump()
+                items = [r for r in encoded['matrix'] if r['type'] == kind]
+                self.assertEqual({r['candidate_element'] for r in items},
+                                 expected_elements)
+                self.assertTrue(all(r['transformed_element'] is None for r in items))
+
+        suppressed = matrix('亥酉卯未')
+        group = next(r for r in suppressed['matrix'] if r['type'] == '삼합(三合)')
+        self.assertEqual(group['activation_status'], 'suppressed')
+        self.assertEqual(group['candidate_element'], '木')
+        self.assertIsNone(group['transformed_element'])
+        dynamics = analyze_branch_dynamics(
+            list('甲甲甲甲'), list('亥酉卯未'), suppressed['matrix'])
+        encoded_dynamics = BranchDynamics.model_validate(dynamics).model_dump()
+        dynamics_group = next(g for g in encoded_dynamics['groups']
+                              if g['type'] == '삼합(三合)')
+        self.assertEqual(dynamics_group['candidate_element'], '木')
+        self.assertIsNone(dynamics_group['transformed_element'])
+        self.assertEqual(dynamics_group['element'], '木')  # 호환용 후보 별칭
+
     def test_every_six_hap_position_pair_survives_permutations(self):
         for branches in sorted(set(permutations('子丑丑子'))):
             with self.subTest(branches=branches):
                 expected = {(PILLARS[i], PILLARS[j]) for i, j in combinations(range(4), 2)
                             if (branches[i], branches[j]) in SIX_HAPS or (branches[j], branches[i]) in SIX_HAPS}
                 self.assertEqual(pairs(matrix(branches), '육합(六合)'), expected)
+
+    def test_group_coverage_keeps_pair_candidate_without_double_counting(self):
+        result = matrix('巳午未寅')
+        encoded = InteractionsInfo.model_validate(result).model_dump()
+        group = next(r for r in encoded['matrix'] if r['type'] == '방합(方合)')
+        included = next(r for r in encoded['matrix']
+                        if r['type'] == '육합(六合)' and
+                        r['participants'] == ['month', 'day'])
+        outside = next(r for r in encoded['matrix']
+                       if r['type'] == '반합(半合)' and
+                       r['participants'] == ['month', 'hour'])
+        self.assertEqual((group['score'], group['score_contribution']), (3.5, 3.5))
+        self.assertEqual((included['score'], included['score_contribution']),
+                         (1.5, 0.0))
+        self.assertEqual(included['score_covered_by'], group['relation_id'])
+        self.assertEqual((outside['score'], outside['score_contribution']),
+                         (0.91, 0.91))
+        self.assertIsNone(outside['score_covered_by'])
+        self.assertEqual(result['harmony_score'], 4.4)
+
+        repeated = matrix('亥子丑子')
+        group = next(r for r in repeated['matrix'] if r['type'] == '방합(方合)')
+        covered = [r for r in repeated['matrix'] if r['type'] == '육합(六合)']
+        self.assertEqual(len(covered), 2)
+        self.assertTrue(all(r['score_contribution'] == 0.0 and
+                            r['score_covered_by'] == group['relation_id']
+                            for r in covered))
+        self.assertEqual(repeated['harmony_score'], 3.5)
+
+        # 깨진 삼합의 점수 0은 남아 있는 반합 후보를 덮지 않는다.
+        fallback = matrix('巳亥卯未')
+        half = next(r for r in fallback['matrix'] if r['type'] == '반합(半合)')
+        self.assertEqual(half['score_contribution'], half['score'])
+        self.assertIsNone(half['score_covered_by'])
+        self.assertEqual(fallback['harmony_score'], 1.1)
 
     def test_half_hap_includes_each_repeated_partner(self):
         result = matrix('寅午午酉')
@@ -47,8 +125,10 @@ class InteractionMatrixTests(unittest.TestCase):
                         if {branches[i], branches[j]} == {'寅', '午'}}
             self.assertEqual(pairs(matrix(branches), '반합(半合)'), expected)
 
-    def test_punishments_are_deduplicated_by_position_not_character(self):
-        self.assertEqual(pairs(matrix('寅巳巳酉'), '형(刑)'), {('year', 'month'), ('year', 'day')})
+    def test_pair_punishments_are_deduplicated_by_position_not_character(self):
+        self.assertEqual(pairs(matrix('寅巳巳酉'), '형(刑)'), set())
+        self.assertEqual(pairs(matrix('戌未未子'), '형(刑)'),
+                         {('year', 'month'), ('year', 'day')})
         self.assertEqual(pairs(matrix('午午午子'), '형(刑)'),
                          {('year', 'month'), ('year', 'day'), ('month', 'day')})
 
@@ -91,23 +171,11 @@ class InteractionMatrixTests(unittest.TestCase):
                 self.assertEqual(raw['participants'], [raw['from_pillar'], raw['to_pillar']])
                 self.assertEqual(raw['formations'], [])
 
-    def test_missing_punishment_fix_changes_root_evidence_not_xu_shi_rule(self):
-        stems, branches = list('癸甲乙丁'), list('巳申巳子')
-        result = matrix(branches, ''.join(stems))
-        corrected = result['matrix']
-        # 구버전은 월지 申에서 일지 巳로 향하는 두 번째 같은 글자의 형을 누락했다.
-        legacy = [r for r in corrected if not (r['type'] == '형(刑)' and r['from_pillar'] == 'month' and r['to_pillar'] == 'day')]
-        roots = analyze_advanced_tonggeun(stems, branches)
-        before = analyze_xu_shi_dynamics(stems, branches, stems[2], roots, legacy)
-        after = analyze_xu_shi_dynamics(stems, branches, stems[2], roots, corrected)
-        self.assertEqual(before['pillars']['hour']['current_status'], '실(實)')
-        self.assertEqual(after['pillars']['hour']['current_status'], '변허(變虛)')
-        self.assertEqual(before['rule_version'], after['rule_version'])
-        ids = {r['relation_id'] for r in corrected}
-        for p in after['pillars'].values():
-            for root in p['root_evidence']:
-                for relation in root['interactions']:
-                    self.assertIn(relation['relation_id'], ids)
+    def test_six_hap_with_repeated_branch_has_no_spurious_punishment(self):
+        result = matrix('巳申巳子')['matrix']
+        self.assertEqual(pairs({'matrix': result}, '육합(六合)'),
+                         {('year', 'month'), ('month', 'day')})
+        self.assertEqual(pairs({'matrix': result}, '형(刑)'), set())
 
 
 if __name__ == '__main__':

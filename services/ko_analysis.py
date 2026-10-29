@@ -2,7 +2,7 @@
 고(庫) 분석 모듈 - 진술축미(辰戌丑未)의 개고/폐고 상태 분석
 """
 
-from services.constants import CHUNGS, BREAKS, ZHI_ZANG
+from services.constants import ZHI_ZANG
 from services.calculator import get_ten_star_stem
 
 # ============ 고 기본 정보 ============

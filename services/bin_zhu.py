@@ -5,7 +5,7 @@ PILLAR_KEYS = ['year', 'month', 'day', 'hour']
 POSITION_NAMES = ['년', '월', '일', '시']
 COMBINATION_TYPES = {'육합(六合)', '반합(半合)', '천간합(天干合)'}
 CONFLICT_TYPES = {'충(沖)', '해/천(穿/害)', '천간충(天干沖)', '형(刑)'}
-UNSCORED_PAIRWISE_TYPES = {'파(破)'}
+UNSCORED_PAIRWISE_TYPES = {'파(破)', '공합(拱合)', '암합(暗合)'}
 
 RESOURCES = {'정인', '편인'}
 WEALTH_AND_OFFICER = {'정재', '편재', '정관', '편관'}
@@ -90,13 +90,14 @@ def analyze_bin_zhu_dynamics(
             if excluded not in excluded_interactions:
                 excluded_interactions.append(excluded)
             # all만 있는 입력에서 참여 기둥을 추측하지 않는다.
-            if is_group and len(participants) >= 3:
+            if is_group and len(participants) >= 3 and item.get('type') != '삼형(三刑)':
                 g_participants = [p for p in participants if p in PILLAR_KEYS[:2]]
                 h_participants = [p for p in participants if p in PILLAR_KEYS[2:]]
                 g_cnt = len(g_participants)
                 h_cnt = len(h_participants)
                 p_cnt = len(participants)
-                base = 3.5 if '방합' in item.get('type', '') else 3.0
+                base = (0.0 if item.get('activation_status') in ('conditional', 'suppressed') else
+                        3.5 if '방합' in item.get('type', '') else 3.0)
                 cohesion = round(base * (g_cnt * h_cnt) / p_cnt, 2) if p_cnt > 0 else 0.0
                 group = {
                     'relation_id': item.get('relation_id'), 'type': item['type'],
@@ -105,6 +106,7 @@ def analyze_bin_zhu_dynamics(
                     'host_participants': h_participants,
                     'included_in_score': False,
                     'cohesion_score': cohesion,
+                    'activation_status': item.get('activation_status'),
                     'description': (f"빈과 주가 함께 참여하는 다자 관계({item['type']})입니다. "
                                     f"빈 {g_cnt}위치, 주 {h_cnt}위치가 참여하며 결합도 {cohesion}점입니다."),
                 }
@@ -120,6 +122,19 @@ def analyze_bin_zhu_dynamics(
         default_weight = 1.0 if dist == 1 else (0.7 if dist == 2 else 0.5)
         weight = item.get('weight', default_weight)
         rel_type = item.get('type')
+
+        if item.get('activation_status') == 'candidate_only':
+            excluded = {
+                'relation_id': item.get('relation_id'),
+                'category': item.get('category', ''), 'type': rel_type,
+                'name': item.get('name', ''),
+                'from_pillar': from_pillar, 'to_pillar': to_pillar,
+                'participants': [from_pillar, to_pillar],
+                'reason_code': 'candidate_only_relation',
+            }
+            if excluded not in excluded_interactions:
+                excluded_interactions.append(excluded)
+            continue
 
         if rel_type in COMBINATION_TYPES:
             unweighted_combination_score += 2.0
@@ -153,7 +168,8 @@ def analyze_bin_zhu_dynamics(
                 'category': item.get('category', ''), 'type': rel_type,
                 'name': item.get('name', ''), 'from_pillar': from_pillar, 'to_pillar': to_pillar,
                 'participants': [from_pillar, to_pillar],
-                'reason_code': 'unsupported_relation_type',
+                'reason_code': ('candidate_only_relation' if rel_type in
+                                {'공합(拱合)', '암합(暗合)'} else 'unsupported_relation_type'),
             }
             if excluded not in excluded_interactions:
                 excluded_interactions.append(excluded)
@@ -180,7 +196,8 @@ def analyze_bin_zhu_dynamics(
             'weight': weight,
         })
 
-    has_bridging_group = any(g['guest_participants'] and g['host_participants'] for g in group_connections)
+    has_bridging_group = any(g['guest_participants'] and g['host_participants']
+                             and g['cohesion_score'] > 0 for g in group_connections)
     total_group_cohesion = round(sum(g.get('cohesion_score', 0.0) for g in group_connections), 2)
     comb_score = round(combination_score, 2)
     conf_score = round(conflict_score, 2)

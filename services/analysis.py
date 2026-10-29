@@ -127,7 +127,10 @@ def analyze_palja_integrated(stems, branches):
             'breaks': '파',
             'three_haps': '삼합',
             'half_haps': '반합',
+            'gong_haps': '공합',
+            'hidden_stem_haps': '지장간 암합',
             'square_haps': '방합',
+            'three_punishments': '삼형',
             'punishments': '형'
         }
         for rel_key, rel_val in branch_relations.items():

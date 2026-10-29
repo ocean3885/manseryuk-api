@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List, Any, Dict, Literal
 
 # ──────────────────────────────────────────
@@ -195,7 +195,16 @@ class InteractionItem(BaseModel):
     is_adjacent: bool
     weight: float
     score: float
+    score_contribution: Optional[float] = None
+    score_covered_by: Optional[str] = None
     transformed_element: Optional[str] = None
+    candidate_element: Optional[str] = None
+    missing_branch: Optional[str] = None
+    hidden_stem_pairs: Optional[List[Dict[str, str]]] = None
+    candidate_hidden_stem_effects: List[Dict[str, str]] = Field(default_factory=list)
+    activation_status: Optional[str] = None
+    status_reasons: List[str] = Field(default_factory=list)
+    condition_evidence: Dict[str, Any] = Field(default_factory=dict)
     description: str
 
 
@@ -305,7 +314,8 @@ class BinZhuExcludedInteraction(BaseModel):
     name: str
     from_pillar: Optional[str] = None
     to_pillar: Optional[str] = None
-    reason_code: Literal['group_relation_unsupported', 'invalid_endpoint', 'unsupported_relation_type']
+    reason_code: Literal['group_relation_unsupported', 'invalid_endpoint',
+                         'unsupported_relation_type', 'candidate_only_relation']
 
 
 class BinZhuGroupConnection(BaseModel):
@@ -316,6 +326,7 @@ class BinZhuGroupConnection(BaseModel):
     host_participants: List[str]
     included_in_score: bool = False
     cohesion_score: Optional[float] = None
+    activation_status: Optional[str] = None
     description: str
 
 
@@ -368,11 +379,113 @@ class SpecialStarItem(BaseModel):
     description: str
 
 
+class BranchHiddenEvidence(BaseModel):
+    stem: str
+    element: str
+    ratio: float
+    season_relation: str
+    stem_relation: str
+
+
+class StemBranchRelation(BaseModel):
+    stem: str
+    stem_element: str
+    relation: str
+    branch_effect: str
+    adjustment: float
+    evidence: List[BranchHiddenEvidence]
+
+
+class BranchStrength(BaseModel):
+    branch: str
+    element: str
+    base_power: float
+    stem_branch_relation: StemBranchRelation
+    after_stem_power: float
+    effective_power: float
+    ambient_evidence: List[Dict[str, Any]]
+    components: Dict[str, float]
+    evidence: List[BranchHiddenEvidence]
+
+
+class BranchRelationEffect(BaseModel):
+    relation_id: str
+    type: str
+    effect_kind: str
+    relation_coefficient: float
+    directional_coefficients: Dict[str, float] = Field(default_factory=dict)
+    directional_mechanisms: Dict[str, str] = Field(default_factory=dict)
+    candidate_hidden_stem_effects: List[Dict[str, str]] = Field(default_factory=list)
+    rule_id: Optional[str] = None
+    activation_status: Literal['potential', 'conditional', 'suppressed', 'candidate_only'] = 'potential'
+    status_reason: Optional[str] = None
+    distance_weight: float
+    element_relation: str
+    element_direction: Optional[str] = None
+    power_before: Dict[str, float]
+    force: Dict[str, float]
+    effect_received: Dict[str, float]
+    dominance: str
+    force_dominance: Literal['year', 'month', 'day', 'hour', 'tie', 'undetermined']
+    roles: Dict[str, str]
+    evidence: List[str]
+
+
+class BranchPairDynamics(BaseModel):
+    pair_id: str
+    pillars: List[str]
+    rule_id: Optional[str] = None
+    primary_relation: Optional[str] = None
+    relations: List[BranchRelationEffect]
+    context_evidence: Dict[str, List[Dict[str, Any]]]
+    domain_pair: Literal['guest_guest', 'host_host', 'guest_host']
+
+
+class BranchGroupPairOverlap(BaseModel):
+    relation_id: str
+    covered_in_harmony_score: bool
+
+
+class BranchGroupFormationEvidence(BaseModel):
+    pillars: List[str]
+    structural_roles: Dict[str, str]
+    power_before: Dict[str, float]
+    context_evidence: Dict[str, List[Dict[str, Any]]]
+    capacity_share: Dict[str, float]
+    overlapping_pairs: List[BranchGroupPairOverlap]
+
+
+class BranchGroupDynamics(BaseModel):
+    relation_id: str
+    type: str
+    participants: List[str]
+    formations: List[List[str]]
+    element: Optional[str] = None
+    candidate_element: Optional[str] = None
+    transformed_element: Optional[str] = None
+    status: Literal['not_scored']
+    activation_status: Optional[str] = None
+    status_reasons: List[str] = Field(default_factory=list)
+    condition_evidence: Dict[str, Any] = Field(default_factory=dict)
+    formation_evidence: List[BranchGroupFormationEvidence] = Field(default_factory=list)
+
+
+class BranchDynamics(BaseModel):
+    rule_profile: str
+    rule_version: str
+    scope: Literal['natal']
+    score_meaning: Literal['uncalibrated_relative_model_index']
+    branch_strengths: Dict[str, BranchStrength]
+    pairwise: List[BranchPairDynamics]
+    groups: List[BranchGroupDynamics]
+
+
 class AdvancedAnalysis(BaseModel):
     five_elements: Optional[FiveElementsInfo] = None
     special_stars: Optional[List[SpecialStarItem]] = None
     special_stars_by_pillar: Optional[Dict[str, List[str]]] = None
     interactions: InteractionsInfo
+    branch_dynamics: Optional[BranchDynamics] = None
     xu_shi_dynamics: XuShiDynamics
     bin_zhu_dynamics: BinZhuDynamics
     ai_consultation_prompts: List[str]

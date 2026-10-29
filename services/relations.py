@@ -1,15 +1,5 @@
-# 자합 매핑에 필요 조건 추가
-JAHAB_MAP = {
-    ('戊', '子'): {'hidden': '癸', 'element': '火', 'conditional': False, 'required': None},
-    ('丁', '亥'): {'hidden': '壬', 'element': '木', 'conditional': False, 'required': None},
-    ('己', '亥'): {'hidden': '甲', 'element': '土', 'conditional': False, 'required': None},
-    ('辛', '巳'): {'hidden': '丙', 'element': '水', 'conditional': False, 'required': None},
-    ('癸', '巳'): {'hidden': '戊', 'element': '火', 'conditional': False, 'required': None},
-    ('壬', '午'): {'hidden': '丁', 'element': '木', 'conditional': False, 'required': None},
-    ('甲', '午'): {'hidden': '己', 'element': '土', 'conditional': False, 'required': None},
-    ('丙', '戌'): {'hidden': '辛', 'element': '水', 'conditional': True, 'required': ('지세형', '未')},
-    ('壬', '戌'): {'hidden': '丁', 'element': '木', 'conditional': True, 'required': ('지세형', '未')},
-}
+from services.relation_rules import JAHAB_MAP
+
 
 def check_jahab(stem, branch, idx, chung_list, punish_list):
     """
@@ -50,9 +40,24 @@ def check_jahab(stem, branch, idx, chung_list, punish_list):
             for p in punish_list
         )
         result['active'] = condition_met
+        result['condition_met'] = condition_met
     else:
         # 비조건부 자합은 항상 활성
         result['active'] = True
+
+    # 戌의 未형은 자합 후보를 열지만, 辰충이 있으면 丙戌·壬戌 자합은 성립하지 않는다.
+    blocked_by = jinfo.get('blocked_by_chung')
+    blocking_chung = next((c for c in (chung_list or [])
+                           if c.get('with') == blocked_by), None) if blocked_by else None
+    if blocking_chung:
+        result['active'] = False
+        result['inactive_reason'] = 'blocked_by_chen_chung'
+        result['blocking_chung'] = {
+            'with_branch': blocked_by,
+            'with_index': blocking_chung['with_index'],
+        }
+    elif jinfo['conditional'] and not result['active']:
+        result['inactive_reason'] = 'required_punishment_missing'
     
     if chung_list:
         strongest_chung = max(chung_list, key=lambda x: x.get('strength', 0))

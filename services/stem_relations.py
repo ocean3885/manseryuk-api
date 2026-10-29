@@ -1,32 +1,5 @@
 from services.calculator import get_ten_star_branch, get_ten_star_stem
-
-STEM_COMBINATIONS = {
-    ('甲', '己'): '土',
-    ('乙', '庚'): '金',
-    ('丙', '辛'): '水',
-    ('丁', '壬'): '木',
-    ('戊', '癸'): '火'
-}
-
-STEM_CONFLICTS = {
-    ('甲', '庚'), ('乙', '辛'), ('丙', '壬'), ('丁', '癸')
-}
-
-# 천간 극 관계 및 강도 (극하는 자, 극당하는 자): 강도
-STEM_RESTRAIN = {
-    ('甲', '戊'): 1.0,
-    ('乙', '戊'): 0.5,
-    ('乙', '己'): 1.0,
-    ('丙', '庚'): 1.0,
-    ('丁', '庚'): 0.5,
-    ('丁', '辛'): 1.0,
-    ('戊', '壬'): 1.0,
-    ('己', '壬'): 0.5,
-    ('己', '癸'): 1.0,
-    ('辛', '甲'): 0.5,
-    ('癸', '丙'): 0.5,
-}
-
+from services.relation_rules import STEM_COMBINATIONS, STEM_CONFLICTS, STEM_RESTRAIN
 
 def check_stem_combination(target_stem, target_index, all_stems, day_stem):
     """천간 합 (五合)"""
