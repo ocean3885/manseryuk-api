@@ -5,7 +5,19 @@
 """
 
 RULE_PROFILE = 'mangpa_project_provisional'
-RULE_VERSION = '2.11.0'
+RULE_VERSION = '2.13.0'
+
+# v3 방향별 잠재량은 기존 v2 계수를 재사용하는 잠정 상대 지표다.
+# 각 방향: source_capacity = 해당 쌍의 상대를 제외하고 계산한 원천 지지 세력.
+# interaction_intensity = round(source_capacity * distance_weight * coefficient, 4).
+# target_exposure = round(interaction_intensity * source_capacity /
+#                         (source_capacity + target_capacity), 4).
+# target_exposure는 잠재 수용 지표이며 실제 손실·피해량이 아니다.
+# 작용 성립 판정 전에는 applied_power_delta를 산출하지 않는다.
+V3_RULE_VERSION = '3.1.0-draft'
+V3_POTENTIAL_FORMULA_ID = 'branch:potential_source_distance_coefficient_v1'
+V3_EXPOSURE_FORMULA_ID = 'branch:exposure_source_share_v1'
+V3_UNSCORED_PAIR_TYPES = frozenset(('공합(拱合)', '암합(暗合)'))
 
 # 천간끼리의 관계 후보와 기존 극 강도.
 STEM_COMBINATIONS = {
@@ -87,11 +99,10 @@ THREE_PUNISHMENTS = {
 }
 PUNISHMENTS = {
     # 두 글자만 있을 때의 형. 寅巳·寅申·巳申 및 丑未는 각각 천·충·합·충이 주작용이다.
-    '무례지형': [('子', '卯')],
     '지세형': [('丑', '戌'), ('戌', '未')],
     '자진형': [('辰', '辰'), ('午', '午'), ('酉', '酉'), ('亥', '亥')],
 }
-BREAKS = {('卯', '午'), ('午', '酉')}
+BREAKS = {('子', '卯'), ('卯', '午'), ('午', '酉')}
 TRADITIONAL_BREAKS = {('子', '酉'), ('丑', '辰'), ('寅', '亥'),
                       ('卯', '午'), ('巳', '申'), ('未', '戌')}
 CHEONS = {('子', '未'), ('丑', '午'), ('寅', '巳'),
@@ -211,13 +222,13 @@ PAIR_ACTION_RULES = {
         },
     },
     frozenset(('子', '卯')): {
-        'rule_id': 'branch:子卯', 'primary_relation': '형(刑)',
+        'rule_id': 'branch:子卯', 'primary_relation': '파(破)',
         'effects': {
-            '형(刑)': {'coefficients': {'子': 0.75, '卯': 0.75},
-                      'mechanisms': {'子': 'punishment', '卯': 'punishment'}},
+            '파(破)': {'coefficients': {'子': 0.45, '卯': 0.45},
+                      'mechanisms': {'子': 'break', '卯': 'break'}},
             '생': {'coefficients': {'子': 0.0, '卯': 0.0},
                   'mechanisms': {'子': 'generation_blocked', '卯': 'no_generation'},
-                  'status': 'suppressed', 'reason': 'punishment_blocks_generation'},
+                  'status': 'suppressed', 'reason': 'break_blocks_generation'},
         },
     },
     frozenset(('卯', '午')): {

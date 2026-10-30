@@ -106,17 +106,17 @@ class BinZhuTests(unittest.TestCase):
         self.assertEqual(result['control_flow'], expected['control_flow'])
         self.assertEqual(len(result['excluded_interactions']), 1)
 
-    def test_zi_mao_punishment_is_scored_without_break(self):
-        # 子卯는 형으로 집계하며 파는 출력하지 않는다.
+    def test_zi_mao_break_is_excluded_from_bin_zhu_scores(self):
+        # 子卯는 파로만 탐지한다. 빈주 집계는 파를 미지원 관계로 분리한다.
         matrix = build_interaction_matrix(list('甲甲甲甲'), list('子子卯卯'), '甲')['matrix']
         result = analyze_bin_zhu_dynamics(list('甲甲甲甲'), list('子子卯卯'), '甲', matrix)
-        self.assertEqual(result['pairwise_scores']['conflict'], 4.35)
-        self.assertEqual(result['pairwise_scores']['unweighted_conflict'], 6.0)
-        self.assertEqual(result['control_flow']['direction'], '충·형·해 관계 우세')
-        self.assertEqual(len(result['guest_host_links']), 4)
-        self.assertTrue(all(link['type'] == '형(관계)'
-                            for link in result['guest_host_links']))
-        self.assertEqual(result['excluded_interactions'], [])
+        self.assertEqual(result['pairwise_scores']['conflict'], 0)
+        self.assertEqual(result['pairwise_scores']['unweighted_conflict'], 0)
+        self.assertEqual(result['guest_host_links'], [])
+        self.assertEqual(len(result['excluded_interactions']), 4)
+        self.assertTrue(all(item['type'] == '파(破)' and
+                            item['reason_code'] == 'unsupported_relation_type'
+                            for item in result['excluded_interactions']))
 
         # 파(破) 관계는 excluded_interactions에 unsupported_relation_type으로 보존
         break_item = dict(category='지지', type='파(破)', name='자유파', from_pillar='year', to_pillar='day')

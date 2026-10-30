@@ -413,7 +413,7 @@ def check_three_punishment(target_branch, target_index, all_branches, day_stem):
 
 
 def check_punishment(target_branch, target_index, all_branches, day_stem):
-    """쌍별 형 후보. 子卯는 무례지형으로 판정한다."""
+    """쌍별 지세형과 자형 후보를 찾는다."""
     punishments = []
     my_ten_star = get_ten_star_branch(day_stem, target_branch)
     
@@ -425,19 +425,6 @@ def check_punishment(target_branch, target_index, all_branches, day_stem):
         strength = 1.0 if distance == 1 else (0.7 if distance == 2 else 0.5)
         is_adjacent = (distance == 1)
 
-        if ((target_branch, other_branch) in PUNISHMENTS['무례지형'] or
-                (other_branch, target_branch) in PUNISHMENTS['무례지형']):
-            punishments.append({
-                'my': target_branch, 'my_index': target_index,
-                'my_ten_star': my_ten_star,
-                'with': other_branch, 'with_index': i,
-                'with_ten_star': get_ten_star_branch(day_stem, other_branch),
-                'distance': distance, 'is_adjacent': is_adjacent,
-                'type': '무례지형', 'strength': strength,
-                'activation_status': 'potential',
-            })
-            continue
-        
         # 지세형 (丑-戌, 戌-未). 丑未는 충으로만 판정한다.
         if (target_branch, other_branch) in PUNISHMENTS['지세형'] or (other_branch, target_branch) in PUNISHMENTS['지세형']:
             # 지세형은 기본 strength에 0.9 가중치 (선택)

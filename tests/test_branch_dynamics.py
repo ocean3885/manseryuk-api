@@ -59,7 +59,7 @@ class BranchDynamicsTests(unittest.TestCase):
 
     def test_strength_and_relation_force_leads_are_distinct(self):
         result = analyze(list('甲甲甲甲'), list('子寅午辰'))
-        self.assertEqual(result['rule_version'], '2.11.0')
+        self.assertEqual(result['rule_version'], '2.13.0')
         generation = next(r for r in pair(result, 'year', 'month')['relations']
                           if r['type'] == '생')
         self.assertEqual(generation['dominance'], 'month')
@@ -132,6 +132,7 @@ class BranchDynamicsTests(unittest.TestCase):
         for branches, first, second in [
             (list('午子酉寅'), 'year', 'day'),
             (list('子卯午寅'), 'month', 'day'),
+            (list('子卯辰寅'), 'year', 'month'),
         ]:
             with self.subTest(branches=branches, pair=(first, second)):
                 result = analyze(list('甲甲甲甲'), branches)
@@ -141,21 +142,17 @@ class BranchDynamicsTests(unittest.TestCase):
         result = analyze(list('甲甲甲甲'), list('子酉辰寅'))
         self.assertNotIn('파(破)',
                          {r['type'] for r in pair(result, 'year', 'month')['relations']})
-        result = analyze(list('甲甲甲甲'), list('子卯辰寅'))
-        self.assertNotIn('파(破)',
-                         {r['type'] for r in pair(result, 'year', 'month')['relations']})
 
     def test_break_suppresses_generation_in_pair_and_ambient_power(self):
         for branches, first, second, structural_type, reason in [
-            (list('子卯辰寅'), 'year', 'month', '형(刑)', 'punishment_blocks_generation'),
+            (list('子卯辰寅'), 'year', 'month', '파(破)', 'break_blocks_generation'),
             (list('子卯午寅'), 'month', 'day', '파(破)', 'break_blocks_generation'),
         ]:
             with self.subTest(branches=branches):
                 result = analyze(list('甲甲甲甲'), branches)
                 relations = pair(result, first, second)['relations']
                 self.assertIn(structural_type, {r['type'] for r in relations})
-                self.assertNotIn('파(破)' if structural_type == '형(刑)' else '형(刑)',
-                                 {r['type'] for r in relations})
+                self.assertNotIn('형(刑)', {r['type'] for r in relations})
                 generation = next(r for r in relations if r['type'] == '생')
                 self.assertEqual(generation['activation_status'], 'suppressed')
                 self.assertEqual(set(generation['force'].values()), {0.0})

@@ -115,23 +115,20 @@ class RelationRulesTests(unittest.TestCase):
                 self.assertGreater(secondary['force'][f'{source}_to_{target}'], 0)
                 self.assertEqual(secondary['force'][f'{target}_to_{source}'], 0)
 
-    def test_zi_mao_is_punishment_without_break(self):
+    def test_zi_mao_is_break_without_punishment(self):
         branches = list('子卯辰寅')
         punishments = check_punishment('子', 0, branches, '甲')
-        self.assertEqual([(p['type'], p['with_index'], p['activation_status'])
-                          for p in punishments], [('무례지형', 1, 'potential')])
+        self.assertEqual(punishments, [])
         result = build_interaction_matrix(list('甲甲甲甲'), branches, '甲')
         pair_items = [r for r in result['matrix']
                       if r['participants'] == ['year', 'month']]
-        self.assertEqual({r['type'] for r in pair_items}, {'형(刑)'})
-        self.assertGreater(pair_items[0]['score'], 0.0)
+        self.assertEqual({r['type'] for r in pair_items}, {'파(破)'})
+        self.assertTrue(all(item['score'] > 0.0 for item in pair_items))
         dynamics = analyze_branch_dynamics(list('甲甲甲甲'), branches, result['matrix'])
         pair = next(p for p in dynamics['pairwise'] if p['pair_id'] == 'year:month')
-        self.assertEqual(pair['primary_relation'], '형(刑)')
-        punishment = next(r for r in pair['relations'] if r['type'] == '형(刑)')
-        self.assertEqual(punishment['activation_status'], 'potential')
-        self.assertTrue(all(force > 0 for force in punishment['force'].values()))
-        self.assertFalse(any(r['type'] == '파(破)' for r in pair['relations']))
+        self.assertEqual(pair['primary_relation'], '파(破)')
+        self.assertFalse(any(r['type'] == '형(刑)' for r in pair['relations']))
+        self.assertTrue(any(r['type'] == '파(破)' for r in pair['relations']))
 
     def test_three_hap_middle_conditions_control_group_score(self):
         self.assertEqual(THREE_HAP_CONDITIONS['duplicate_middle'], 'conditional')
@@ -345,7 +342,7 @@ class RelationRulesTests(unittest.TestCase):
                                                 ['year', 'month', 'hour']])
 
     def test_mangpa_breaks_are_used_by_branch_detector(self):
-        self.assertEqual(BREAKS, {('卯', '午'), ('午', '酉')})
+        self.assertEqual(BREAKS, {('子', '卯'), ('卯', '午'), ('午', '酉')})
         matches = check_break('午', 0, ['午', '酉', '子', '寅'], '甲')
         self.assertEqual([(item['with'], item['with_index']) for item in matches],
                          [('酉', 1)])

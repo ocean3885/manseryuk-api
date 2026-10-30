@@ -1,0 +1,772 @@
+
+{
+  "meta": {
+    "schema_version": "3.1-draft",        // JSON 출력 구조 버전
+    "rule_version": null,                // 실제 적용한 명리 계산 규칙 버전
+    "analysis_school": "mangpa",
+    "score_meaning": "uncalibrated_relative_index",
+    "score_policy": {
+      "cross_type_addition": false,       // 서로 다른 관계의 force 합산 금지
+      "zero_means_no_effect": true,       // 0은 해당 관계·지표의 계산된 0 또는 규칙상 완전 차단
+      "null_means_not_calculated": true   // 수치 null은 미계산·미확정; metrics:null의 사유는 calculation_status 참조
+    }
+  },
+
+  "chart_context": {
+    "bin_zhu_rule": "year_month_guest_day_hour_host",
+    "pillars": {
+      "year":  {"stem": "己", "branch": "亥", "domain": "guest"},
+      "month": {"stem": "丁", "branch": "卯", "domain": "guest"},
+      "day":   {"stem": "辛", "branch": "未", "domain": "host"},
+      "hour":  {"stem": "己", "branch": "亥", "domain": "host"}
+    }
+  },
+
+  "stem_dynamics": null,                 // 천간 분석 결과. 별도 모듈과 연동
+
+  "branch_dynamics": {
+
+    // ─────────────────────────────
+    // 1. 개별 지지의 기초 세력
+    // ─────────────────────────────
+    "branch_strengths": {
+      "year": {
+        "branch": "亥",
+        "element": "水",
+        "bin_zhu_domain": "guest",
+
+        "base_power": null,             // 위치·월령·지장간 기반 기초 세력
+        "after_stem_power": null,       // 동주 천간 반영 후 세력
+        "effective_power": null,        // 주변의 독립적 배경 영향 반영 후 세력
+
+        "strength_evidence": {
+          "position_weight": 1.0,
+
+          "season": {
+            "month_branch": "卯",
+            "relation": "component_generates_season",
+            "factor": null
+          },
+
+          "hidden_stems": [
+            {
+              "stem": "壬",
+              "element": "水",
+              "ratio": 0.70,
+              "season_relation": "component_generates_season",
+              "effective_contribution": null
+            },
+            {
+              "stem": "甲",
+              "element": "木",
+              "ratio": 0.30,
+              "season_relation": "same",
+              "effective_contribution": null
+            }
+          ],
+
+          "same_pillar_stem": {
+            "stem": "己",
+            "relation": "stem_controls_branch",
+            "effect": "pressure",
+            "adjustment": null
+          },
+
+          "surroundings": [
+            {
+              "source_pillar": "month",
+              "relation": "year_generates_month",
+              "adjustment_ratio": null
+            },
+            {
+              "source_pillar": "hour",
+              "relation": "same_element",
+              "adjustment_ratio": null
+            }
+          ]
+        },
+
+        "calculation_trace": {
+          "base_formula_id": null,
+          "stem_formula_id": null,
+          "surroundings_formula_id": null,
+          "applied_adjustments": [],
+          "validation_status": "unverified"
+        }
+      },
+
+      "month": {
+        "branch": "卯",
+        "element": "木",
+        "bin_zhu_domain": "guest",
+
+        "base_power": null,
+        "after_stem_power": null,
+        "effective_power": null,
+
+        "strength_evidence": {
+          "position_weight": 2.0,
+          "season": {
+            "month_branch": "卯",
+            "relation": "same",
+            "factor": null
+          },
+          "hidden_stems": [
+            {
+              "stem": "乙",
+              "element": "木",
+              "ratio": 1.0,
+              "season_relation": "same",
+              "effective_contribution": null
+            }
+          ],
+          "same_pillar_stem": {
+            "stem": "丁",
+            "relation": "branch_generates_stem",
+            "effect": "outflow",
+            "adjustment": null
+          },
+          "surroundings": []
+        },
+
+        "calculation_trace": {
+          "base_formula_id": null,
+          "stem_formula_id": null,
+          "surroundings_formula_id": null,
+          "applied_adjustments": [],
+          "validation_status": "unverified"
+        }
+      },
+
+      "day": {
+        "branch": "未",
+        "element": "土",
+        "bin_zhu_domain": "host",
+
+        "base_power": null,
+        "after_stem_power": null,
+        "effective_power": null,
+
+        "strength_evidence": {
+          "position_weight": 1.5,
+          "season": {
+            "month_branch": "卯",
+            "relation": "season_controls_component",
+            "factor": null
+          },
+          "hidden_stems": [
+            {
+              "stem": "己",
+              "element": "土",
+              "ratio": 0.60,
+              "season_relation": "season_controls_component",
+              "effective_contribution": null
+            },
+            {
+              "stem": "丁",
+              "element": "火",
+              "ratio": 0.30,
+              "season_relation": "season_generates_component",
+              "effective_contribution": null
+            },
+            {
+              "stem": "乙",
+              "element": "木",
+              "ratio": 0.10,
+              "season_relation": "same",
+              "effective_contribution": null
+            }
+          ],
+          "same_pillar_stem": {
+            "stem": "辛",
+            "relation": "branch_generates_stem",
+            "effect": "outflow",
+            "adjustment": null
+          },
+          "surroundings": []
+        },
+
+        "calculation_trace": {
+          "base_formula_id": null,
+          "stem_formula_id": null,
+          "surroundings_formula_id": null,
+          "applied_adjustments": [],
+          "validation_status": "unverified"
+        }
+      },
+
+      "hour": {
+        "branch": "亥",
+        "element": "水",
+        "bin_zhu_domain": "host",
+
+        "base_power": null,
+        "after_stem_power": null,
+        "effective_power": null,
+
+        "strength_evidence": {
+          "position_weight": 1.0,
+          "season": {
+            "month_branch": "卯",
+            "relation": "component_generates_season",
+            "factor": null
+          },
+          "hidden_stems": [
+            {
+              "stem": "壬",
+              "element": "水",
+              "ratio": 0.70,
+              "season_relation": "component_generates_season",
+              "effective_contribution": null
+            },
+            {
+              "stem": "甲",
+              "element": "木",
+              "ratio": 0.30,
+              "season_relation": "same",
+              "effective_contribution": null
+            }
+          ],
+          "same_pillar_stem": {
+            "stem": "己",
+            "relation": "stem_controls_branch",
+            "effect": "pressure",
+            "adjustment": null
+          },
+          "surroundings": []
+        },
+
+        "calculation_trace": {
+          "base_formula_id": null,
+          "stem_formula_id": null,
+          "surroundings_formula_id": null,
+          "applied_adjustments": [],
+          "validation_status": "unverified"
+        }
+      }
+    },
+
+    // ─────────────────────────────
+    // 2. 지지 6개 쌍의 관계 탐지
+    // 관계가 여럿이면 relations 배열에 각각 저장
+    // 대표 오행상 생·극 경로는 여섯 위치 쌍 모두 검사하고, 실제 작용 여부는 별도 판정
+    // ─────────────────────────────
+    "pairwise": [
+      {
+        "pair_id": "year:month",
+        "pillars": ["year", "month"],
+        "branches": ["亥", "卯"],
+        "pillar_distance": 1,          // 기둥 위치 차이
+        "adjacent": true,
+        "domain_pair": "guest_guest",
+
+        "relations": [
+          {
+            "relation_id": "branch:half_combine:year:month",
+            "type": "half_combine",
+            "label_ko": "반합",
+            "candidate_element": "木",
+            "activation_status": "candidate_only",
+            "formation_status": "included_in_complete_group",
+            "effect_status": "structural_only",
+            "calculation_status": "not_applicable",
+            "direction": null,
+            "metrics": null              // 완성 삼합의 구성 근거이며 독립 작용량 없음
+          },
+          {
+            "relation_id": "branch:generate:year:month",
+            "type": "generate",
+            "label_ko": "생",
+            "activation_status": "candidate_only",
+            "calculation_status": "pending",
+            "direction": {"from_pillar": "year", "to_pillar": "month"},
+            "metrics": null,             // 오행상 경로만 확인. 실제 작용량 미계산
+            "evidence": [{"rule_id": "element:water_generates_wood", "basis": "水生木"}]
+          }
+        ]
+      },
+
+      {
+        "pair_id": "year:day",
+        "pillars": ["year", "day"],
+        "branches": ["亥", "未"],
+        "pillar_distance": 2,
+        "adjacent": false,
+        "domain_pair": "guest_host",
+        "relations": [
+          {
+            "relation_id": "branch:control:year:day",
+            "type": "control",
+            "label_ko": "극",
+            "activation_status": "candidate_only",
+            "calculation_status": "pending",
+            "direction": {"from_pillar": "day", "to_pillar": "year"},
+            "metrics": null,             // 거리·세력·다른 관계를 반영한 실제 작용 미확정
+            "evidence": [{"rule_id": "element:earth_controls_water", "basis": "土克水"}]
+          }
+        ]
+      },
+
+      {
+        "pair_id": "year:hour",
+        "pillars": ["year", "hour"],
+        "branches": ["亥", "亥"],
+        "pillar_distance": 3,
+        "adjacent": false,
+        "domain_pair": "guest_host",
+
+        "relations": [
+          {
+            "relation_id": "branch:same_branch:year:hour",
+            "type": "same_branch",
+            "label_ko": "동지",
+            "activation_status": "detected",
+            "effect_status": "structural_only",
+            "calculation_status": "not_applicable",
+            "direction": null,
+            "metrics": null              // 동일 글자의 위치별 존재 사실. 독립 작용량 없음
+          },
+          {
+            "relation_id": "branch:self_punishment:year:hour",
+            "type": "self_punishment",
+            "label_ko": "자형",
+            "activation_status": "candidate_only",
+            "calculation_status": "pending",
+            "status_reason": "requires_school_rule",
+            "direction": null,
+            "metrics": null              // 성립 조건과 작용량을 아직 확정하지 않음
+          }
+        ]
+      },
+
+      {
+        "pair_id": "month:day",
+        "pillars": ["month", "day"],
+        "branches": ["卯", "未"],
+        "pillar_distance": 1,
+        "adjacent": true,
+        "domain_pair": "guest_host",
+
+        "relations": [
+          {
+            "relation_id": "branch:control:month:day",
+            "type": "control",
+            "label_ko": "극",
+            "activation_status": "potential",
+            "calculation_status": "pending", // 잠재 작용 가능성만 표시; 아직 강도 미산출
+
+            "direction": {
+              "from_pillar": "month",
+              "to_pillar": "day"
+            },
+
+            "power_before": {
+              "month": null,
+              "day": null
+            },
+
+            "metrics": null,             // pending: 수치 미계산. 계산 시 directional_effects에
+                                         // 각 방향의 acting_domain, receiving_domain,
+                                         // source_capacity, coefficient, distance_weight,
+                                         // interaction_intensity, target_exposure, applied_power_delta 저장
+
+            "force_dominance": null,
+
+            "roles": {
+              "month": "controls",
+              "day": "receives_control"
+            },
+
+            "bin_zhu_context": {
+              "acting_domain": "guest",
+              "receiving_domain": "host",
+              "direction": "guest_to_host"
+            },
+
+            "interaction_context": {
+              "coexisting_interaction_ids": [
+                "branch:half_combine:month:day",
+                "group:trine:hai_mao_wei"
+              ],
+              "resolution_status": "unresolved"
+            },
+
+            "evidence": [
+              {
+                "rule_id": "element:wood_controls_earth",
+                "basis": "木克土"
+              }
+            ]
+          },
+
+          {
+            "relation_id": "branch:half_combine:month:day",
+            "type": "half_combine",
+            "label_ko": "반합",
+            "candidate_element": "木",
+            "activation_status": "candidate_only",
+            "formation_status": "included_in_complete_group",
+            "effect_status": "structural_only",
+            "calculation_status": "not_applicable",
+            "direction": null,            // 독립 반합의 방향을 계산하지 않음
+            "metrics": null,             // 완성 삼합 내부 반합의 독립 작용량 없음
+            "evidence": [
+              {
+                "rule_id": "branch:mao_wei_half_combine",
+                "basis": "卯未 반합"
+              }
+            ]
+          }
+        ]
+      },
+
+      {
+        "pair_id": "month:hour",
+        "pillars": ["month", "hour"],
+        "branches": ["卯", "亥"],
+        "pillar_distance": 2,
+        "adjacent": false,
+        "domain_pair": "guest_host",
+
+        "relations": [
+          {
+            "relation_id": "branch:half_combine:month:hour",
+            "type": "half_combine",
+            "label_ko": "반합",
+            "candidate_element": "木",
+            "activation_status": "candidate_only",
+            "formation_status": "included_in_complete_group",
+            "effect_status": "structural_only",
+            "calculation_status": "not_applicable",
+            "direction": null,
+            "metrics": null              // 완성 삼합의 구성 근거이며 독립 작용량 없음
+          },
+          {
+            "relation_id": "branch:generate:month:hour",
+            "type": "generate",
+            "label_ko": "생",
+            "activation_status": "candidate_only",
+            "calculation_status": "pending",
+            "direction": {"from_pillar": "hour", "to_pillar": "month"},
+            "metrics": null,             // 오행상 경로만 확인. 실제 작용량 미계산
+            "evidence": [{"rule_id": "element:water_generates_wood", "basis": "水生木"}]
+          }
+        ]
+      },
+
+      {
+        "pair_id": "day:hour",
+        "pillars": ["day", "hour"],
+        "branches": ["未", "亥"],
+        "pillar_distance": 1,
+        "adjacent": true,
+        "domain_pair": "host_host",
+        "relations": [
+          {
+            "relation_id": "branch:control:day:hour",
+            "type": "control",
+            "label_ko": "극",
+            "activation_status": "candidate_only",
+            "calculation_status": "pending",
+            "direction": {"from_pillar": "day", "to_pillar": "hour"},
+            "metrics": null,             // 거리·세력·다른 관계를 반영한 실제 작용 미확정
+            "evidence": [{"rule_id": "element:earth_controls_water", "basis": "土克水"}]
+          }
+        ]
+      }
+    ],
+
+    // ─────────────────────────────
+    // 3. 삼합·삼회 등 다자 관계
+    // ─────────────────────────────
+    "groups": [
+      {
+        "group_id": "group:trine:hai_mao_wei", // 삼합 종류·정형 지지 조합으로 식별. 출력 순서와 무관
+        "type": "trine",
+        "label_ko": "삼합",
+        "branches": ["亥", "卯", "未"],
+
+        "candidate_element": "木",
+        "transformed_element": null,     // 실제 합화 확정 시에만 값 입력
+
+        "formation_status": "potential",
+        "transformation_status": "undetermined",
+        "group_power": null,            // 독립적인 삼합 작용량은 부여하지 않음
+        "group_power_status": "not_scored",
+        "status_reasons": [],
+
+        "condition_evidence": {
+          "middle_pillars": ["month"],
+          "adjacent_clashes": [],
+          "duplicate_middle": false,
+          "duplicate_components": ["亥"]
+        },
+
+        "formation_candidates": [
+          {
+            "formation_id": "formation:trine:year:month:day",
+            "pillars": ["year", "month", "day"],
+
+            "structural_roles": {
+              "year": "birth",          // 생지
+              "month": "center",        // 왕지
+              "day": "storage"          // 고지
+            },
+
+            "component_pairs": [
+              {
+                "pillars": ["year", "month"],
+                "relation_id": "branch:half_combine:year:month",
+                "effect": "structural_only"
+              },
+              {
+                "pillars": ["month", "day"],
+                "relation_id": "branch:half_combine:month:day",
+                "effect": "structural_only"
+              }
+            ],
+
+            "direction_candidates": [
+              {
+                "from_pillar": "year",
+                "to_pillar": "month",
+                "pillar_distance": 1,
+                "status": "candidate_only"
+              },
+              {
+                "from_pillar": "day",
+                "to_pillar": "month",
+                "pillar_distance": 1,
+                "status": "candidate_only"
+              }
+            ],
+
+            "bin_zhu_context": {
+              "domains": {
+                "year": "guest",
+                "month": "guest",
+                "day": "host"
+              },
+              "crosses_domains": true
+            }
+          },
+
+          {
+            "formation_id": "formation:trine:month:day:hour",
+            "pillars": ["month", "day", "hour"],
+
+            "structural_roles": {
+              "month": "center",
+              "day": "storage",
+              "hour": "birth"
+            },
+
+            "component_pairs": [
+              {
+                "pillars": ["month", "hour"],
+                "relation_id": "branch:half_combine:month:hour",
+                "effect": "structural_only"
+              },
+              {
+                "pillars": ["month", "day"],
+                "relation_id": "branch:half_combine:month:day",
+                "effect": "structural_only"
+              }
+            ],
+
+            "direction_candidates": [
+              {
+                "from_pillar": "hour",
+                "to_pillar": "month",
+                "pillar_distance": 2,
+                "status": "candidate_only"
+              },
+              {
+                "from_pillar": "day",
+                "to_pillar": "month",
+                "pillar_distance": 1,
+                "status": "candidate_only"
+              }
+            ],
+
+            "bin_zhu_context": {
+              "domains": {
+                "month": "guest",
+                "day": "host",
+                "hour": "host"
+              },
+              "crosses_domains": true
+            }
+          }
+        ],
+
+        "overlap": {
+          "shared_pillars": ["month", "day"],
+          "counting_policy": "evaluate_as_one_network", // 중복 조합의 독립 작용량 합산 금지. 산식 아님
+          "dominant_formation_id": null
+        },
+
+        "evidence_rule_ids": [
+          "branch:hai_mao_wei_trine"
+        ]
+      }
+    ]
+  },
+
+  // ─────────────────────────────
+  // 4. 서로 경합하는 관계의 실제 작용 판단
+  // branch_dynamics의 탐지 결과를 기반으로 계산
+  // ─────────────────────────────
+  "interaction_resolution": {
+    "status": "unresolved",
+
+    "resolution_cases": [
+      {
+        "case_id": "resolve:month:day",
+
+        "interaction_ids": [
+          "branch:control:month:day",
+          "group:trine:hai_mao_wei"
+        ],
+        "structural_context_relation_ids": [
+          "branch:half_combine:month:day"
+        ],                               // 구조 근거는 독립 작용의 선택·억제 대상이 아님
+
+        "resolution_status": "unresolved",
+        "selected_interaction_ids": [],   // 실제 작용이 인정된 쌍 관계 또는 그룹
+        "suppressed_interaction_ids": [], // 다른 관계로 억제된 쌍 관계 또는 그룹
+        "rule_ids": [],                 // 판단에 사용한 규칙
+        "reason_codes": []
+      },
+
+      {
+        "case_id": "resolve:group:trine:hai_mao_wei:overlap",
+
+        "group_id": "group:trine:hai_mao_wei",
+        "candidate_ids": [
+          "formation:trine:year:month:day",
+          "formation:trine:month:day:hour"
+        ],
+
+        "resolution_status": "unresolved",
+        "selected_formation_ids": [],
+        "counting_policy": "evaluate_as_one_network",
+        "rule_ids": [],
+        "reason_codes": []
+      }
+    ],
+
+    "active_interaction_ids": [],
+    "suppressed_interaction_ids": [],
+    "unresolved_interaction_ids": [
+      "branch:control:month:day",
+      "group:trine:hai_mao_wei"
+    ]
+  },
+
+  // ─────────────────────────────
+  // 5. 맹파명리 작공 분석
+  // 천간·지지·십신·빈주를 종합하여 판단
+  // ─────────────────────────────
+  "work_dynamics": {
+    "status": "pending_resolution",
+
+    "candidate_paths": [
+      {
+        "path_id": "work_001",
+
+        "source": {
+          "pillar": "month",
+          "component": "branch",
+          "branch": "卯",
+          "domain": "guest"
+        },
+
+        "target": {
+          "pillar": "day",
+          "component": "branch",
+          "branch": "未",
+          "domain": "host"
+        },
+
+        "mechanism_candidates": [
+          "control",
+          "trine_participation"
+        ],
+
+        "source_interaction_ids": [
+          "branch:control:month:day",
+          "group:trine:hai_mao_wei"
+        ],
+        "structural_context_relation_ids": [
+          "branch:half_combine:month:day"
+        ],                               // 구조 근거이며 독립 작공 원천이 아님
+
+        "bin_zhu_direction": "guest_to_host",
+        "active_mechanism": null,
+
+        "ten_god_context": {
+          "source_ten_god": null,
+          "target_ten_god": null,
+          "affected_hidden_stems": []
+        },
+
+        "work_status": "requires_analysis",
+        "result_ownership": "undetermined", // 결과의 귀속 미확정
+        "interpretation": null
+      }
+    ],
+
+    "active_work_paths": [],
+
+    "overall_assessment": {
+      "primary_work_path_id": null,     // 주요 작공 경로
+      "body_use_relation": null,        // 체용 관계
+      "control_transformation": null,   // 제화 구조
+      "result_ownership": "undetermined",
+      "analysis_status": "pending"
+    }
+  },
+
+  // ─────────────────────────────
+  // 6. LLM에 전달할 정리된 해석 데이터
+  // ─────────────────────────────
+  "llm_interpretation_payload": {
+    "status": "draft",
+
+    "structural_facts": [
+      {
+        "code": "duplicate_branch",
+        "summary": "년지와 시지에 亥가 각각 존재한다."
+      },
+      {
+        "code": "wood_trine_candidate",
+        "summary": "亥卯未 삼합 후보가 두 구성으로 발견된다.",
+        "ref_ids": ["group:trine:hai_mao_wei"]
+      }
+    ],
+
+    "active_relations": [],
+
+    "unresolved_mechanisms": [
+      {
+        "ref_ids": [
+          "branch:control:month:day",
+          "branch:half_combine:month:day",
+          "group:trine:hai_mao_wei"
+        ],
+        "summary": "卯未의 목극토 작용은 미확정이며, 반합은 삼합의 구성 근거로만 기록한다."
+      }
+    ],
+
+    "confirmed_work_paths": [],
+
+    "interpretation_constraints": [
+      "potential 관계를 확정된 실제 작용으로 단정하지 않는다.",
+      "완성 삼합 내부의 반합을 독립 작용량이나 별도 경합 후보로 취급하지 않는다.",
+      "삼합의 중복 후보를 독립적인 힘으로 합산하지 않는다.",
+      "검증되지 않은 세력 지표를 현실의 결과 예측치로 해석하지 않는다.",
+      "작공의 결과 귀속이 미확정이면 유보하여 설명한다."
+    ]
+  }
+}
