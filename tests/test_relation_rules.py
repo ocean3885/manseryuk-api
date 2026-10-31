@@ -52,7 +52,7 @@ class RelationRulesTests(unittest.TestCase):
         for branches, status, reason, expected_score in (
             ('子午丑寅', 'suppressed', 'intervening_adjacent_clash', 0.0),
             ('午子丑寅', 'conditional', 'external_adjacent_clash', 0.0),
-            ('子丑午寅', 'potential', None, 1.5),
+            ('子丑午寅', 'active', None, 1.5),
         ):
             with self.subTest(branches=branches):
                 result = build_interaction_matrix(list('甲甲甲甲'), list(branches), '甲')
@@ -74,7 +74,7 @@ class RelationRulesTests(unittest.TestCase):
                 self.assertEqual(effect['directional_mechanisms'][item['participants'][1]],
                                  'closes_hidden_metal')
                 self.assertEqual(all(force == 0 for force in effect['force'].values()),
-                                 status != 'potential')
+                                 status != 'active')
 
     def test_each_six_hap_exposes_direction_and_hidden_stem_candidates(self):
         cases = (
@@ -96,7 +96,7 @@ class RelationRulesTests(unittest.TestCase):
                                  r['participants'] == ['year', 'month'])
                 self.assertEqual(candidate['candidate_element'], element)
                 self.assertIsNone(candidate['transformed_element'])
-                self.assertEqual(candidate['activation_status'], 'potential')
+                self.assertEqual(candidate['activation_status'], 'active')
                 self.assertEqual([(h['pillar'], h['stem'], h['effect'])
                                   for h in candidate['candidate_hidden_stem_effects']], hidden)
                 self.assertTrue(all(h['activation_status'] == 'candidate_only'
@@ -112,7 +112,8 @@ class RelationRulesTests(unittest.TestCase):
                 self.assertNotIn('generic', combination['directional_mechanisms'].values())
                 self.assertNotIn('generic', secondary['directional_mechanisms'].values())
                 target = 'month' if source == 'year' else 'year'
-                self.assertGreater(secondary['force'][f'{source}_to_{target}'], 0)
+                self.assertEqual(secondary['activation_status'], 'suppressed')
+                self.assertEqual(secondary['force'][f'{source}_to_{target}'], 0)
                 self.assertEqual(secondary['force'][f'{target}_to_{source}'], 0)
 
     def test_zi_mao_is_break_without_punishment(self):
@@ -302,8 +303,48 @@ class RelationRulesTests(unittest.TestCase):
         self.assertEqual(group['participants'], ['year', 'month', 'day'])
         self.assertEqual(group['formations'], [['year', 'month', 'day']])
         self.assertEqual(group['score'], 0.0)
-        self.assertTrue({'해/천(穿/害)', '충(沖)', '육합(六合)'}.issubset(
+        self.assertEqual(group['activation_status'], 'active')
+        self.assertEqual(group['activation_rule_id'],
+                         'branch:triple_punishment_presence_active_v1')
+        self.assertTrue({'천(穿)', '충(沖)', '육합(六合)'}.issubset(
             {r['type'] for r in result['matrix']}))
+
+    def test_distant_triple_punishment_preserves_each_pair_status(self):
+        cases = (
+            ('寅巳子申', '무은지형', {
+                ('year', 'month'): '천(穿)',
+                ('year', 'hour'): '충(沖)',
+                ('month', 'hour'): '육합(六合)',
+            }),
+            ('丑戌子未', '지세형', {
+                ('year', 'month'): '형(刑)',
+                ('year', 'hour'): '충(沖)',
+                ('month', 'hour'): '형(刑)',
+            }),
+        )
+        for branch_text, name, expected_pairs in cases:
+            with self.subTest(branches=branch_text):
+                result = build_interaction_matrix(
+                    list('甲甲甲甲'), list(branch_text), '甲')['matrix']
+                group = next(item for item in result if item['type'] == '삼형(三刑)')
+                self.assertEqual(group['name'], name)
+                self.assertEqual(group['activation_status'], 'active')
+                self.assertFalse(group['is_adjacent'])
+                self.assertEqual(group['score'], 0.0)
+                for pillars, kind in expected_pairs.items():
+                    relation = next(item for item in result
+                                    if item['type'] == kind
+                                    and item['participants'] == list(pillars))
+                    self.assertEqual(relation['activation_status'], 'active')
+
+        conditional = build_interaction_matrix(
+            list('甲甲甲甲'), list('巳申寅子'), '甲')['matrix']
+        self.assertEqual(next(item for item in conditional
+                              if item['type'] == '삼형(三刑)')['activation_status'], 'active')
+        self.assertEqual(next(item for item in conditional
+                              if item['type'] == '육합(六合)' and
+                              item['participants'] == ['year', 'month'])
+                         ['activation_status'], 'conditional')
 
     def test_earth_punishment_and_clash_are_distinct(self):
         result = build_interaction_matrix(list('甲甲甲甲'), list('丑未午子'), '甲')
@@ -323,7 +364,7 @@ class RelationRulesTests(unittest.TestCase):
         dynamics = analyze_branch_dynamics(stems, branches, interactions)
         primaries = {pair['pair_id']: pair['primary_relation']
                      for pair in dynamics['pairwise']}
-        self.assertEqual(primaries['year:month'], '해/천(穿/害)')
+        self.assertEqual(primaries['year:month'], '천(穿)')
         self.assertEqual(primaries['year:day'], '충(沖)')
         self.assertEqual(primaries['month:day'], '육합(六合)')
         self.assertEqual([g['type'] for g in dynamics['groups']

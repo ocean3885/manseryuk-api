@@ -123,7 +123,7 @@ def analyze_palja_integrated(stems, branches):
         branch_label_map = {
             'six_haps_all': '육합',
             'chungs': '충',
-            'cheons': '천(해)',
+            'cheons': '천(穿)',
             'breaks': '파',
             'three_haps': '삼합',
             'half_haps': '반합',

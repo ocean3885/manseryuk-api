@@ -11,6 +11,7 @@ from services.relation_rules import (
     STEM_ADJUSTMENTS, AMBIENT_RATES, ATTRACTION_TYPES, PRESSURE_TYPES,
     RELATION_COEFFICIENTS, RULE_PROFILE, RULE_VERSION, PAIR_ACTION_RULES,
     THREE_HAPS, SQUARE_HAPS, GROUP_ROLE_ORDER, HARMONY_GROUP_COVERS_PAIR,
+    ACTIVE_PAIR_RELATION_TYPES, PAIR_ELEMENT_OVERRIDE_REASON,
     get_pair_action_rule, get_group_action_rule,
 )
 
@@ -135,6 +136,12 @@ def _distance_weight(first_index, second_index):
     return {1: 1.0, 2: 0.7, 3: 0.5}[abs(first_index - second_index)]
 
 
+def _active_pair_structures(matrix_by_pair, pair):
+    return [item for item in matrix_by_pair.get(pair, [])
+            if item['type'] in ACTIVE_PAIR_RELATION_TYPES
+            and item.get('activation_status') == 'active']
+
+
 def _context_power(target_index, strengths, matrix_by_pair, excluded_index=None,
                    excluded_indices=()):
     """상대 지지와의 자기 피드백 없이 나머지 원국의 배경 작용을 반영한다."""
@@ -156,6 +163,12 @@ def _context_power(target_index, strengths, matrix_by_pair, excluded_index=None,
         element_blocked = element_status in ('suppressed', 'conditional')
         pair = tuple(sorted((source_pillar, PILLARS[target_index]),
                             key=PILLARS.index))
+        if element_type and _active_pair_structures(matrix_by_pair, pair):
+            element_status = 'suppressed'
+            element_reason = PAIR_ELEMENT_OVERRIDE_REASON
+        else:
+            element_reason = effect.get('reason') if element_blocked else None
+        element_blocked = element_status in ('suppressed', 'conditional')
         related_relations = [
             {'relation_id': item['relation_id'], 'type': item['type'],
              'activation_status': item.get('activation_status', 'potential')}
@@ -175,7 +188,7 @@ def _context_power(target_index, strengths, matrix_by_pair, excluded_index=None,
             'related_relations': related_relations,
             'adjustment_ratio': round(ratio, 6),
             'activation_status': element_status,
-            'status_reason': effect.get('reason') if element_blocked else None,
+            'status_reason': element_reason,
         })
     adjustment_ratio = max(-0.35, min(0.35, adjustment_ratio))
     return round(target['after_stem_power'] * (1 + adjustment_ratio), 4), contributions
@@ -300,6 +313,7 @@ def _event(item, first_pillar, second_pillar, first_branch, second_branch,
             second_pillar: effect.get('mechanisms', {}).get(second_branch, 'generic'),
         },
         'rule_id': rule_id,
+        'activation_rule_id': item.get('activation_rule_id'),
         'activation_status': status,
         'status_reason': (item.get('status_reasons') or [effect.get('reason')])[0],
         'candidate_hidden_stem_effects': item.get('candidate_hidden_stem_effects', []),
@@ -344,6 +358,7 @@ def analyze_branch_dynamics(stems, branches, interaction_matrix):
                 'transformed_element': item.get('transformed_element'),
                 'status': 'not_scored',
                 'activation_status': item.get('activation_status'),
+                'activation_rule_id': item.get('activation_rule_id'),
                 'status_reasons': item.get('status_reasons', []),
                 'condition_evidence': item.get('condition_evidence', {}),
             })
@@ -394,10 +409,14 @@ def analyze_branch_dynamics(stems, branches, interaction_matrix):
                 first['element'], second['element'], first_pillar, second_pillar)
             events = list(matrix_by_pair.get((first_pillar, second_pillar), []))
             if element_relation in ('생', '극'):
-                events.append({
+                element_event = {
                     'relation_id': f'지지:{element_relation}:{first_pillar},{second_pillar}',
                     'type': element_relation,
-                })
+                }
+                if _active_pair_structures(matrix_by_pair, (first_pillar, second_pillar)):
+                    element_event['activation_status'] = 'suppressed'
+                    element_event['status_reasons'] = [PAIR_ELEMENT_OVERRIDE_REASON]
+                events.append(element_event)
             distance_weight = _distance_weight(first_idx, second_idx)
             relations = [
                 _event(item, first_pillar, second_pillar,
@@ -408,6 +427,7 @@ def analyze_branch_dynamics(stems, branches, interaction_matrix):
             ]
             first_guest = first_idx < 2
             second_guest = second_idx < 2
+            # v2 호환용 정적 분류. 실제 성립·우세 관계는 v3 경합 단계에서 판정한다.
             pair_rule = PAIR_ACTION_RULES.get(frozenset((first['branch'], second['branch'])))
             pairs.append({
                 'pair_id': f'{first_pillar}:{second_pillar}',

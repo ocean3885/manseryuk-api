@@ -368,7 +368,9 @@
             "metrics": null,             // pending: 수치 미계산. 계산 시 directional_effects에
                                          // 각 방향의 acting_domain, receiving_domain,
                                          // source_capacity, coefficient, distance_weight,
-                                         // interaction_intensity, target_exposure, applied_power_delta 저장
+                                         // interaction_intensity와 target_exposure는 잠재 지표.
+                                         // applied_power_delta는 to_pillar의 부호 있는 세력 변화량;
+                                         // 실제 산식 미정이면 null, 해당 방향 독립 작용이 없으면 0
 
             "force_dominance": null,
 

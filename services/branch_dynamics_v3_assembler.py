@@ -1,6 +1,6 @@
-"""기존 지지 계산 결과를 v3 계약의 검증 가능한 부분에 연결한다.
+"""기존 지지 계산 결과를 v3의 지지·경합 계약에 연결한다.
 
-경합·작공은 아직 조립하지 않는다. 이 모듈은 전체 v3 응답이 아니다.
+작공은 아직 조립하지 않는다. 이 모듈은 전체 v3 응답이 아니다.
 """
 
 from itertools import combinations
@@ -15,7 +15,8 @@ from services.five_elements import BRANCH_ELEMENT_MAP
 from services.relation_rules import (
     HALF_HAPS, SIX_HAPS, THREE_HAPS, SQUARE_HAPS, THREE_PUNISHMENTS,
     V3_RULE_VERSION, V3_POTENTIAL_FORMULA_ID, V3_EXPOSURE_FORMULA_ID,
-    V3_UNSCORED_PAIR_TYPES,
+    V3_UNSCORED_PAIR_TYPES, V3_ELEMENT_OVERRIDE_PAIR_TYPES,
+    V3_ELEMENT_OVERRIDE_RULE_ID, PAIR_ELEMENT_OVERRIDE_REASON,
 )
 
 
@@ -27,7 +28,7 @@ RELATION_TYPES = {
     '충(沖)': ('clash', '충'),
     '형(刑)': ('punishment', '형'),
     '파(破)': ('break', '파'),
-    '해/천(穿/害)': ('harm', '해·천'),
+    '천(穿)': ('pierce', '천'),
     '육합(六合)': ('combine', '육합'),
     '반합(半合)': ('half_combine', '반합'),
     '공합(拱合)': ('arch_combine', '공합'),
@@ -264,15 +265,14 @@ def assemble_branch_pairs_v3(branches, dynamics_v2):
                 relation_type, label = 'self_punishment', '자형'
             structural_half = (relation_type == 'half_combine'
                                and positions in covered_halves)
-            status = ('candidate_only' if self_punishment or structural_half
+            status = ('candidate_only' if structural_half
                       else event['activation_status'])
             suppressed = status == 'suppressed'
             quantifiable = (not structural_half and not self_punishment and
                             original_type not in V3_UNSCORED_PAIR_TYPES)
             metrics = (_directional_metrics(event, left, right, suppressed)
                        if quantifiable else None)
-            reason = ('requires_school_rule' if self_punishment
-                      else event['status_reason'])
+            reason = event['status_reason']
             direction = None
             if original_type in ('생', '극') and event['element_direction']:
                 from_pillar, to_pillar = event['element_direction'].split('_to_')
@@ -280,6 +280,9 @@ def assemble_branch_pairs_v3(branches, dynamics_v2):
             evidence = _element_evidence(event, positions, source_strengths)
             if event['rule_id']:
                 evidence.append({'rule_id': event['rule_id'], 'basis': ''.join(members)})
+            if event.get('activation_rule_id'):
+                evidence.append({'rule_id': event['activation_rule_id'],
+                                 'basis': ''.join(members)})
             relation = {
                 'relation_id': f'branch:{relation_type}:{pair_id}',
                 'type': relation_type,
@@ -326,6 +329,29 @@ def assemble_branch_pairs_v3(branches, dynamics_v2):
                 'calculation_status': 'not_applicable',
                 'direction': None, 'metrics': None,
             })
+        active_structures = [item for item in relations
+                             if item['type'] in V3_ELEMENT_OVERRIDE_PAIR_TYPES
+                             and item['activation_status'] == 'active']
+        if active_structures:
+            for relation in relations:
+                if relation['type'] not in ('generate', 'control'):
+                    continue
+                if (relation['activation_status'] == 'suppressed' and
+                        relation['status_reason'] != PAIR_ELEMENT_OVERRIDE_REASON):
+                    continue
+                if relation['metrics'] is None:
+                    raise ValueError(f"{relation['relation_id']}: 생·극 억제 수치가 없습니다.")
+                relation['activation_status'] = 'suppressed'
+                relation['calculation_status'] = 'resolved'
+                relation['status_reason'] = PAIR_ELEMENT_OVERRIDE_REASON
+                relation['force_dominance'] = None
+                relation['roles'] = None
+                for effect in relation['metrics']['directional_effects']:
+                    effect['applied_power_delta'] = 0.0
+                relation['evidence'].append({
+                    'rule_id': V3_ELEMENT_OVERRIDE_RULE_ID,
+                    'basis': ','.join(item['relation_id'] for item in active_structures),
+                })
         relation_ids = [item['relation_id'] for item in relations]
         for relation in relations:
             if relation.get('effect_status') == 'structural_only':
@@ -344,7 +370,8 @@ def assemble_branch_pairs_v3(branches, dynamics_v2):
             relation['interaction_context'] = {
                 'coexisting_interaction_ids': [ref for ref in relation_ids
                                                if ref != relation['relation_id']],
-                'resolution_status': ('suppressed' if relation['activation_status'] == 'suppressed'
+                'resolution_status': (relation['activation_status']
+                                      if relation['activation_status'] in ('active', 'suppressed')
                                       else 'unresolved'),
             }
         distance = PILLARS.index(right) - PILLARS.index(left)
@@ -468,8 +495,9 @@ def assemble_branch_groups_v3(branches, dynamics_v2, pairs_v3):
             },
             'formation_candidates': formations,
             'overlap': overlap,
-            'evidence_rule_ids': ([source['action_rule_id']]
-                                  if source['action_rule_id'] else []),
+            'evidence_rule_ids': list(dict.fromkeys(
+                rule_id for rule_id in (source['action_rule_id'],
+                                        source.get('activation_rule_id')) if rule_id)),
         }).model_dump())
     if len({group['group_id'] for group in result}) != len(result):
         raise ValueError('v3 그룹 ID가 중복되었습니다.')
@@ -477,7 +505,7 @@ def assemble_branch_groups_v3(branches, dynamics_v2, pairs_v3):
 
 
 def assemble_interaction_resolution_v3(pairs_v3, groups_v3):
-    """명시적 차단만 확정하고 나머지 경합은 미해결로 분류한다.
+    """확정된 성립·차단을 분류하고 나머지 경합은 미해결로 둔다.
 
     여러 관계가 공존한다는 사실만으로 주작용이나 우세 성립 조합을 고르지 않는다.
     """
@@ -500,12 +528,15 @@ def assemble_interaction_resolution_v3(pairs_v3, groups_v3):
     if len(group_by_id) != len(groups):
         raise ValueError('중복 그룹 ID입니다.')
 
+    active = []
     suppressed = []
     unresolved = []
     structural = set()
     for relation_id, relation in relation_by_id.items():
         if relation['effect_status'] == 'structural_only':
             structural.add(relation_id)
+        elif relation['activation_status'] == 'active':
+            active.append(relation_id)
         elif relation['activation_status'] == 'suppressed':
             if (relation['calculation_status'] != 'resolved' or
                     relation['metrics'] is None or
@@ -522,6 +553,8 @@ def assemble_interaction_resolution_v3(pairs_v3, groups_v3):
             if not group['status_reasons']:
                 raise ValueError(f"{group['group_id']}: 억제 사유가 없습니다.")
             suppressed.append(group['group_id'])
+        elif group['type'] == 'triple_punishment' and group['formation_status'] == 'active':
+            active.append(group['group_id'])
         else:
             unresolved.append(group['group_id'])
 
@@ -542,6 +575,7 @@ def assemble_interaction_resolution_v3(pairs_v3, groups_v3):
         if len(candidates) < 2:
             continue
         case_suppressed = [candidate for candidate in candidates if candidate in suppressed]
+        case_active = [candidate for candidate in candidates if candidate in active]
         reasons = []
         rule_ids = []
         for relation_id in case_suppressed:
@@ -559,8 +593,8 @@ def assemble_interaction_resolution_v3(pairs_v3, groups_v3):
             'structural_context_relation_ids': context,
             'resolution_status': ('unresolved' if any(candidate in unresolved
                                                       for candidate in candidates)
-                                  else 'suppressed'),
-            'selected_interaction_ids': [],
+                                  else 'active' if case_active else 'suppressed'),
+            'selected_interaction_ids': case_active,
             'suppressed_interaction_ids': case_suppressed,
             'rule_ids': list(dict.fromkeys(rule_ids)),
             'reason_codes': list(dict.fromkeys(reasons)),
@@ -583,12 +617,14 @@ def assemble_interaction_resolution_v3(pairs_v3, groups_v3):
         })
 
     all_candidates = (set(relation_by_id) - structural) | set(group_by_id)
-    if set(suppressed) & set(unresolved) or set(suppressed) | set(unresolved) != all_candidates:
-        raise ValueError('관계 후보의 억제·미해결 분류가 완전하지 않습니다.')
+    classified = (set(active), set(suppressed), set(unresolved))
+    if (any(left & right for left, right in combinations(classified, 2)) or
+            set.union(*classified) != all_candidates):
+        raise ValueError('관계 후보의 성립·억제·미해결 분류가 완전하지 않습니다.')
     return InteractionResolutionV3.model_validate({
         'status': 'unresolved' if unresolved else 'resolved',
         'resolution_cases': cases,
-        'active_interaction_ids': [],
+        'active_interaction_ids': active,
         'suppressed_interaction_ids': suppressed,
         'unresolved_interaction_ids': unresolved,
     }).model_dump()

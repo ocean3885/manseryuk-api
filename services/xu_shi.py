@@ -5,7 +5,7 @@ PILLAR_KEYS = ['year', 'month', 'day', 'hour']
 POSITION_NAMES = ['년', '월', '일', '시']
 REAL_THRESHOLD = 0.5
 RULE_VERSION = '1.0.0'  # 기존 판정 규칙을 최초로 명시한 버전
-AFFECTING_TYPES = ('충(沖)', '해/천(穿/害)', '형(刑)')
+AFFECTING_TYPES = ('충(沖)', '천(穿)', '형(刑)')
 
 
 def analyze_xu_shi_dynamics(
@@ -17,7 +17,7 @@ def analyze_xu_shi_dynamics(
 ) -> Dict[str, Any]:
     """원국의 관계 반영 전후 허실과 판정 근거를 반환한다.
 
-    v1은 기존 규칙을 유지한다. 충·형·해에 연결된 뿌리의 기여도를
+    v1은 기존 규칙을 유지한다. 충·형·천에 연결된 뿌리의 기여도를
     전부 제외하며, 원래 실인 천간만 잔여 점수에 따라 변허로 전이한다.
     대운·세운 또는 관계별 손상률을 계산하지 않는다.
     """
@@ -99,7 +99,7 @@ def analyze_xu_shi_dynamics(
                 f"해당 뿌리 점수 {root['score']}를 잔여 점수에서 제외합니다(기존 규칙)."
             )
         if not affected_roots:
-            transition_reasons.append('통근처에 반영할 충·형·해 관계가 없습니다.')
+            transition_reasons.append('통근처에 반영할 충·형·천 관계가 없습니다.')
         if original_status == '실(實)' and affected_roots:
             comparison = '미만' if is_transformed else '이상'
             transition_reasons.append(
@@ -160,7 +160,7 @@ def analyze_xu_shi_dynamics(
             f"{pillar['position']}({pillar['char']})은 {support}으로 {pillar['current_status']}{action}."
         )
     if not impact_groups:
-        summary_parts.append('통근처에 반영할 충·형·해 관계가 없어 원래 분류를 유지합니다.')
+        summary_parts.append('통근처에 반영할 충·형·천 관계가 없어 원래 분류를 유지합니다.')
 
     return {
         'analysis_scope': 'natal',

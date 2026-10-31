@@ -5,7 +5,7 @@
 """
 
 RULE_PROFILE = 'mangpa_project_provisional'
-RULE_VERSION = '2.13.0'
+RULE_VERSION = '2.19.0'
 
 # v3 방향별 잠재량은 기존 v2 계수를 재사용하는 잠정 상대 지표다.
 # 각 방향: source_capacity = 해당 쌍의 상대를 제외하고 계산한 원천 지지 세력.
@@ -14,10 +14,27 @@ RULE_VERSION = '2.13.0'
 #                         (source_capacity + target_capacity), 4).
 # target_exposure는 잠재 수용 지표이며 실제 손실·피해량이 아니다.
 # 작용 성립 판정 전에는 applied_power_delta를 산출하지 않는다.
-V3_RULE_VERSION = '3.1.0-draft'
+V3_RULE_VERSION = '3.8.0-draft'
 V3_POTENTIAL_FORMULA_ID = 'branch:potential_source_distance_coefficient_v1'
 V3_EXPOSURE_FORMULA_ID = 'branch:exposure_source_share_v1'
 V3_UNSCORED_PAIR_TYPES = frozenset(('공합(拱合)', '암합(暗合)'))
+# 같은 위치 쌍의 구조 관계가 active로 확정되면 생·극은 독립 작용에서 제외한다.
+# 삼형은 세 지지 구조다. 자형은 인접한 같은 글자에서만 active지만
+# 동일 오행 쌍이므로 독립 생·극 억제 대상이 없다.
+# potential/conditional/candidate_only는 성립 확정이 아니다.
+V3_ELEMENT_OVERRIDE_PAIR_TYPES = frozenset((
+    'break', 'pierce', 'clash', 'combine', 'punishment',
+))
+V3_ELEMENT_OVERRIDE_RULE_ID = 'branch:active_pair_structure_overrides_element_v1'
+PAIR_PRESENCE_ACTIVE_RULE_ID = 'branch:pair_presence_active_v1'
+TRIPLE_PUNISHMENT_PRESENCE_RULE_ID = 'branch:triple_punishment_presence_active_v1'
+ADJACENT_SELF_PUNISHMENT_RULE_ID = 'branch:adjacent_self_punishment_active_v1'
+# 파·충·천·지세형은 쌍의 존재로, 육합은 인접 충 조건이 없을 때 active다.
+# 삼형은 세 글자의 존재로, 자형은 인접한 동일 지지의 존재로 active다.
+ACTIVE_PAIR_RELATION_TYPES = frozenset((
+    '충(沖)', '파(破)', '천(穿)', '육합(六合)', '형(刑)',
+))
+PAIR_ELEMENT_OVERRIDE_REASON = 'active_pair_structure_overrides_element'
 
 # 천간끼리의 관계 후보와 기존 극 강도.
 STEM_COMBINATIONS = {
@@ -43,7 +60,7 @@ STEM_RESTRAIN = {
 SIX_HAPS = {('子', '丑'): '土', ('寅', '亥'): '木', ('卯', '戌'): '火',
             ('辰', '酉'): '金', ('巳', '申'): '水', ('午', '未'): '土'}
 # 충하는 글자가 합 사이에 있으면 합 작용을 억제한다. 합 밖에서 충할 지지에
-# 인접하면 충과 합이 병존하므로 작용량을 유보하고, 떨어지면 합 후보를 유지한다.
+# 인접하면 충과 합이 병존하므로 작용량을 유보하고, 충 개입이 없으면 합을 성립시킨다.
 SIX_HAP_CONDITIONS = {
     'intervening_adjacent_clash': 'suppressed',
     'external_adjacent_clash': 'conditional',
@@ -108,11 +125,13 @@ TRADITIONAL_BREAKS = {('子', '酉'), ('丑', '辰'), ('寅', '亥'),
 CHEONS = {('子', '未'), ('丑', '午'), ('寅', '巳'),
           ('卯', '辰'), ('酉', '戌'), ('申', '亥')}
 
-# 조합별 작용. coefficients는 방향별 잠재 작용량에 곱할 미보정 모델 계수다.
+# 조합별 작용. primary_relation은 명시적으로 검토한 쌍의 정적 기본 분류이며
+# 원국에서 실제로 성립하거나 우세한 작용을 확정하지 않는다.
+# coefficients는 방향별 잠재 작용량에 곱할 미보정 모델 계수다.
 # 0은 관계 후보를 보존하되 실제 생 작용을 억제한다는 뜻이다.
 # 다른 관계나 사주 전체 세력에 따른 주도권은 이 표에서 고정하지 않는다.
 PAIR_ACTION_RULES = {
-    # 쌍별 주작용을 먼저 고정한다. 삼형은 세 글자가 모일 때 별도 구조로 기록한다.
+    # 검토된 쌍의 기본 분류를 기록한다. 삼형은 세 글자가 모일 때 별도 구조로 기록한다.
     frozenset(('子', '丑')): {
         'rule_id': 'branch:子丑', 'primary_relation': '육합(六合)',
         'effects': {
@@ -164,7 +183,7 @@ PAIR_ACTION_RULES = {
         },
     },
     frozenset(('寅', '巳')): {
-        'rule_id': 'branch:寅巳', 'primary_relation': '해/천(穿/害)', 'effects': {},
+        'rule_id': 'branch:寅巳', 'primary_relation': '천(穿)', 'effects': {},
     },
     frozenset(('寅', '申')): {
         'rule_id': 'branch:寅申', 'primary_relation': '충(沖)', 'effects': {},
@@ -226,9 +245,6 @@ PAIR_ACTION_RULES = {
         'effects': {
             '파(破)': {'coefficients': {'子': 0.45, '卯': 0.45},
                       'mechanisms': {'子': 'break', '卯': 'break'}},
-            '생': {'coefficients': {'子': 0.0, '卯': 0.0},
-                  'mechanisms': {'子': 'generation_blocked', '卯': 'no_generation'},
-                  'status': 'suppressed', 'reason': 'break_blocks_generation'},
         },
     },
     frozenset(('卯', '午')): {
@@ -236,9 +252,6 @@ PAIR_ACTION_RULES = {
         'effects': {
             '파(破)': {'coefficients': {'卯': 0.45, '午': 0.45},
                        'mechanisms': {'卯': 'break', '午': 'break'}},
-            '생': {'coefficients': {'卯': 0.0, '午': 0.0},
-                  'mechanisms': {'卯': 'generation_blocked', '午': 'no_generation'},
-                  'status': 'suppressed', 'reason': 'break_blocks_generation'},
         },
     },
     frozenset(('午', '酉')): {
@@ -282,7 +295,7 @@ def get_pair_action_rule(first_branch, second_branch, relation_type):
 # 기존 코드가 노출하던 우선순위와 충 조건. 현재 판정기에 일괄 적용되지는 않는다.
 PRIORITY_RANK = {
     '삼합': 1, '방합': 2, '육합': 3, '반합': 4,
-    '충': 5, '형': 6, '해': 7, '파': 8,
+    '충': 5, '형': 6, '천': 7, '파': 8,
 }
 # 집계 점수의 중복 방지 정책. 후보와 개별 점수는 남기고, 활성 다자 구조의
 # 한 성립 조합 안에 완전히 포함된 쌍의 총점 기여만 0으로 둔다.
@@ -410,7 +423,7 @@ AMBIENT_RATES = {
     'controlled_by': -0.03,
 }
 ATTRACTION_TYPES = {'육합(六合)', '반합(半合)', '공합(拱合)', '암합(暗合)'}
-PRESSURE_TYPES = {'충(沖)', '형(刑)', '파(破)', '해/천(穿/害)'}
+PRESSURE_TYPES = {'충(沖)', '형(刑)', '파(破)', '천(穿)'}
 RELATION_COEFFICIENTS = {
     '육합(六合)': 1.00,
     '반합(半合)': 0.70,
@@ -419,7 +432,7 @@ RELATION_COEFFICIENTS = {
     '충(沖)': 1.00,
     '형(刑)': 0.75,
     '파(破)': 0.45,
-    '해/천(穿/害)': 0.65,
+    '천(穿)': 0.65,
     '생': 0.60,
     '극': 0.80,
 }

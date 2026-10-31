@@ -4,7 +4,7 @@ from services.calculator import get_ten_star_stem, get_ten_star_branch
 PILLAR_KEYS = ['year', 'month', 'day', 'hour']
 POSITION_NAMES = ['년', '월', '일', '시']
 COMBINATION_TYPES = {'육합(六合)', '반합(半合)', '천간합(天干合)'}
-CONFLICT_TYPES = {'충(沖)', '해/천(穿/害)', '천간충(天干沖)', '형(刑)'}
+CONFLICT_TYPES = {'충(沖)', '천(穿)', '천간충(天干沖)', '형(刑)'}
 UNSCORED_PAIRWISE_TYPES = {'파(破)', '공합(拱合)', '암합(暗合)'}
 
 RESOURCES = {'정인', '편인'}
@@ -156,12 +156,12 @@ def analyze_bin_zhu_dynamics(
                 score = float(item['score'])
             elif rel_type == '충(沖)':
                 score = round(2.0 * weight, 2)
-            elif rel_type in ('천간충(天干沖)', '해/천(穿/害)', '형(刑)'):
+            elif rel_type in ('천간충(天干沖)', '천(穿)', '형(刑)'):
                 score = round(1.5 * weight, 2)
             else:
                 score = round(1.5 * weight, 2)
             conflict_score += score
-            link_type = '형(관계)' if rel_type == '형(刑)' else '충/해(관계)'
+            link_type = '형(관계)' if rel_type == '형(刑)' else '충/천(관계)'
         elif rel_type in UNSCORED_PAIRWISE_TYPES:
             excluded = {
                 'relation_id': item.get('relation_id'),
@@ -214,7 +214,7 @@ def analyze_bin_zhu_dynamics(
             summary = '현재 쌍별 계산에 반영된 빈-주 통로가 없어 관계 유형의 우세를 판정하지 않습니다.'
     elif has_bridging_group:
         if conf_score > comb_score:
-            direction = '다자 합 결합 및 대립(충·형·해) 공존'
+            direction = '다자 합 결합 및 대립(충·형·천) 공존'
             dominant_interaction = 'group_bridging_with_conflict'
             summary = f'빈과 주를 잇는 다자 합(결합도: {total_group_cohesion}점)이 형성되어 있으며, 동시에 쌍별 대립 점수({conf_score}점)가 합 점수({comb_score}점)보다 높은 상태로 공존합니다.'
         elif comb_score > conf_score:
@@ -228,11 +228,11 @@ def analyze_bin_zhu_dynamics(
     elif comb_score > conf_score:
         direction = '합 관계 우세'
         dominant_interaction = 'combination_dominant'
-        summary = f'거리 가중치가 반영된 빈-주 간 합 관계 점수({comb_score}점)가 충·형·해 관계 점수({conf_score}점)보다 높습니다.'
+        summary = f'거리 가중치가 반영된 빈-주 간 합 관계 점수({comb_score}점)가 충·형·천 관계 점수({conf_score}점)보다 높습니다.'
     elif conf_score > comb_score:
-        direction = '충·형·해 관계 우세'
+        direction = '충·형·천 관계 우세'
         dominant_interaction = 'conflict_dominant'
-        summary = f'거리 가중치가 반영된 빈-주 간 충·형·해 관계 점수({conf_score}점)가 합 관계 점수({comb_score}점)보다 높습니다.'
+        summary = f'거리 가중치가 반영된 빈-주 간 충·형·천 관계 점수({conf_score}점)가 합 관계 점수({comb_score}점)보다 높습니다.'
     else:
         direction = '관계 점수 동률'
         dominant_interaction = 'balanced'

@@ -36,8 +36,8 @@ class BinZhuTests(unittest.TestCase):
         # 십성의 취용 조건 없이 거리 가중치 및 상호작용 강도를 반영한다.
         for relations, direction, w_scores, unw_scores in [
             ([rel('육합(六合)')], '합 관계 우세', {'combination': 1.05, 'conflict': 0.0}, {'unweighted_combination': 2.0, 'unweighted_conflict': 0.0}),
-            ([rel('충(沖)')], '충·형·해 관계 우세', {'combination': 0.0, 'conflict': 1.4}, {'unweighted_combination': 0.0, 'unweighted_conflict': 1.5}),
-            ([rel('형(刑)')], '충·형·해 관계 우세', {'combination': 0.0, 'conflict': 1.05}, {'unweighted_combination': 0.0, 'unweighted_conflict': 1.5}),
+            ([rel('충(沖)')], '충·형·천 관계 우세', {'combination': 0.0, 'conflict': 1.4}, {'unweighted_combination': 0.0, 'unweighted_conflict': 1.5}),
+            ([rel('형(刑)')], '충·형·천 관계 우세', {'combination': 0.0, 'conflict': 1.05}, {'unweighted_combination': 0.0, 'unweighted_conflict': 1.5}),
             ([rel('파(破)')], '평가 가능한 빈-주 통로 없음', {'combination': 0.0, 'conflict': 0.0}, {'unweighted_combination': 0.0, 'unweighted_conflict': 0.0}),
         ]:
             result = analyze(relations)
@@ -95,7 +95,7 @@ class BinZhuTests(unittest.TestCase):
                 actual = analyze(matrix, list(branches))
                 self.assertEqual(actual['pairwise_scores'], expected['pairwise_scores'])
                 self.assertEqual(actual['guest_host_links'], expected['guest_host_links'])
-                self.assertEqual(actual['control_flow']['direction'], '다자 합 결합 및 대립(충·형·해) 공존')
+                self.assertEqual(actual['control_flow']['direction'], '다자 합 결합 및 대립(충·형·천) 공존')
                 self.assertTrue(any(r['type'] == kind for r in actual['excluded_interactions']))
 
     def test_repeated_group_is_excluded_once_and_does_not_change_direction(self):

@@ -203,6 +203,7 @@ class InteractionItem(BaseModel):
     hidden_stem_pairs: Optional[List[Dict[str, str]]] = None
     candidate_hidden_stem_effects: List[Dict[str, str]] = Field(default_factory=list)
     activation_status: Optional[str] = None
+    activation_rule_id: Optional[str] = None
     status_reasons: List[str] = Field(default_factory=list)
     condition_evidence: Dict[str, Any] = Field(default_factory=dict)
     description: str
@@ -417,7 +418,8 @@ class BranchRelationEffect(BaseModel):
     directional_mechanisms: Dict[str, str] = Field(default_factory=dict)
     candidate_hidden_stem_effects: List[Dict[str, str]] = Field(default_factory=list)
     rule_id: Optional[str] = None
-    activation_status: Literal['potential', 'conditional', 'suppressed', 'candidate_only'] = 'potential'
+    activation_rule_id: Optional[str] = None
+    activation_status: Literal['potential', 'conditional', 'suppressed', 'candidate_only', 'active'] = 'potential'
     status_reason: Optional[str] = None
     distance_weight: float
     element_relation: str
@@ -483,6 +485,7 @@ class BranchGroupDynamics(BaseModel):
     transformed_element: Optional[str] = None
     status: Literal['not_scored']
     activation_status: Optional[str] = None
+    activation_rule_id: Optional[str] = None
     status_reasons: List[str] = Field(default_factory=list)
     condition_evidence: Dict[str, Any] = Field(default_factory=dict)
     formation_evidence: List[BranchGroupFormationEvidence] = Field(default_factory=list)

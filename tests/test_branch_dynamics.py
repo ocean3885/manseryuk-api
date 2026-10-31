@@ -59,7 +59,7 @@ class BranchDynamicsTests(unittest.TestCase):
 
     def test_strength_and_relation_force_leads_are_distinct(self):
         result = analyze(list('甲甲甲甲'), list('子寅午辰'))
-        self.assertEqual(result['rule_version'], '2.13.0')
+        self.assertEqual(result['rule_version'], '2.19.0')
         generation = next(r for r in pair(result, 'year', 'month')['relations']
                           if r['type'] == '생')
         self.assertEqual(generation['dominance'], 'month')
@@ -69,8 +69,8 @@ class BranchDynamicsTests(unittest.TestCase):
         self.assertGreater(generation['force']['year_to_month'], 0)
         self.assertEqual(generation['force']['month_to_year'], 0)
 
-        suppressed = analyze(list('甲辛甲甲'), list('子卯午寅'))
-        generation = next(r for r in pair(suppressed, 'year', 'month')['relations']
+        break_candidate = analyze(list('甲辛甲甲'), list('子卯午寅'))
+        generation = next(r for r in pair(break_candidate, 'year', 'month')['relations']
                           if r['type'] == '생')
         self.assertEqual(generation['dominance'], 'month')
         self.assertEqual(generation['force_dominance'], 'undetermined')
@@ -122,11 +122,14 @@ class BranchDynamicsTests(unittest.TestCase):
                 opposite = ('day_to_year' if direction == 'year_to_day'
                             else 'year_to_day')
                 self.assertEqual(control['force'][opposite], 0.0)
-                self.assertGreater(control['force'][direction], 0.0)
+                self.assertEqual(control['activation_status'], 'suppressed')
+                self.assertEqual(control['force'][direction], 0.0)
+                self.assertEqual(control['status_reason'],
+                                 'active_pair_structure_overrides_element')
                 source = direction.split('_to_')[0]
                 target = direction.split('_to_')[1]
-                self.assertEqual(control['roles'][source], 'controls')
-                self.assertEqual(control['roles'][target], 'receives_control')
+                self.assertEqual(control['roles'][source], 'inactive')
+                self.assertEqual(control['roles'][target], 'inactive')
 
     def test_project_break_pairs_include_mao_wu_and_wu_you(self):
         for branches, first, second in [
@@ -143,28 +146,60 @@ class BranchDynamicsTests(unittest.TestCase):
         self.assertNotIn('파(破)',
                          {r['type'] for r in pair(result, 'year', 'month')['relations']})
 
-    def test_break_suppresses_generation_in_pair_and_ambient_power(self):
-        for branches, first, second, structural_type, reason in [
-            (list('子卯辰寅'), 'year', 'month', '파(破)', 'break_blocks_generation'),
-            (list('子卯午寅'), 'month', 'day', '파(破)', 'break_blocks_generation'),
+    def test_active_break_suppresses_generation_and_ambient_power(self):
+        for branches, first, second in [
+            (list('子卯辰寅'), 'year', 'month'),
+            (list('子卯午寅'), 'month', 'day'),
         ]:
             with self.subTest(branches=branches):
                 result = analyze(list('甲甲甲甲'), branches)
                 relations = pair(result, first, second)['relations']
-                self.assertIn(structural_type, {r['type'] for r in relations})
+                self.assertIn('파(破)', {r['type'] for r in relations})
                 self.assertNotIn('형(刑)', {r['type'] for r in relations})
                 generation = next(r for r in relations if r['type'] == '생')
                 self.assertEqual(generation['activation_status'], 'suppressed')
-                self.assertEqual(set(generation['force'].values()), {0.0})
-                self.assertEqual(generation['status_reason'], reason)
-                for pillar in (first, second):
-                    other = second if pillar == first else first
-                    evidence = next(e for e in result['branch_strengths'][pillar]['ambient_evidence']
-                                    if e['source_pillar'] == other)
-                    self.assertEqual(evidence['adjustment_ratio'], 0.0)
-                    self.assertEqual(evidence['status_reason'], reason)
-                    generation_id = generation['relation_id']
-                    self.assertEqual(evidence['element_relation_id'], generation_id)
+                self.assertEqual(generation['status_reason'],
+                                 'active_pair_structure_overrides_element')
+                self.assertEqual(generation['force'][f'{first}_to_{second}'], 0)
+                self.assertEqual(generation['force'][f'{second}_to_{first}'], 0)
+                for source, target in ((first, second), (second, first)):
+                    evidence = next(e for e in result['branch_strengths'][target]['ambient_evidence']
+                                    if e['source_pillar'] == source)
+                    self.assertEqual(evidence['activation_status'], 'suppressed')
+                    self.assertEqual(evidence['adjustment_ratio'], 0)
+                    self.assertEqual(evidence['status_reason'],
+                                     'active_pair_structure_overrides_element')
+                    self.assertEqual(evidence['element_relation_id'], generation['relation_id'])
+
+    def test_distant_clash_suppresses_only_its_own_elemental_pair(self):
+        stems, branches = list('甲甲甲甲'), list('子辰寅午')
+        matrix = build_interaction_matrix(stems, branches, stems[2])['matrix']
+        result = analyze_branch_dynamics(stems, branches, matrix)
+        distant = pair(result, 'year', 'hour')
+        clash = next(r for r in distant['relations'] if r['type'] == '충(沖)')
+        control = next(r for r in distant['relations'] if r['type'] == '극')
+        self.assertEqual(clash['activation_status'], 'active')
+        self.assertEqual(clash['distance_weight'], 0.5)
+        self.assertEqual(clash['activation_rule_id'], 'branch:pair_presence_active_v1')
+        self.assertEqual(control['activation_status'], 'suppressed')
+        for target, source in (('year', 'hour'), ('hour', 'year')):
+            evidence = next(e for e in result['branch_strengths'][target]['ambient_evidence']
+                            if e['source_pillar'] == source)
+            self.assertEqual(evidence['adjustment_ratio'], 0)
+            self.assertEqual(evidence['status_reason'],
+                             'active_pair_structure_overrides_element')
+        other_pair = pair(result, 'year', 'day')
+        self.assertEqual(next(r for r in other_pair['relations'] if r['type'] == '생')
+                         ['activation_status'], 'potential')
+        potential_matrix = [dict(item) for item in matrix]
+        for item in potential_matrix:
+            if (item.get('category') == '지지' and item.get('type') == '충(沖)'
+                    and item.get('from_pillar') == 'year'
+                    and item.get('to_pillar') == 'hour'):
+                item['activation_status'] = 'potential'
+        hypothetical = analyze_branch_dynamics(stems, branches, potential_matrix)
+        self.assertNotEqual(result['branch_strengths']['year']['effective_power'],
+                            hypothetical['branch_strengths']['year']['effective_power'])
 
     def test_conditional_combination_does_not_suppress_separate_generation(self):
         result = analyze(list('甲甲甲甲'), list('申寅亥子'))
@@ -195,7 +230,10 @@ class BranchDynamicsTests(unittest.TestCase):
                 by_type = {r['type']: r for r in relations}
                 self.assertEqual(set(by_type), {'파(破)', '극'})
                 self.assertTrue(all(v > 0 for v in by_type['파(破)']['force'].values()))
-                self.assertGreater(by_type['극']['force'][control_direction], 0)
+                self.assertEqual(by_type['파(破)']['activation_status'], 'active')
+                self.assertEqual(by_type['극']['activation_status'], 'suppressed')
+                self.assertEqual(by_type['극']['element_direction'], control_direction)
+                self.assertEqual(by_type['극']['force'][control_direction], 0)
                 opposite = ('day_to_year' if control_direction == 'year_to_day'
                             else 'year_to_day')
                 self.assertEqual(by_type['극']['force'][opposite], 0.0)
@@ -206,7 +244,7 @@ class BranchDynamicsTests(unittest.TestCase):
         self.assertEqual(pair_result['primary_relation'], '육합(六合)')
         combination = next(r for r in pair_result['relations']
                            if r['type'] == '육합(六合)')
-        self.assertEqual(combination['activation_status'], 'potential')
+        self.assertEqual(combination['activation_status'], 'active')
         self.assertEqual(combination['status_reason'],
                          'combination_candidate_not_transformation')
         self.assertEqual(combination['directional_mechanisms']['year'],

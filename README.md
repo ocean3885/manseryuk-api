@@ -134,7 +134,7 @@ GET http://localhost:8000/?year=1995&month=5&day=12&hour=14&min=30&sl=sol&gen=�
 
 AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명리학적 근거를 바탕으로 사주를 풀이할 수 있도록 맹파명리 및 고급 역학 엔진을 통합 제공합니다.
 
-`branch_dynamics`는 지지 간 작용 분석의 초기 결과입니다. `branch_strengths`는 월령·지장간·동주 천간·다른 지지의 배경 효과를 분리해 네 지지의 상대 세력을 보여줍니다. `pairwise`는 여섯 지지 쌍의 합·충·형·파·해와 오행 생·극을 보존하고, 관계마다 양쪽 잠재 작용량(`force`), 받는 효과(`effect_received`), 관계 전 세력 우세(`dominance`), 해당 관계의 작용량 우세(`force_dominance`), 작용 종류에 따른 양쪽 역할(`roles`)을 제공합니다. `groups`에는 삼합·방합 참여 위치를 담되 아직 작용량은 매기지 않습니다. 이 수치는 검증된 절대 세력이나 현실 피해량이 아닌 `uncalibrated_relative_model_index`이며, 계산 규칙은 [지지 작용 분석 명세](docs/branch_dynamics_v2.md)에 있습니다. 기존 `bin_zhu_dynamics`는 호환을 위해 제공되며 새 지지 작용 계산의 근거로 쓰지 않습니다.
+`branch_dynamics`는 지지 간 작용 분석의 초기 결과입니다. `branch_strengths`는 월령·지장간·동주 천간·다른 지지의 배경 효과를 분리해 네 지지의 상대 세력을 보여줍니다. `pairwise`는 여섯 지지 쌍의 합·충·형·파·천과 오행 생·극을 보존하고, 관계마다 양쪽 잠재 작용량(`force`), 받는 효과(`effect_received`), 관계 전 세력 우세(`dominance`), 해당 관계의 작용량 우세(`force_dominance`), 작용 종류에 따른 양쪽 역할(`roles`)을 제공합니다. `groups`에는 삼합·방합 참여 위치를 담되 아직 작용량은 매기지 않습니다. 이 수치는 검증된 절대 세력이나 현실 피해량이 아닌 `uncalibrated_relative_model_index`이며, 계산 규칙은 [지지 작용 분석 명세](docs/branch_dynamics_v2.md)에 있습니다. 기존 `bin_zhu_dynamics`는 호환을 위해 제공되며 새 지지 작용 계산의 근거로 쓰지 않습니다.
 
 `branch_dynamics.groups[]`의 `candidate_element`는 삼합·방합의 후보 오행이고, `transformed_element`는 실제 합화 판정 전에는 `null`입니다. 기존 `element`는 호환을 위한 후보 오행 별칭입니다.
 
@@ -144,9 +144,9 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 
 `branch_strengths[].ambient_evidence`와 `pairwise[].context_evidence`에는 주변 지지의 생·극 보정과 같은 쌍의 합·충·형 등 관계 상태를 별도 근거로 기록합니다. 생·극 규칙에 명시된 억제는 보정량 0으로 반영합니다. 합이 조건부라는 이유만으로 별개의 생·극 보정을 자동 제거하지 않습니다.
 
-합·충·형·파·해, 천간 관계, 동주 자합 후보와 실험적 작용 계수의 실행 규칙은 [단일 관계 규칙 모듈](services/relation_rules.py)에서 관리합니다. 맹파 해석상의 성립 조건과 검토 상태는 [관계 규칙표](docs/mangpa_relation_rulebook.md)에 기록합니다.
+합·충·형·파·천, 천간 관계, 동주 자합 후보와 실험적 작용 계수의 실행 규칙은 [단일 관계 규칙 모듈](services/relation_rules.py)에서 관리합니다. 맹파 해석상의 성립 조건과 검토 상태는 [관계 규칙표](docs/mangpa_relation_rulebook.md)에 기록합니다.
 
-조합별 작용 규칙은 현재 子午·子卯·卯午·午酉·辰酉부터 적용됩니다. `pairwise[].relations[]`의 `directional_coefficients`, `directional_mechanisms`, `activation_status`로 방향과 생 억제 여부를 확인할 수 있습니다. `potential`은 잠재 작용이며 합화나 현실 사건의 확정 판정이 아닙니다.
+조합별 작용 규칙은 현재 子午·子卯·卯午·午酉·辰酉부터 적용됩니다. `pairwise[].relations[]`의 `directional_coefficients`, `directional_mechanisms`, `activation_status`로 후보의 방향과 상태를 확인할 수 있습니다. 파·충·천·쌍별 지세형은 해당 두 지지가 있으면 거리와 무관하게 `active`이며, 육합은 인접 충 개입이 없을 때 `active`입니다. 같은 쌍의 생·극은 독립 작용과 주변 세력 보정에서 억제됩니다. `active`는 관계 성립 상태이고 `force`와 v3 `interaction_intensity`는 미보정 잠재 강도입니다. 실제 세력 증감인 `applied_power_delta`는 아직 계산하지 않습니다.
 
 ### 구성 요소:
 
@@ -167,7 +167,7 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 - `type`: `길신`, `흉신`, `특수성`
 - `description`: 상담용 신살 해석 가이드
 
-#### 3. `interactions` (합·충·형·해·파 6기둥 페어 매트릭스)
+#### 3. `interactions` (합·충·형·천·파 6기둥 페어 매트릭스)
 년-월, 월-일, 일-시, 년-일, 년-시, 월-시 총 6개 기둥 간의 인접성 가중치 및 상호작용 분석:
 - `climate`: 사주 기후 (`조화 안정형`, `역동 발전형`, `긴장 극복형`, `복합형`)
 - `tension_score`: 충/형/파/해로 인한 긴장·변동 지수
@@ -208,7 +208,7 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 
 `巳午未寅`에서 午未 육합은 `score: 1.5`인 후보로 남지만, 巳午未 방합의 성립 조합에 포함되어 `score_contribution: 0`입니다. 해당 방합 3.5점과 조합 밖 寅午 반합 0.91점만 조화 총점에 반영합니다(`harmony_score: 4.4`, 소수 첫째 자리 반올림). 이 중복 집계 방지는 프로젝트의 점수 정책이며 실제 합화·작용의 확정 판정이 아닙니다.
 
-반복 지지는 글자가 같아도 위치별로 별도 관계입니다. `寅午午酉`의 년–월·년–일 반합, `子丑丑子`의 네 육합 쌍, 반복 상대의 형을 모두 반환합니다. 기존 상세 분석의 단일 `six_haps`는 유지하고 전체 육합 목록은 `six_haps_all`로 제공합니다. 충·해·파와 천간 합·충은 기존에도 상대 위치를 순회하므로 해당 수집 규칙을 유지했습니다.
+반복 지지는 글자가 같아도 위치별로 별도 관계입니다. `寅午午酉`의 년–월·년–일 반합, `子丑丑子`의 네 육합 쌍, 반복 상대의 형을 모두 반환합니다. 기존 상세 분석의 단일 `six_haps`는 유지하고 전체 육합 목록은 `six_haps_all`로 제공합니다. 충·천·파와 천간 합·충은 기존에도 상대 위치를 순회하므로 해당 수집 규칙을 유지했습니다.
 
 **누락 수정에 따른 결과 변경:** 관계 점수와 이를 사용하는 허실·빈주 결과가 일부 달라질 수 있습니다. 수정 전 합성 입력 200건과 비교했을 때 31건의 긴장/조화 점수가 변했고, 2건에서 천간 3개의 허실 판정이 바뀌었습니다. 아래 변경은 누락된 형 복원에 따른 것으로, 허실 감점 계수나 임계값 변경이 아닙니다.
 
@@ -218,7 +218,7 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 | 丁庚丙丁 / 巳午午午 | 일간·시간 | 실 → 변허 |
 
 #### 4. `xu_shi_dynamics` (허와 실 및 실자변허 實者變虛)
-원국의 통근 점수와 지지 충·형·해 관계를 이용한 규칙 기반 분석입니다. `original_status`와 `current_status`는 **같은 원국의 관계 반영 전후**를 뜻하며, 대운·세운에 따른 시기별 변화가 아닙니다.
+원국의 통근 점수와 지지 충·형·천 관계를 이용한 규칙 기반 분석입니다. `original_status`와 `current_status`는 **같은 원국의 관계 반영 전후**를 뜻하며, 대운·세운에 따른 시기별 변화가 아닙니다.
 
 | 필드 | 의미 |
 | --- | --- |
@@ -226,7 +226,7 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 | `rule_version` | `"1.0.0"`: 기존 판정 규칙을 최초로 명시한 버전 |
 | `pillars` | `year`, `month`, `day`, `hour` 천간별 분석 |
 | `shared_roots` | 둘 이상의 천간이 공유하는 지지별 뿌리와 각 천간의 기여도·최종 상태 |
-| `impact_groups` | 충·형·해 관계별로 기여도가 제외된 뿌리 위치와 영향을 받은 천간 목록 |
+| `impact_groups` | 충·형·천 관계별로 기여도가 제외된 뿌리 위치와 영향을 받은 천간 목록 |
 | `real_count` | 관계 반영 후 실(實)인 천간 수 |
 | `transformed_empty_count` | 실에서 변허(變虛)로 분류된 천간 수 |
 | `hollow_penetrate_count` | 허투(虛透)인 천간 수 |
@@ -238,14 +238,14 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 - `score`: 관계 반영 **전** 통근 총점. 확률이나 정규화된 0~1 점수가 아닙니다.
 - `effective_score`: 관계에 연결된 뿌리를 제외하고 남은 개별 통근 점수의 합.
 - `root_evidence`: 뿌리별 `pillar`, `position`, `branch_char`, `score`, `is_affected`, `effective_score`, `interactions`.
-- `root_evidence[].interactions`: 해당 뿌리에 영향을 준 충·형·해의 `type`, `name`, `from_pillar`, `to_pillar`, `weight`, `is_adjacent`. 가중치와 인접성은 근거로 공개하지만 v1 감점에는 사용하지 않습니다. 동일 항목은 중복 표시하지 않습니다.
+- `root_evidence[].interactions`: 해당 뿌리에 영향을 준 충·형·천의 `type`, `name`, `from_pillar`, `to_pillar`, `weight`, `is_adjacent`. 가중치와 인접성은 근거로 공개하지만 v1 감점에는 사용하지 않습니다. 동일 항목은 중복 표시하지 않습니다.
 - `root_evidence[].interactions[].relation_id`: 원본 `interactions.matrix`를 참조합니다. 관계 ID가 없는 직접 함수 입력에서는 `null`입니다. `impact_groups[].interaction`도 같은 ID를 제공합니다.
 - `transition_reasons`: 최초 분류, 영향 관계, 최종 분류의 이유 목록. 기존 `reason`은 이 목록을 연결한 문장입니다.
 - `meaning`: 계산 결과와 구분된 **전통적 상징 해석 참고**. 실제 능력·성과·재정 상태·직업 적합성을 예측하지 않습니다.
 - `transition_code`: `maintained`(기존 분류 유지) 또는 `real_to_empty`(실 → 변허). `is_transformed`와 같은 상태 전이 정보를 코드로 제공합니다.
 - `root_structure.primary_root_pillars`: 관계 반영 전 개별 기여도가 가장 큰 뿌리 위치. 동점이면 모두 포함하고 뿌리가 없으면 빈 목록입니다.
 - `root_structure.remaining_root_pillars`: 관계 반영 후 양의 기여도가 남은 뿌리 위치.
-- `root_structure.excluded_root_pillars`: 충·형·해로 기여도가 제외된 뿌리 위치.
+- `root_structure.excluded_root_pillars`: 충·형·천로 기여도가 제외된 뿌리 위치.
 - `root_structure.remaining_support`: 잔여 점수만으로 분류한 `none`(0), `below_threshold`(0 초과 0.5 미만), `meets_threshold`(0.5 이상). 변화 이력을 포함하는 `current_status`와 구별합니다.
 
 `shared_roots[]`는 `root_pillar`, `branch_char`, `is_affected`, `interactions`, `dependents`를 제공합니다. `dependents[]`의 `stem_pillar`, `score`, `effective_score`, `current_status`로 같은 뿌리가 각 천간에 기여한 정도와 최종 결과를 확인합니다. 같은 지지 글자가 반복되어도 **위치가 다르면 다른 뿌리**입니다.
@@ -257,7 +257,7 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 **v1 판정 규칙과 한계**
 
 1. 원점수가 `0.5` 이상이면 실, `0`이면 허투, 그 사이이면 허입니다.
-2. 지지 충·형·해에 참여한 양쪽 지지의 뿌리 기여도를 모두 `0`으로 취급합니다. 관계 유형별 손상률, 거리별 감점, 합에 따른 회복, 파는 반영하지 않습니다.
+2. 지지 충·형·천에 참여한 양쪽 지지의 뿌리 기여도를 모두 `0`으로 취급합니다. 관계 유형별 손상률, 거리별 감점, 합에 따른 회복, 파는 반영하지 않습니다.
 3. 원래 실이고 영향을 받은 뿌리가 있을 때만 잔여 점수를 검사합니다. `0.5` 미만이면 변허, 이상이면 실을 유지합니다.
 4. 원래 허·허투는 분류를 유지합니다. 따라서 원래 허인 천간의 잔여 점수가 `0`이어도 허투나 변허로 바뀌지 않습니다.
 5. 원점수와 개별 뿌리 점수는 상위 통근 계산기에서 각각 소수 둘째 자리로 반올림합니다. 이 때문에 뿌리 점수 합과 원점수가 미세하게 다를 수 있습니다. 기존 판정 호환성을 위해 잔여 합산값은 추가 반올림 없이 비교·반환합니다.
@@ -339,9 +339,9 @@ python -m unittest discover -s tests -v
 - `interaction_scope`: `"pairwise"`. **점수 계산**은 기둥 쌍별 관계에 한정됩니다.
 - `pairwise_scores`: 
   - `combination`: 거리 가중치가 반영된 합 관계 점수 (천간합 1.8, 육합 1.5, 반합 1.2 등 × 가중치)
-  - `conflict`: 거리 가중치가 반영된 대립 관계 점수 (충 2.0, 천간충 1.5, 형 1.5, 해/천 1.5 등 × 가중치)
+  - `conflict`: 거리 가중치가 반영된 대립 관계 점수 (충 2.0, 천간충 1.5, 형 1.5, 천 1.5 등 × 가중치)
   - `unweighted_combination`: 가중치 없는 기본 합 점수 (합마다 2.0점)
-  - `unweighted_conflict`: 가중치 없는 기본 대립 점수 (충·형·해마다 1.5점)
+  - `unweighted_conflict`: 가중치 없는 기본 대립 점수 (충·형·천마다 1.5점)
 - `group_cohesion_score`: 빈-주를 연계하는 삼합·방합의 다자 결합 점수 합계. 기둥 참여도 기반 공식 산출 ($$\text{Base} \times \frac{|G| \times |H|}{|P|}$$)
 - `guest_host_links`: 점수에 반영한 쌍별 관계의 `relation_id`, `type`, `detail`, `target_guest`, `source_host`, `mechanism`, `flow_direction`, `weight`.
   - `mechanism`: `일간합재(合財)`, `합취(合取)`, `제용(制用)`, `환경압박(沖破)`, `군겁쟁재(爭財)`, `재관마찰`, `대립조율`, `상호유대(有情)` 등
@@ -355,7 +355,7 @@ python -m unittest discover -s tests -v
   - `scope`: `"일주(자아/배우자/개인영역) + 시주(수단/도구/말년/귀숙처)"`
   - `dominant_means`: 주 영역에 위치한 주요 수단·도구 십신 목록 (식상, 비겁, 인성 등)
 - `control_flow`:
-  - `direction`: `합 관계 우세`, `충·형·해 관계 우세`, `다자 합 결합(삼합/방합) 형성`, `다자 합 결합 및 대립(충·형·해) 공존`, `합 관계 우세 (다자 합 결합 포함)`, `다자 합 결합 및 동률 관계`, `관계 점수 동률`, `평가 가능한 빈-주 통로 없음`
+  - `direction`: `합 관계 우세`, `충·형·천 관계 우세`, `다자 합 결합(삼합/방합) 형성`, `다자 합 결합 및 대립(충·형·천) 공존`, `합 관계 우세 (다자 합 결합 포함)`, `다자 합 결합 및 동률 관계`, `관계 점수 동률`, `평가 가능한 빈-주 통로 없음`
   - `dominant_interaction`: 기계 판독용 관계 식별자 (`combination_dominant`, `conflict_dominant`, `group_bridging`, `group_bridging_with_conflict`, `group_bridging_with_combination`, `group_bridging_balanced`, `balanced`, `none`)
   - `vector`: 한국어 역학 벡터 명칭 (`주 ➔ 빈 (자원 취용/주도형)`, `빈 ➔ 주 (환경 조율/적응형)`, `주 ⇄ 빈 (상호 연대/협력형)`, `주 ∥ 빈 (독립 영역 유지형)`)
   - `vector_code`: 기계 판독용 벡터 코드 (`host_takes_guest`, `guest_pressures_host`, `mutual_cooperation`, `independent_parallel`)
@@ -375,7 +375,7 @@ LLM 시스템 프롬프트 또는 RAG 컨텍스트에 그대로 주입할 수 �
   "【주요 신살 및 길신】 천을귀인(월지), 역마살(월지), 천을귀인(일지)",
   "【사주 기후】 긴장과 조화가 공존하는 복합형 (긴장도: 3.5, 조화도: 3.0)",
   "【원국 허실】 원국 천간 4자의 관계 반영 후 분포는 실(實) 3개, 변허(變虛) 1개입니다. (뿌리별 근거 요약 생략) 원국의 관계 반영 전후 비교이며, 대운·세운에 따른 시기별 변화가 아닙니다. 십성의 상징 해석은 참고로 구분하고, 능력·성과·직업 적합성으로 단정하지 마세요.",
-  "【빈주 관계】 다자 합 결합 및 대립(충·형·해) 공존: 빈과 주를 잇는 다자 합(결합도: 3.0점)이 형성되어 있으며, 동시에 쌍별 대립 점수(1.2점)가 합 점수(0.0점)보다 높은 상태로 공존합니다.",
+  "【빈주 관계】 다자 합 결합 및 대립(충·형·천) 공존: 빈과 주를 잇는 다자 합(결합도: 3.0점)이 형성되어 있으며, 동시에 쌍별 대립 점수(1.2점)가 합 점수(0.0점)보다 높은 상태로 공존합니다.",
   "【빈주 역학 흐름】 주 ➔ 빈 (자원 취용/주도형): 개인의 역량과 수단(일·시주)을 바탕으로 외부 사회의 기회와 재관(년·월주)을 내 영역으로 견인·취용하는 동력이 우세합니다.",
   "【빈주 해석 참고】 빈은 사회적 환경(국가·직장), 주는 개인 영역(자아·수단)의 상징입니다. 관계 집계는 기둥 간 거리와 결합 구조를 나타내며, 직업 적합성이나 성과를 단정하지 않습니다.",
   "【빈주 계산 범위】 쌍별 관계만 점수에 반영했습니다. 다자 관계 또는 위치를 확인할 수 없거나 미가산된 관계 1건은 계산에서 제외했으므로 빈주 점수의 근거로 사용하지 마세요.",

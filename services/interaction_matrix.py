@@ -18,6 +18,8 @@ from services.stem_relations import (
 )
 from services.relation_rules import (
     get_pair_action_rule, HARMONY_SCORE_TYPES, HARMONY_GROUP_COVERS_PAIR,
+    PAIR_PRESENCE_ACTIVE_RULE_ID, TRIPLE_PUNISHMENT_PRESENCE_RULE_ID,
+    ADJACENT_SELF_PUNISHMENT_RULE_ID,
 )
 
 POSITION_NAMES = ['년', '월', '일', '시']
@@ -25,7 +27,7 @@ PILLAR_KEYS = ['year', 'month', 'day', 'hour']
 
 def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: str) -> Dict[str, Any]:
     """
-    4개 기둥 간의 모든 천간/지지 상호작용(합, 충, 형, 해/천, 파, 극)을 분석하고
+    4개 기둥 간의 모든 천간/지지 상호작용(합, 충, 형, 천, 파, 극)을 분석하고
     상세 매트릭스, 요약 목록, 긴장도(Tension) 및 조화도(Harmony) 점수를 산출합니다.
     """
     matrix: List[Dict[str, Any]] = []
@@ -71,6 +73,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "is_adjacent": (dist == 1),
                             "weight": weight,
                             "score": score,
+                            "activation_status": "active",
+                            "activation_rule_id": PAIR_PRESENCE_ACTIVE_RULE_ID,
                             "description": desc
                         })
 
@@ -79,7 +83,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             if hap['with_index'] == j), None)
             if six_hap and six_hap.get('with_index') == j:
                 status = six_hap['activation_status']
-                score = 1.5 * weight if status == 'potential' else 0.0
+                score = 1.5 * weight if status == 'active' else 0.0
                 pair_rule = get_pair_action_rule(b1, b2, '육합(六合)')
                 effect = pair_rule[1] if pair_rule else {}
                 hidden_candidates = [
@@ -88,8 +92,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     for candidate in effect.get('hidden_stem_candidates', [])
                 ]
                 desc = (f"{name_from}지({b1})-{name_to}지({b2}) "
-                        f"육합 후보({six_hap['element']}): " +
-                        ('결합 가능' if status == 'potential' else '인접 충으로 작용 유보'))
+                        f"육합({six_hap['element']} 후보): " +
+                        ('결합 성립' if status == 'active' else '인접 충으로 작용 유보'))
                 summary_list.append(desc)
                 matrix.append({
                     "category": "지지",
@@ -103,6 +107,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     "candidate_element": six_hap['element'],
                     "transformed_element": None,
                     "activation_status": status,
+                    "activation_rule_id": (PAIR_PRESENCE_ACTIVE_RULE_ID
+                                           if status == 'active' else None),
                     "status_reasons": six_hap['status_reasons'],
                     "condition_evidence": {
                         'adjacent_clashes': [
@@ -116,24 +122,26 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     "description": desc
                 })
 
-            # (3) 천/해 (穿/害)
+            # (3) 천 (穿)
             cheons = check_cheon(b1, i, branches, day_stem)
             if cheons:
                 for c in cheons:
                     if c.get('with_index') == j:
                         score = 1.5 * weight
                         tension_score += score
-                        desc = f"{name_from}지({b1})-{name_to}지({b2}) 육해(천): 암묵적 갈등 및 손상"
+                        desc = f"{name_from}지({b1})-{name_to}지({b2}) 천(穿): 암묵적 갈등 및 손상"
                         summary_list.append(desc)
                         matrix.append({
                             "category": "지지",
-                            "type": "해/천(穿/害)",
+                            "type": "천(穿)",
                             "name": f"{b1}{b2}천",
                             "from_pillar": pos_from,
                             "to_pillar": pos_to,
                             "is_adjacent": (dist == 1),
                             "weight": weight,
                             "score": score,
+                            "activation_status": "active",
+                            "activation_rule_id": PAIR_PRESENCE_ACTIVE_RULE_ID,
                             "description": desc
                         })
 
@@ -142,12 +150,15 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
             if punishments:
                 for p in punishments:
                     if p.get('with_index') == j:
-                        candidate_only = p.get('activation_status') == 'candidate_only'
-                        score = 0.0 if candidate_only else 1.5 * weight
+                        is_self_punishment = p.get('type') == '자형'
+                        candidate_only = is_self_punishment and dist != 1
+                        # 자형의 독립 강도는 미정이다. 기존 긴장 총점에 합산하지 않는다.
+                        score = 0.0 if is_self_punishment else 1.5 * weight
                         tension_score += score
                         desc = (f"{name_from}지({b1})-{name_to}지({b2}) "
                                 f"형({p.get('type', '')}): " +
-                                ("파가 주작용인 부수 후보" if candidate_only else "조정 및 압박"))
+                                ("격위 자형 후보" if candidate_only else
+                                 "인접 자형 성립" if is_self_punishment else "조정 및 압박"))
                         summary_list.append(desc)
                         matrix.append({
                             "category": "지지",
@@ -158,7 +169,15 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "is_adjacent": (dist == 1),
                             "weight": weight,
                             "score": score,
-                            "activation_status": p.get('activation_status', 'potential'),
+                            "activation_status": ('candidate_only' if candidate_only else 'active'),
+                            "activation_rule_id": (None if candidate_only else
+                                                   ADJACENT_SELF_PUNISHMENT_RULE_ID
+                                                   if is_self_punishment else
+                                                   PAIR_PRESENCE_ACTIVE_RULE_ID),
+                            "status_reasons": (["nonadjacent_self_punishment_candidate"]
+                                               if candidate_only else
+                                               ["adjacent_self_punishment"]
+                                               if is_self_punishment else []),
                             "description": desc
                         })
 
@@ -180,6 +199,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "is_adjacent": (dist == 1),
                             "weight": weight,
                             "score": score,
+                            "activation_status": "active",
+                            "activation_rule_id": PAIR_PRESENCE_ACTIVE_RULE_ID,
                             "description": desc
                         })
 
@@ -316,7 +337,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
             if kind in seen_three_punishments:
                 continue
             seen_three_punishments.add(kind)
-            desc = f"지지 삼형({kind}): 세 지지의 형 구조 후보"
+            desc = f"지지 삼형({kind}): 세 지지의 형 구조 성립"
             summary_list.append(desc)
             matrix.append({
                 'category': '지지',
@@ -330,6 +351,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                 'weight': 1.0,
                 # 각 쌍의 천·충·육합 또는 지세형·충과 중복 가산하지 않는다.
                 'score': 0.0,
+                'activation_status': 'active',
+                'activation_rule_id': TRIPLE_PUNISHMENT_PRESENCE_RULE_ID,
                 'description': desc,
             })
 

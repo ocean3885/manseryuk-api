@@ -20,6 +20,88 @@ def pairs(result, kind):
 
 
 class InteractionMatrixTests(unittest.TestCase):
+    def test_break_and_clash_are_active_at_adjacent_and_distant_positions(self):
+        cases = [
+            ('子午辰寅', 'year', 'month', '충(沖)', 1.0),
+            ('子辰寅午', 'year', 'hour', '충(沖)', 0.5),
+            ('子卯辰寅', 'year', 'month', '파(破)', 1.0),
+            ('子辰午卯', 'year', 'hour', '파(破)', 0.5),
+        ]
+        for branches, left, right, kind, weight in cases:
+            with self.subTest(branches=branches, kind=kind):
+                relation = next(item for item in matrix(branches)['matrix']
+                                if item['type'] == kind
+                                and item['from_pillar'] == left
+                                and item['to_pillar'] == right)
+                self.assertEqual(relation['activation_status'], 'active')
+                self.assertEqual(relation['activation_rule_id'],
+                                 'branch:pair_presence_active_v1')
+                self.assertEqual(relation['weight'], weight)
+
+    def test_pierce_pair_punishment_and_unblocked_combine_are_active_at_any_distance(self):
+        cases = [
+            ('寅巳午子', 'year', 'month', '천(穿)', 1.0),
+            ('寅子午巳', 'year', 'hour', '천(穿)', 0.5),
+            ('丑戌辰寅', 'year', 'month', '형(刑)', 1.0),
+            ('戌子卯未', 'year', 'hour', '형(刑)', 0.5),
+            ('寅亥辰子', 'year', 'month', '육합(六合)', 1.0),
+            ('辰寅午酉', 'year', 'hour', '육합(六合)', 0.5),
+        ]
+        for branches, left, right, kind, weight in cases:
+            with self.subTest(branches=branches, kind=kind):
+                relation = next(item for item in matrix(branches)['matrix']
+                                if item['type'] == kind
+                                and item['from_pillar'] == left
+                                and item['to_pillar'] == right)
+                self.assertEqual(relation['activation_status'], 'active')
+                self.assertEqual(relation['activation_rule_id'],
+                                 'branch:pair_presence_active_v1')
+                self.assertEqual(relation['weight'], weight)
+
+    def test_clash_condition_and_adjacent_self_punishment_remain_separate(self):
+        for branches, status in [('子午丑寅', 'suppressed'),
+                                 ('午子丑寅', 'conditional')]:
+            with self.subTest(branches=branches):
+                combination = next(item for item in matrix(branches)['matrix']
+                                   if item['type'] == '육합(六合)')
+                self.assertEqual(combination['activation_status'], status)
+                self.assertIsNone(combination['activation_rule_id'])
+        self_punishment = next(item for item in matrix('午午子辰')['matrix']
+                               if item['type'] == '형(刑)')
+        self.assertEqual(self_punishment['activation_status'], 'active')
+        self.assertEqual(self_punishment['activation_rule_id'],
+                         'branch:adjacent_self_punishment_active_v1')
+
+    def test_self_punishment_requires_adjacency_for_each_position_pair(self):
+        for branch in '辰午酉亥':
+            with self.subTest(branch=branch):
+                result = matrix(branch * 3 + '子')
+                punishments = {
+                    tuple(item['participants']): item
+                    for item in result['matrix']
+                    if item['type'] == '형(刑)' and item['name'] == '자형'
+                }
+                self.assertEqual(set(punishments), {
+                    ('year', 'month'), ('year', 'day'), ('month', 'day')})
+                for pair in (('year', 'month'), ('month', 'day')):
+                    self.assertEqual(punishments[pair]['activation_status'], 'active')
+                    self.assertEqual(punishments[pair]['score'], 0)
+                self.assertEqual(punishments[('year', 'day')]['activation_status'],
+                                 'candidate_only')
+                self.assertIsNone(punishments[('year', 'day')]['activation_rule_id'])
+
+    def test_six_piercing_pairs_use_cheon_type_in_both_orders(self):
+        for first, second in [('子', '未'), ('丑', '午'), ('寅', '巳'),
+                              ('卯', '辰'), ('申', '亥'), ('酉', '戌')]:
+            for left, right in ((first, second), (second, first)):
+                with self.subTest(pair=left + right):
+                    items = [item for item in matrix(left + right + left + right)['matrix']
+                             if item['category'] == '지지' and
+                             item['participants'] == ['year', 'month']]
+                    self.assertEqual([item['type'] for item in items
+                                      if item['type'] == '천(穿)'], ['천(穿)'])
+                    self.assertFalse(any('害' in item['type'] for item in items))
+
     def test_six_hap_keeps_legacy_single_and_adds_all_partners(self):
         branches = list('子丑丑子')
         all_haps = check_six_haps('子', 0, branches, '甲')

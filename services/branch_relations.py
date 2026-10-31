@@ -50,7 +50,7 @@ def check_six_haps(target_branch, target_index, all_branches, day_stem):
                 'type': '근합' if is_adjacent else '원합',
                 'strength': 1.0 if is_adjacent else 0.5,
                 'is_adjacent': is_adjacent,
-                'activation_status': SIX_HAP_CONDITIONS[reason] if reason else 'potential',
+                'activation_status': SIX_HAP_CONDITIONS[reason] if reason else 'active',
                 'status_reasons': [reason] if reason else [],
                 'condition_evidence': {'adjacent_clashes': adjacent_clashes},
             })

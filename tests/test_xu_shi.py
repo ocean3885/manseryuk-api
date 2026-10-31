@@ -145,13 +145,13 @@ class XuShiTests(unittest.TestCase):
         self.assertNotIn('균형', result['overall_status'])
 
     def test_each_affecting_type_and_both_endpoints(self):
-        for kind in ('충(沖)', '형(刑)', '해/천(穿/害)'):
+        for kind in ('충(沖)', '형(刑)', '천(穿)'):
             for index in (0, 1):
                 with self.subTest(kind=kind, endpoint=index):
                     pillar = analyze(0.8, [root(index, 0.8)], [relation(kind)])['pillars']['year']
                     self.assertEqual(pillar['current_status'], '변허(變虛)')
                     self.assertIn(kind, pillar['reason'])
-                    self.assertNotIn('충·형·해로 손상', pillar['reason'])
+                    self.assertNotIn('충·형·천으로 손상', pillar['reason'])
                     self.assertEqual(pillar['root_evidence'][0]['interactions'][0]['type'], kind)
 
     def test_unrelated_or_unsupported_interactions_do_not_remove_roots(self):
