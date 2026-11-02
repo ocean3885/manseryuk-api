@@ -1,6 +1,6 @@
 {
   "meta": {
-    "schema_version": "3.1-draft",
+    "schema_version": "3.4-draft",
     "rule_version": null,
     "analysis_school": "mangpa",
     "score_meaning": "uncalibrated_relative_index",
@@ -45,6 +45,9 @@
         "base_power": null,
         "after_stem_power": null,
         "effective_power": null,
+        "post_effect_power": null,
+        "post_effect_status": "not_calculated",
+        "influence_path_ids": [],
         "strength_evidence": {
           "position_weight": 1.0,
           "season": {
@@ -78,12 +81,28 @@
             {
               "source_pillar": "month",
               "relation": "year_generates_month",
-              "adjustment_ratio": null
+              "adjustment_ratio": null,
+              "element_relation_id": null,
+              "related_relations": [],
+              "accounting_path": null,
+              "accounting_relation_ids": [],
+              "structural_effect_status": null,
+              "structural_power_delta": null,
+              "activation_status": null,
+              "status_reason": null
             },
             {
               "source_pillar": "hour",
               "relation": "same_element",
-              "adjustment_ratio": null
+              "adjustment_ratio": null,
+              "element_relation_id": null,
+              "related_relations": [],
+              "accounting_path": null,
+              "accounting_relation_ids": [],
+              "structural_effect_status": null,
+              "structural_power_delta": null,
+              "activation_status": null,
+              "status_reason": null
             }
           ]
         },
@@ -102,6 +121,9 @@
         "base_power": null,
         "after_stem_power": null,
         "effective_power": null,
+        "post_effect_power": null,
+        "post_effect_status": "not_calculated",
+        "influence_path_ids": [],
         "strength_evidence": {
           "position_weight": 2.0,
           "season": {
@@ -141,6 +163,9 @@
         "base_power": null,
         "after_stem_power": null,
         "effective_power": null,
+        "post_effect_power": null,
+        "post_effect_status": "not_calculated",
+        "influence_path_ids": [],
         "strength_evidence": {
           "position_weight": 1.5,
           "season": {
@@ -194,6 +219,9 @@
         "base_power": null,
         "after_stem_power": null,
         "effective_power": null,
+        "post_effect_power": null,
+        "post_effect_status": "not_calculated",
+        "influence_path_ids": [],
         "strength_evidence": {
           "position_weight": 1.0,
           "season": {
@@ -652,7 +680,8 @@
           "branch:hai_mao_wei_trine"
         ]
       }
-    ]
+    ],
+    "influence_paths": []
   },
   "interaction_resolution": {
     "status": "unresolved",

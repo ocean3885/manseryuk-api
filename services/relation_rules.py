@@ -14,7 +14,7 @@ RULE_VERSION = '2.19.0'
 #                         (source_capacity + target_capacity), 4).
 # target_exposure는 잠재 수용 지표이며 실제 손실·피해량이 아니다.
 # 작용 성립 판정 전에는 applied_power_delta를 산출하지 않는다.
-V3_RULE_VERSION = '3.8.0-draft'
+V3_RULE_VERSION = '3.9.0-draft'
 V3_POTENTIAL_FORMULA_ID = 'branch:potential_source_distance_coefficient_v1'
 V3_EXPOSURE_FORMULA_ID = 'branch:exposure_source_share_v1'
 V3_UNSCORED_PAIR_TYPES = frozenset(('공합(拱合)', '암합(暗合)'))
@@ -235,7 +235,17 @@ PAIR_ACTION_RULES = {
         'rule_id': 'branch:子午', 'primary_relation': '충(沖)',
         'effects': {
             '충(沖)': {'coefficients': {'子': 1.0, '午': 1.0},
-                       'mechanisms': {'子': 'collision', '午': 'collision'}},
+                       'mechanisms': {'子': 'collision', '午': 'collision'},
+                       # 잠재 강도 계수와 별개인 실제 손실률 시범값.
+                       # v3 독립 조립기의 잠정 적용량에만 사용한다.
+                       'applied_effect_calibration': {
+                           'formula_id': 'branch:ziwu_clash_loss_rate_v0',
+                           'calibration_version': 'ziwu_clash_0.1',
+                           'status': 'provisional',
+                           'k_shock': 0.30,
+                           'k_base': 0.02,
+                           'k_resist': 0.08,
+                       }},
             '극': {'coefficients': {'子': 0.8, '午': 0.0},
                   'mechanisms': {'子': 'controls_fire', '午': 'no_element_control'}},
         },

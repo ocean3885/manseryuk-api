@@ -11,12 +11,15 @@ from schemas.branch_dynamics_v3 import (
 )
 from schemas.branch_dynamics_v3_contract import BRANCH_CODES
 from services.branch_dynamics import PILLARS, _season_relation
+from services.branch_influence_paths import build_influence_paths
+from services.branch_clash_effects import allocate_branch_losses, ziwu_loss_rates
 from services.five_elements import BRANCH_ELEMENT_MAP
 from services.relation_rules import (
     HALF_HAPS, SIX_HAPS, THREE_HAPS, SQUARE_HAPS, THREE_PUNISHMENTS,
     V3_RULE_VERSION, V3_POTENTIAL_FORMULA_ID, V3_EXPOSURE_FORMULA_ID,
     V3_UNSCORED_PAIR_TYPES, V3_ELEMENT_OVERRIDE_PAIR_TYPES,
     V3_ELEMENT_OVERRIDE_RULE_ID, PAIR_ELEMENT_OVERRIDE_REASON,
+    get_pair_action_rule,
 )
 
 
@@ -51,9 +54,27 @@ def assemble_branch_dynamics_v3_foundation(stems, branches, dynamics_v2):
     source_strengths = dynamics_v2['branch_strengths']
     if set(source_strengths) != set(PILLARS):
         raise ValueError('v2 지지 세력에는 네 기둥이 모두 있어야 합니다.')
+    relation_ids = {}
+    for pair in dynamics_v2['pairwise']:
+        left, right = pair['pillars']
+        for relation in pair['relations']:
+            relation_type = RELATION_TYPES[relation['type']][0]
+            if (relation_type == 'punishment' and
+                    branches[PILLARS.index(left)] == branches[PILLARS.index(right)]):
+                relation_type = 'self_punishment'
+            relation_ids[relation['relation_id']] = (
+                f'branch:{relation_type}:{pair["pair_id"]}'
+            )
+
+    def v3_relation_id(source_id):
+        if source_id is None:
+            return None
+        if source_id not in relation_ids:
+            raise ValueError(f'주변 세력 근거에 없는 관계 ID: {source_id}')
+        return relation_ids[source_id]
 
     meta = MetaV3.model_validate({
-        'schema_version': '3.1-draft',
+        'schema_version': '3.4-draft',
         'rule_version': f"{dynamics_v2['rule_version']}+{V3_RULE_VERSION}",
         'analysis_school': 'mangpa',
         'score_meaning': 'uncalibrated_relative_index',
@@ -107,6 +128,11 @@ def assemble_branch_dynamics_v3_foundation(stems, branches, dynamics_v2):
             'base_power': source['base_power'],
             'after_stem_power': source['after_stem_power'],
             'effective_power': source['effective_power'],
+            # 독립 구조 효과와 모든 관계의 적용량을 집계하기 전에는
+            # 잠정 배경값을 작용 후 세력으로 복사하지 않는다.
+            'post_effect_power': None,
+            'post_effect_status': 'not_calculated',
+            'influence_path_ids': [],
             'strength_evidence': {
                 'position_weight': source['components']['position_weight'],
                 'season': {
@@ -137,6 +163,21 @@ def assemble_branch_dynamics_v3_foundation(stems, branches, dynamics_v2):
                         'relation': item['relation'],
                         'adjustment_ratio': (None if item['activation_status'] == 'conditional'
                                              else item['adjustment_ratio']),
+                        'element_relation_id': v3_relation_id(item['element_relation_id']),
+                        'related_relations': [
+                            {**relation,
+                             'relation_id': v3_relation_id(relation['relation_id'])}
+                            for relation in item['related_relations']
+                        ],
+                        'accounting_path': item['accounting_path'],
+                        'accounting_relation_ids': [
+                            v3_relation_id(relation_id)
+                            for relation_id in item['accounting_relation_ids']
+                        ],
+                        'structural_effect_status': item['structural_effect_status'],
+                        'structural_power_delta': item['structural_power_delta'],
+                        'activation_status': item['activation_status'],
+                        'status_reason': item['status_reason'],
                     }
                     for item in ambient
                 ],
@@ -155,6 +196,23 @@ def assemble_branch_dynamics_v3_foundation(stems, branches, dynamics_v2):
         'meta': meta.model_dump(),
         'chart_context': chart_context.model_dump(),
         'branch_strengths': branch_strengths.model_dump(),
+    }
+
+
+def assemble_branch_influence_paths_v3(branches, branch_strengths, pairs, groups):
+    """출처 경로를 한 번 조립하고 각 지지에는 그 ID만 연결한다."""
+    paths = build_influence_paths(branches, branch_strengths, pairs, groups)
+    enriched = {
+        pillar: {
+            **branch_strengths[pillar],
+            'influence_path_ids': [path['path_id'] for path in paths
+                                   if path['target']['pillar'] == pillar],
+        }
+        for pillar in PILLARS
+    }
+    return {
+        'branch_strengths': BranchStrengthsV3.model_validate(enriched).model_dump(),
+        'influence_paths': paths,
     }
 
 
@@ -192,9 +250,10 @@ def _element_evidence(event, pair, source_strengths):
     }]
 
 
-def _directional_metrics(event, left, right, suppressed):
+def _directional_metrics(event, left, right, suppressed, directions=None):
     """v2의 상태별 0 마스킹 이전 잠재량을 방향마다 재계산한다."""
-    directions = [(left, right), (right, left)]
+    if directions is None:
+        directions = [(left, right), (right, left)]
     if event['type'] in ('생', '극'):
         source, target = event['element_direction'].split('_to_')
         directions = [(source, target)]
@@ -224,6 +283,36 @@ def _directional_metrics(event, left, right, suppressed):
         'exposure_formula_id': V3_EXPOSURE_FORMULA_ID,
         'directional_effects': effects,
     }
+
+
+def _allocate_ziwu_pair_effects(pairs):
+    """동일 지지가 받는 잠정 子午 손실을 중복 없이 4자리로 배분한다."""
+    by_pillar = {}
+    for pair in pairs:
+        for relation in pair['relations']:
+            if relation['calculation_status'] != 'provisional_calculated':
+                continue
+            direction = relation['direction']
+            metrics = relation['metrics']
+            impact = metrics['directional_effects'][0]
+            own = metrics['self_effects'][0]
+            for pillar, effect, key in (
+                (direction['to_pillar'], impact, 'applied_power_delta'),
+                (direction['from_pillar'], own, 'power_delta'),
+            ):
+                by_pillar.setdefault(pillar, []).append((
+                    relation['relation_id'], effect['candidate_loss_rate'],
+                    relation['power_before'][pillar], effect, key,
+                ))
+    for pillar, entries in by_pillar.items():
+        base = entries[0][2]
+        if any(abs(item[2] - base) > 0.00001 for item in entries):
+            raise ValueError(f'{pillar}: 다중 충의 기준 세력이 일치하지 않습니다.')
+        allocated = allocate_branch_losses(base, [
+            (relation_id, rate) for relation_id, rate, _, _, _ in entries
+        ])
+        for relation_id, _, _, effect, key in entries:
+            effect[key] = allocated[relation_id]
 
 
 def assemble_branch_pairs_v3(branches, dynamics_v2):
@@ -268,21 +357,53 @@ def assemble_branch_pairs_v3(branches, dynamics_v2):
             status = ('candidate_only' if structural_half
                       else event['activation_status'])
             suppressed = status == 'suppressed'
+            ziwu = (relation_type == 'clash' and status == 'active' and
+                    set(members) == {'子', '午'})
+            zi_pillar = positions[members.index('子')] if ziwu else None
+            wu_pillar = positions[members.index('午')] if ziwu else None
             quantifiable = (not structural_half and not self_punishment and
                             original_type not in V3_UNSCORED_PAIR_TYPES)
-            metrics = (_directional_metrics(event, left, right, suppressed)
+            metrics = (_directional_metrics(
+                event, left, right, suppressed,
+                directions=[(zi_pillar, wu_pillar)] if ziwu else None)
                        if quantifiable else None)
             reason = event['status_reason']
             direction = None
             if original_type in ('생', '극') and event['element_direction']:
                 from_pillar, to_pillar = event['element_direction'].split('_to_')
                 direction = {'from_pillar': from_pillar, 'to_pillar': to_pillar}
+            if ziwu:
+                direction = {'from_pillar': zi_pillar, 'to_pillar': wu_pillar}
+                _, effect_rule = get_pair_action_rule('子', '午', '충(沖)')
+                calibration = effect_rule['applied_effect_calibration']
+                wu_rate, zi_rate = ziwu_loss_rates(
+                    event['power_before'][zi_pillar],
+                    event['power_before'][wu_pillar],
+                    event['distance_weight'], calibration)
+                metrics['directional_effects'][0].update({
+                    'mechanism': 'primary_shock',
+                    'candidate_loss_rate': round(wu_rate, 6),
+                })
+                metrics.update({
+                    'self_effects': [{
+                        'pillar': zi_pillar,
+                        'mechanism': 'attacker_self_loss',
+                        'candidate_loss_rate': round(zi_rate, 6),
+                        'power_delta': None,
+                    }],
+                    'applied_formula_id': calibration['formula_id'],
+                    'calibration_version': calibration['calibration_version'],
+                    'calibration_status': 'provisional',
+                })
             evidence = _element_evidence(event, positions, source_strengths)
             if event['rule_id']:
                 evidence.append({'rule_id': event['rule_id'], 'basis': ''.join(members)})
             if event.get('activation_rule_id'):
                 evidence.append({'rule_id': event['activation_rule_id'],
                                  'basis': ''.join(members)})
+            if ziwu:
+                evidence.append({'rule_id': calibration['formula_id'],
+                                 'basis': calibration['calibration_version']})
             relation = {
                 'relation_id': f'branch:{relation_type}:{pair_id}',
                 'type': relation_type,
@@ -290,6 +411,7 @@ def assemble_branch_pairs_v3(branches, dynamics_v2):
                 'activation_status': status,
                 'calculation_status': ('not_applicable' if structural_half else
                                        'pending' if metrics is None else
+                                       'provisional_calculated' if ziwu else
                                        'resolved' if suppressed else 'potential_calculated'),
                 'status_reason': reason,
                 'candidate_element': (HALF_HAPS[half_key]['element']
@@ -301,10 +423,11 @@ def assemble_branch_pairs_v3(branches, dynamics_v2):
                 'direction': None if structural_half else direction,
                 'metrics': metrics,
                 'power_before': None if structural_half else event['power_before'],
-                'force_dominance': None if not quantifiable or status in ('conditional', 'suppressed')
+                'force_dominance': None if ziwu or not quantifiable or status in ('conditional', 'suppressed')
                                    else event['force_dominance'],
-                'roles': None if not quantifiable or status in ('conditional', 'suppressed')
-                         else event['roles'],
+                'roles': ({zi_pillar: 'attacker', wu_pillar: 'resistor'} if ziwu else
+                          None if not quantifiable or status in ('conditional', 'suppressed')
+                          else event['roles']),
                 'evidence': evidence,
             }
             relations.append(relation)
@@ -375,7 +498,7 @@ def assemble_branch_pairs_v3(branches, dynamics_v2):
                                       else 'unresolved'),
             }
         distance = PILLARS.index(right) - PILLARS.index(left)
-        result.append(BranchPairV3.model_validate({
+        result.append({
             'pair_id': pair_id,
             'pillars': list(positions),
             'branches': members,
@@ -383,8 +506,9 @@ def assemble_branch_pairs_v3(branches, dynamics_v2):
             'adjacent': distance == 1,
             'domain_pair': source_pair['domain_pair'],
             'relations': relations,
-        }).model_dump())
-    return result
+        })
+    _allocate_ziwu_pair_effects(result)
+    return [BranchPairV3.model_validate(pair).model_dump() for pair in result]
 
 
 def assemble_branch_groups_v3(branches, dynamics_v2, pairs_v3):

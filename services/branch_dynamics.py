@@ -163,12 +163,17 @@ def _context_power(target_index, strengths, matrix_by_pair, excluded_index=None,
         element_blocked = element_status in ('suppressed', 'conditional')
         pair = tuple(sorted((source_pillar, PILLARS[target_index]),
                             key=PILLARS.index))
-        if element_type and _active_pair_structures(matrix_by_pair, pair):
+        active_structures = _active_pair_structures(matrix_by_pair, pair)
+        if element_type and active_structures:
             element_status = 'suppressed'
             element_reason = PAIR_ELEMENT_OVERRIDE_REASON
         else:
             element_reason = effect.get('reason') if element_blocked else None
         element_blocked = element_status in ('suppressed', 'conditional')
+        accounting_path = ('suppressed_by_active_structure'
+                           if element_type and active_structures else
+                           'deferred_by_element_rule' if element_blocked else
+                           'elemental_background')
         related_relations = [
             {'relation_id': item['relation_id'], 'type': item['type'],
              'activation_status': item.get('activation_status', 'potential')}
@@ -186,6 +191,15 @@ def _context_power(target_index, strengths, matrix_by_pair, excluded_index=None,
             'element_relation_id': (f'지지:{element_type}:{pair[0]},{pair[1]}'
                                     if element_type else None),
             'related_relations': related_relations,
+            'accounting_path': accounting_path,
+            'accounting_relation_ids': ([item['relation_id'] for item in active_structures]
+                                        if element_type and active_structures else
+                                        [f'지지:{element_type}:{pair[0]},{pair[1]}']
+                                        if element_type else []),
+            # 구조 관계의 세력 변화는 아직 계량하지 않는다. 배경 보정 0과 구별한다.
+            'structural_effect_status': ('unresolved' if active_structures
+                                         else 'not_applicable'),
+            'structural_power_delta': None,
             'adjustment_ratio': round(ratio, 6),
             'activation_status': element_status,
             'status_reason': element_reason,

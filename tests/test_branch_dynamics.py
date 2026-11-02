@@ -171,6 +171,45 @@ class BranchDynamicsTests(unittest.TestCase):
                                      'active_pair_structure_overrides_element')
                     self.assertEqual(evidence['element_relation_id'], generation['relation_id'])
 
+    def test_month_wood_support_records_one_accounting_path_per_source_pair(self):
+        for branches, expected_path, supported in [
+            ('子午寅辰', 'elemental_background', True),
+            ('子午卯辰', 'suppressed_by_active_structure', False),
+        ]:
+            with self.subTest(branches=branches):
+                result = analyze(list('甲甲甲甲'), list(branches))
+                evidence = [item for item in result['branch_strengths']['month']['ambient_evidence']
+                            if item['source_pillar'] == 'day']
+                self.assertEqual(len(evidence), 1)
+                item = evidence[0]
+                self.assertEqual(item['accounting_path'], expected_path)
+                self.assertEqual(len(item['accounting_relation_ids']), 1)
+                if supported:
+                    self.assertGreater(item['adjustment_ratio'], 0)
+                    self.assertEqual(item['structural_effect_status'],
+                                     'not_applicable')
+                    self.assertEqual(item['accounting_relation_ids'],
+                                     [item['element_relation_id']])
+                    self.assertTrue(any(rel['type'] == '반합(半合)'
+                                        for rel in item['related_relations']))
+                else:
+                    self.assertEqual(item['adjustment_ratio'], 0)
+                    self.assertEqual(item['structural_effect_status'], 'unresolved')
+                    self.assertIsNone(item['structural_power_delta'])
+                    self.assertEqual(item['activation_status'], 'suppressed')
+                    self.assertTrue(any(rel['type'] == '파(破)' and
+                                        rel['relation_id'] in item['accounting_relation_ids']
+                                        for rel in item['related_relations']))
+
+    def test_active_self_punishment_keeps_unscored_structure_distinct_from_peer_background(self):
+        result = analyze(list('甲甲甲甲'), list('子午午辰'))
+        evidence = next(item for item in result['branch_strengths']['month']['ambient_evidence']
+                        if item['source_pillar'] == 'day')
+        self.assertEqual(evidence['accounting_path'], 'elemental_background')
+        self.assertGreater(evidence['adjustment_ratio'], 0)
+        self.assertEqual(evidence['structural_effect_status'], 'unresolved')
+        self.assertIsNone(evidence['structural_power_delta'])
+
     def test_distant_clash_suppresses_only_its_own_elemental_pair(self):
         stems, branches = list('甲甲甲甲'), list('子辰寅午')
         matrix = build_interaction_matrix(stems, branches, stems[2])['matrix']

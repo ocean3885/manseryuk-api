@@ -30,6 +30,16 @@ class BranchDynamicsV3ModelTests(unittest.TestCase):
             BranchDynamicsV3Response.model_validate(raw)
 
         raw = load_fixture()
+        del raw['branch_dynamics']['branch_strengths']['month']['post_effect_status']
+        with self.assertRaises(ValidationError):
+            BranchDynamicsV3Response.model_validate(raw)
+
+        raw = load_fixture()
+        del raw['branch_dynamics']['influence_paths']
+        with self.assertRaises(ValidationError):
+            BranchDynamicsV3Response.model_validate(raw)
+
+        raw = load_fixture()
         raw['branch_dynamics']['pairwise'][0]['adjacent'] = 'unknown'
         with self.assertRaises(ValidationError):
             BranchDynamicsV3Response.model_validate(raw)

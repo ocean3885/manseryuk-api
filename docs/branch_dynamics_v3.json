@@ -1,7 +1,7 @@
 
 {
   "meta": {
-    "schema_version": "3.1-draft",        // JSON 출력 구조 버전
+    "schema_version": "3.4-draft",        // JSON 출력 구조 버전
     "rule_version": null,                // 실제 적용한 명리 계산 규칙 버전
     "analysis_school": "mangpa",
     "score_meaning": "uncalibrated_relative_index",
@@ -37,7 +37,10 @@
 
         "base_power": null,             // 위치·월령·지장간 기반 기초 세력
         "after_stem_power": null,       // 동주 천간 반영 후 세력
-        "effective_power": null,        // 주변의 독립적 배경 영향 반영 후 세력
+        "effective_power": null,        // 주변의 독립적 배경 영향 반영 후 잠정 세력
+        "post_effect_power": null,      // 모든 관계 적용 후 세력. 미완성이면 null
+        "post_effect_status": "not_calculated", // 집계기 미구현. 상태 의미는 계획 문서 참조
+        "influence_path_ids": [],       // 중앙 influence_paths에서 이 지지를 대상으로 하는 경로 ID
 
         "strength_evidence": {
           "position_weight": 1.0,
@@ -76,12 +79,28 @@
             {
               "source_pillar": "month",
               "relation": "year_generates_month",
-              "adjustment_ratio": null
+              "adjustment_ratio": null,
+              "element_relation_id": null, // 같은 쌍의 생극 후보 ID. 동일 오행이면 null
+              "related_relations": [],     // 이 출처 쌍에서 탐지된 구조 관계와 성립 상태
+              "accounting_path": null,     // elemental_background / suppressed_by_active_structure / deferred_by_element_rule
+              "accounting_relation_ids": [], // 이 배경 보정의 선택 근거가 된 관계 ID
+              "structural_effect_status": null, // 활성 구조 작용의 독립 세력 변화: unresolved / not_applicable
+              "structural_power_delta": null, // 구조 관계의 미계산 변화량. 배경 보정 0과 구별
+              "activation_status": null,  // 배경 생극 작용 자체의 상태
+              "status_reason": null       // 억제·유보 사유
             },
             {
               "source_pillar": "hour",
               "relation": "same_element",
-              "adjustment_ratio": null
+              "adjustment_ratio": null,
+              "element_relation_id": null,
+              "related_relations": [],
+              "accounting_path": null,
+              "accounting_relation_ids": [],
+              "structural_effect_status": null,
+              "structural_power_delta": null,
+              "activation_status": null,
+              "status_reason": null
             }
           ]
         },
@@ -103,6 +122,9 @@
         "base_power": null,
         "after_stem_power": null,
         "effective_power": null,
+        "post_effect_power": null,
+        "post_effect_status": "not_calculated",
+        "influence_path_ids": [],
 
         "strength_evidence": {
           "position_weight": 2.0,
@@ -146,6 +168,9 @@
         "base_power": null,
         "after_stem_power": null,
         "effective_power": null,
+        "post_effect_power": null,
+        "post_effect_status": "not_calculated",
+        "influence_path_ids": [],
 
         "strength_evidence": {
           "position_weight": 1.5,
@@ -203,6 +228,9 @@
         "base_power": null,
         "after_stem_power": null,
         "effective_power": null,
+        "post_effect_power": null,
+        "post_effect_status": "not_calculated",
+        "influence_path_ids": [],
 
         "strength_evidence": {
           "position_weight": 1.0,
@@ -250,6 +278,8 @@
     // 2. 지지 6개 쌍의 관계 탐지
     // 관계가 여럿이면 relations 배열에 각각 저장
     // 대표 오행상 생·극 경로는 여섯 위치 쌍 모두 검사하고, 실제 작용 여부는 별도 판정
+    // 子午충만 provisional_calculated 시범 적용: 子→午 충격 1건 + 子 self_effects 1건
+    // 손실은 임시 계수로 계산하며 effective_power는 충 이전 잠정 세력이다.
     // ─────────────────────────────
     "pairwise": [
       {
@@ -612,7 +642,9 @@
           "branch:hai_mao_wei_trine"
         ]
       }
-    ]
+    ],
+    "influence_paths": []              // 실제 조립 결과는 일반 배경·활성 구조·그룹 후보를
+                                         // 출처→대상 경로로 한 번만 기록한다. 예시는 설계 골격
   },
 
   // ─────────────────────────────

@@ -14,7 +14,8 @@ from schemas.branch_dynamics_v3_contract import validate_branch_dynamics_v3
 Pillar = Literal['year', 'month', 'day', 'hour']
 Domain = Literal['guest', 'host']
 CalculationStatus = Literal[
-    'not_applicable', 'pending', 'potential_calculated', 'resolved',
+    'not_applicable', 'pending', 'potential_calculated',
+    'provisional_calculated', 'resolved',
 ]
 ActivationStatus = Literal[
     'candidate_only', 'potential', 'conditional', 'suppressed', 'active', 'detected',
@@ -78,10 +79,27 @@ class SamePillarStemEvidenceV3(V3Model):
     adjustment: float | None
 
 
+class SurroundingRelationEvidenceV3(V3Model):
+    relation_id: str
+    type: str
+    activation_status: ActivationStatus
+
+
 class SurroundingEvidenceV3(V3Model):
     source_pillar: Pillar
     relation: str
     adjustment_ratio: float | None
+    element_relation_id: str | None = None
+    related_relations: list[SurroundingRelationEvidenceV3] = Field(default_factory=list)
+    accounting_path: Literal[
+        'elemental_background', 'suppressed_by_active_structure',
+        'deferred_by_element_rule',
+    ] | None = None
+    accounting_relation_ids: list[str] = Field(default_factory=list)
+    structural_effect_status: Literal['unresolved', 'not_applicable'] | None = None
+    structural_power_delta: float | None = None
+    activation_status: ActivationStatus | None = None
+    status_reason: str | None = None
 
 
 class StrengthEvidenceV3(V3Model):
@@ -107,6 +125,11 @@ class BranchStrengthV3(V3Model):
     base_power: float | None
     after_stem_power: float | None
     effective_power: float | None
+    post_effect_power: float | None
+    post_effect_status: Literal[
+        'not_calculated', 'incomplete', 'provisional', 'resolved',
+    ]
+    influence_path_ids: list[str]
     strength_evidence: StrengthEvidenceV3
     calculation_trace: CalculationTraceV3
 
@@ -134,12 +157,25 @@ class DirectionalEffectV3(V3Model):
     interaction_intensity: float | None
     target_exposure: float | None
     applied_power_delta: float | None
+    mechanism: str | None = None
+    candidate_loss_rate: float | None = None
+
+
+class SelfEffectV3(V3Model):
+    pillar: Pillar
+    mechanism: Literal['attacker_self_loss']
+    candidate_loss_rate: float
+    power_delta: float
 
 
 class RelationMetricsV3(V3Model):
     potential_formula_id: str
     exposure_formula_id: str
     directional_effects: list[DirectionalEffectV3]
+    self_effects: list[SelfEffectV3] = Field(default_factory=list)
+    applied_formula_id: str | None = None
+    calibration_version: str | None = None
+    calibration_status: Literal['provisional'] | None = None
 
 
 class RuleEvidenceV3(V3Model):
@@ -250,6 +286,7 @@ class BranchDynamicsV3(V3Model):
     branch_strengths: BranchStrengthsV3
     pairwise: list[BranchPairV3]
     groups: list[BranchGroupV3]
+    influence_paths: list[dict[str, Any]]
 
 
 class ResolutionCaseV3(V3Model):

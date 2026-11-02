@@ -9,9 +9,11 @@ from schemas.branch_dynamics_v3 import (
     BranchStrengthsV3, ChartContextV3, MetaV3,
 )
 from services.branch_dynamics import analyze_branch_dynamics
+from services.branch_clash_effects import allocate_branch_losses
 from services.branch_dynamics_v3_assembler import (
     assemble_branch_dynamics_v3_foundation, assemble_branch_pairs_v3,
-    assemble_branch_groups_v3, assemble_interaction_resolution_v3,
+    assemble_branch_groups_v3, assemble_branch_influence_paths_v3,
+    assemble_interaction_resolution_v3,
 )
 from services.interaction_matrix import build_interaction_matrix
 from services.relation_rules import V3_RULE_VERSION
@@ -46,6 +48,9 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
                 self.assertEqual(strength['base_power'], original['base_power'])
                 self.assertEqual(strength['after_stem_power'], original['after_stem_power'])
                 self.assertEqual(strength['effective_power'], original['effective_power'])
+                self.assertIsNone(strength['post_effect_power'])
+                self.assertEqual(strength['post_effect_status'], 'not_calculated')
+                self.assertEqual(strength['influence_path_ids'], [])
                 self.assertEqual(strength['strength_evidence']['season']['factor'],
                                  original['components']['seasonal_factor'])
                 self.assertEqual(strength['strength_evidence']['season']['month_branch'], '卯')
@@ -76,6 +81,34 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
                 powers[stem] = month['after_stem_power']
         self.assertGreater(powers['癸'], powers['丁'])
         self.assertGreater(powers['丁'], powers['辛'])
+
+    def test_surroundings_keep_support_accounting_path_and_overlapping_relation(self):
+        for branches, expected_path, expected_type in [
+            ('子午寅辰', 'elemental_background', '반합(半合)'),
+            ('子午卯辰', 'suppressed_by_active_structure', '파(破)'),
+        ]:
+            with self.subTest(branches=branches):
+                source, result = assemble(list('甲甲甲甲'), list(branches))
+                original = next(item for item in source['branch_strengths']['month']['ambient_evidence']
+                                if item['source_pillar'] == 'day')
+                evidence = next(item for item in result['branch_strengths']['month']
+                                ['strength_evidence']['surroundings']
+                                if item['source_pillar'] == 'day')
+                self.assertEqual(evidence['accounting_path'], expected_path)
+                expected_id = ('branch:generate:month:day' if expected_path ==
+                               'elemental_background' else 'branch:break:month:day')
+                self.assertEqual(evidence['accounting_relation_ids'], [expected_id])
+                self.assertEqual(evidence['element_relation_id'],
+                                 'branch:generate:month:day')
+                self.assertIn(expected_type,
+                              {item['type'] for item in evidence['related_relations']})
+                self.assertTrue(all(item['relation_id'].startswith('branch:')
+                                    for item in evidence['related_relations']))
+                self.assertEqual(evidence['adjustment_ratio'],
+                                 original['adjustment_ratio'])
+                self.assertEqual(evidence['structural_effect_status'],
+                                 original['structural_effect_status'])
+                self.assertIsNone(evidence['structural_power_delta'])
 
     def test_rejects_strengths_from_another_chart(self):
         stems, branches = list('己丁辛己'), list('亥卯未亥')
@@ -164,7 +197,7 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
                       [item['rule_id'] for item in generation['evidence']])
         self.assertEqual(self.relation(pairs, 'month:day', 'break')['label_ko'], '파')
         self.assertEqual(self.relation(pairs, 'year:day', 'clash')['calculation_status'],
-                         'potential_calculated')
+                         'provisional_calculated')
         self.assertEqual(self.relation(pairs, 'year:day', 'control')['calculation_status'],
                          'resolved')
 
@@ -208,7 +241,7 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
         self.assertEqual(relation['relation_id'], 'branch:pierce:year:month')
         self.assertEqual(relation['calculation_status'], 'potential_calculated')
 
-    def test_month_stem_changes_clash_potential_without_reversing_control(self):
+    def test_month_stem_changes_ziwu_shock_and_self_loss_without_reversing_control(self):
         branches = list('子午辰寅')
         supported_source, _ = assemble(list('甲甲甲甲'), branches)
         pressured_source, _ = assemble(list('甲壬甲甲'), branches)
@@ -219,22 +252,94 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
         strong = strong_clash['metrics']['directional_effects']
         weak = weak_clash['metrics']['directional_effects']
         self.assertEqual([(item['from_pillar'], item['to_pillar']) for item in strong],
-                         [('year', 'month'), ('month', 'year')])
-        self.assertGreater(strong[1]['source_capacity'], weak[1]['source_capacity'])
-        self.assertGreater(strong[1]['interaction_intensity'],
-                           weak[1]['interaction_intensity'])
+                         [('year', 'month')])
+        self.assertEqual(strong_clash['direction'],
+                         {'from_pillar': 'year', 'to_pillar': 'month'})
+        self.assertEqual(strong_clash['calculation_status'], 'provisional_calculated')
+        self.assertEqual(strong_clash['metrics']['calibration_status'], 'provisional')
+        self.assertGreater(strong_clash['power_before']['month'],
+                           weak_clash['power_before']['month'])
         self.assertEqual(strong[0]['interaction_intensity'], weak[0]['interaction_intensity'])
-        self.assertEqual(strong[1]['interaction_intensity'], round(
-            strong[1]['source_capacity'] * strong[1]['distance_weight'] *
-            strong[1]['coefficient'], 4))
-        self.assertEqual(strong[1]['target_exposure'], round(
-            strong[1]['interaction_intensity'] * strong[1]['source_capacity'] /
-            (strong[1]['source_capacity'] + strong[0]['source_capacity']), 4))
-        self.assertEqual(strong_clash['force_dominance'], 'month')
+        self.assertLess(strong[0]['candidate_loss_rate'], weak[0]['candidate_loss_rate'])
+        strong_self = strong_clash['metrics']['self_effects'][0]
+        weak_self = weak_clash['metrics']['self_effects'][0]
+        self.assertEqual(strong_self['pillar'], 'year')
+        self.assertEqual(strong_self['mechanism'], 'attacker_self_loss')
+        self.assertGreater(strong_self['candidate_loss_rate'],
+                           weak_self['candidate_loss_rate'])
+        self.assertLess(strong_self['power_delta'], weak_self['power_delta'])
+        self.assertIsNone(strong_clash['force_dominance'])
+        self.assertEqual(strong_clash['roles'], {'year': 'attacker', 'month': 'resistor'})
         control = self.relation(supported, 'year:month', 'control')
         self.assertEqual(control['direction'], {'from_pillar': 'year', 'to_pillar': 'month'})
         self.assertEqual(len(control['metrics']['directional_effects']), 1)
         self.assertEqual(control['metrics']['directional_effects'][0]['from_pillar'], 'year')
+
+    def test_ziwu_provisional_losses_follow_fixed_direction_and_calibration(self):
+        for stems, branches, expected_shock, expected_self in (
+            ('甲甲甲甲', '子午辰寅', -0.0412, -0.0619),
+            ('甲癸甲甲', '子午辰寅', -0.0469, -0.0587),
+            ('甲壬甲甲', '午子辰寅', -0.1436, -0.1011),
+        ):
+            with self.subTest(stems=stems, branches=branches):
+                source, _ = assemble(list(stems), list(branches))
+                pairs = assemble_branch_pairs_v3(list(branches), source)
+                clash = self.relation(pairs, 'year:month', 'clash')
+                zi = 'year' if branches[0] == '子' else 'month'
+                wu = 'month' if zi == 'year' else 'year'
+                self.assertEqual(clash['direction'],
+                                 {'from_pillar': zi, 'to_pillar': wu})
+                self.assertEqual(clash['calculation_status'], 'provisional_calculated')
+                metrics = clash['metrics']
+                self.assertEqual(metrics['calibration_version'], 'ziwu_clash_0.1')
+                self.assertEqual(metrics['directional_effects'][0]['applied_power_delta'],
+                                 expected_shock)
+                self.assertEqual(metrics['self_effects'][0]['power_delta'], expected_self)
+                self.assertEqual(metrics['self_effects'][0]['pillar'], zi)
+
+    def test_repeated_ziwu_clashes_allocate_one_bounded_loss_per_branch(self):
+        stems, branches = list('甲甲甲甲'), list('子午午午')
+        source, _ = assemble(stems, branches)
+        pairs = assemble_branch_pairs_v3(branches, source)
+        clashes = [self.relation(pairs, pair_id, 'clash')
+                   for pair_id in ('year:month', 'year:day', 'year:hour')]
+        self.assertEqual([relation['metrics']['self_effects'][0]['power_delta']
+                          for relation in clashes], [-0.0618, -0.0439, -0.0310])
+        total = round(sum(relation['metrics']['self_effects'][0]['power_delta']
+                          for relation in clashes), 4)
+        self.assertEqual(total, -0.1367)
+        self.assertGreaterEqual(source['branch_strengths']['year']['effective_power'] + total,
+                                0)
+
+    def test_two_zi_branches_share_one_wu_loss_budget(self):
+        stems, branches = list('甲甲甲甲'), list('子午子辰')
+        source, _ = assemble(stems, branches)
+        pairs = assemble_branch_pairs_v3(branches, source)
+        clashes = [self.relation(pairs, pair_id, 'clash')
+                   for pair_id in ('year:month', 'month:day')]
+        self.assertEqual([relation['direction'] for relation in clashes], [
+            {'from_pillar': 'year', 'to_pillar': 'month'},
+            {'from_pillar': 'day', 'to_pillar': 'month'},
+        ])
+        base = source['branch_strengths']['month']['effective_power']
+        rates = [relation['metrics']['directional_effects'][0]['candidate_loss_rate']
+                 for relation in clashes]
+        losses = [relation['metrics']['directional_effects'][0]['applied_power_delta']
+                  for relation in clashes]
+        self.assertEqual(round(sum(losses), 4),
+                         -round(base * (1 - (1 - rates[0]) * (1 - rates[1])), 4))
+        self.assertGreaterEqual(base + round(sum(losses), 4), 0)
+
+    def test_loss_allocation_is_order_independent_with_stable_tie_break(self):
+        candidates = [('branch:clash:year:day', 0.1),
+                      ('branch:clash:year:month', 0.1)]
+        forward = allocate_branch_losses(0.0006, candidates)
+        reverse = allocate_branch_losses(0.0006, list(reversed(candidates)))
+        self.assertEqual(forward, reverse)
+        self.assertEqual(forward, {
+            'branch:clash:year:day': -0.0001,
+            'branch:clash:year:month': 0.0,
+        })
 
     def test_conditional_potential_is_not_treated_as_applied_zero(self):
         stems, branches = list('甲甲甲甲'), list('申寅亥子')
@@ -291,7 +396,8 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
         response['meta'] = foundation['meta']
         response['chart_context'] = foundation['chart_context']
         response['branch_dynamics'] = {
-            'branch_strengths': foundation['branch_strengths'],
+            **assemble_branch_influence_paths_v3(
+                branches, foundation['branch_strengths'], pairs, groups),
             'pairwise': pairs, 'groups': groups,
         }
         response['interaction_resolution'] = assemble_interaction_resolution_v3(pairs, groups)
@@ -487,10 +593,12 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
         response = json.loads(fixture.read_text())
         response['meta'] = foundation['meta']
         response['chart_context'] = foundation['chart_context']
+        groups = assemble_branch_groups_v3(branches, source, pairs)
         response['branch_dynamics'] = {
-            'branch_strengths': foundation['branch_strengths'],
+            **assemble_branch_influence_paths_v3(
+                branches, foundation['branch_strengths'], pairs, groups),
             'pairwise': pairs,
-            'groups': assemble_branch_groups_v3(branches, source, pairs),
+            'groups': groups,
         }
         response['interaction_resolution'] = assemble_interaction_resolution_v3(
             pairs, response['branch_dynamics']['groups'])
