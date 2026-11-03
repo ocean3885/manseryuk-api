@@ -59,7 +59,7 @@ GET http://localhost:8000/?year=1995&month=5&day=12&hour=14&min=30&sl=sol&gen=�
 GET http://localhost:8000/relation-index?year=1995&month=5&day=12&hour=14&min=30&sl=sol&gen=남
 ```
 
-응답에는 `schema_version: "1.3-draft"`, 위치별 여덟 글자의 `characters`, 관계 본문 `relations`, 지원 범위를 설명하는 `coverage`가 있습니다. 각 글자의 `relation_ids`는 관계 본문을 참조합니다. `cross_layer:transmission:*`은 지장간과 실제 천간 글자가 일치해 투출된 **위치별 사실**입니다. 천간의 `stem_state`에는 기존 허실 분석의 원상태·현재상태, 통근/잔여 점수와 뿌리 지지 위치를 구분해 담습니다. `root_scope: all_four_branches_weighted`는 허실 점수가 **네 지지 전체와 거리 가중치**에서 나왔음을 명시합니다. 통근 점수·변허 판정은 잠정 모델의 기존 값을 옮긴 것이며, 투출 여부와 같은 판정이 아닙니다. `coverage.detected_only_relation_ids`는 후보만 발견하고 성립 여부를 아직 판정하지 않은 관계 ID입니다. `coverage.not_evaluated_mechanisms`는 현 규칙 범위 밖의 기전을 기록합니다. 관계의 `activation_status`는 탐지·성립 상태이며 세력 변화량이나 피해 확정값이 아닙니다. 이 경로는 기존 원국 분석의 결과로 조회 자료를 만들며, 기존 `GET /` 응답 형식에는 필드를 추가하지 않습니다. [8글자 관계 조회 계약](docs/character_relation_index_contract.md)에 지원 유형과 미지원 범위를 기록했습니다.
+응답에는 `schema_version: "1.6-draft"`, 위치별 여덟 글자의 `characters`, 관계 본문 `relations`, 지원 범위를 설명하는 `coverage`가 있습니다. 각 글자의 `relation_ids`는 관계 본문을 참조합니다. `cross_layer:transmission:*`은 지장간과 실제 천간 글자가 일치해 투출된 **위치별 사실**입니다. 천간의 `stem_state`에는 동주 통근 여부 `has_same_pillar_root`, 원상태·현재상태·위치 가중치 없는 점수·뿌리 지지와 별도 `external_support_score / external_support_branch_ids`를 담습니다. `root_scope: same_pillar_only`는 허실이 **동주 지지**로 판정됐음을 명시합니다. 타주 지원은 허투·실 판정에 합산하지 않습니다. 통근 점수가 양수이면 실이며, 점수 크기는 뿌리 강도 정보로 별도 표시합니다. 통근 점수·변허 판정은 잠정 모델의 기존 계수를 사용하며, 투출 여부와 같은 판정이 아닙니다. `coverage.detected_only_relation_ids`는 후보만 발견하고 성립 여부를 아직 판정하지 않은 관계 ID입니다. `coverage.not_evaluated_mechanisms`는 현 규칙 범위 밖의 기전을 기록합니다. 관계의 `activation_status`는 탐지·성립 상태이며 세력 변화량이나 피해 확정값이 아닙니다. 이 경로는 기존 원국 분석의 결과로 조회 자료를 만들며, 기존 `GET /` 응답 형식에는 동주 통근 여부 필드가 추가됩니다. [8글자 관계 조회 계약](docs/character_relation_index_contract.md)에 지원 유형과 미지원 범위를 기록했습니다.
 
 ---
 
@@ -139,6 +139,10 @@ GET http://localhost:8000/relation-index?year=1995&month=5&day=12&hour=14&min=30
 - `details`: 신살, 형충회합 등의 세부 데이터
 
 `details[기둥].branch.jijanggan/transmitted/hidden`은 지지 세력 계산과 같은 상세 지장간 표를 기준으로 합니다. 같은 지장간 글자가 천간의 두 위치에 보이면 `transmitted`에도 위치별 두 항목이 나옵니다. 기존 첫 위치만 표시하던 응답과 결과가 달라질 수 있으며, 투출 사실은 천간의 실·허 판정과 구분합니다.
+
+`details[기둥].stem.score/status/root_info`는 현재 **동주 지지 기준**입니다. `same_pillar_root_exists`는 동주 통근 유무이며, `score`는 위치 가중치를 곱하지 않은 동주 계수입니다. 양의 점수는 크기에 관계없이 실이며, `0`은 허투입니다. 다른 세 지지의 기존 가중 지원은 `external_support_score/external_support_info`로 별도 표시됩니다. 동주 뿌리가 없으면 타주 지원이 있어도 허투입니다. 통근 점수를 입력으로 사용하는 `advanced_analysis.five_elements.scores`도 이전 전주 합산 방식과 값이 달라질 수 있습니다.
+
+`analysis.summary.total_energy_balance`는 동주 통근/무근 개수만 알리고 원국 전체 신강·신약은 미판정으로 표시합니다. 동주 통근이 여러 천간에 있다는 사실만으로 전체 세력을 단정하지 않습니다.
 
 허실의 관계 반영에서는 `active`인 충·천·형만 뿌리 영향으로 봅니다. 격위 자형의 `candidate_only`는 뿌리 점수에서 제외하지 않습니다. 실·허투·변허의 기존 점수 기준과 뿌리 전체 제외 방식은 잠정 모델입니다.
 
@@ -232,24 +236,25 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 | 丁庚丙丁 / 巳午午午 | 일간·시간 | 실 → 변허 |
 
 #### 4. `xu_shi_dynamics` (허와 실 및 실자변허 實者變虛)
-원국의 통근 점수와 지지 충·형·천 관계를 이용한 규칙 기반 분석입니다. `original_status`와 `current_status`는 **같은 원국의 관계 반영 전후**를 뜻하며, 대운·세운에 따른 시기별 변화가 아닙니다.
+원국의 **동주 통근 점수**와 지지 충·형·천 관계를 이용한 규칙 기반 분석입니다. 다른 기둥 지지의 지원은 `analysis.details[기둥].stem.external_support_*`와 `relation-index`의 천간 상태에서 별도로 확인합니다. `original_status`와 `current_status`는 **같은 원국의 관계 반영 전후**를 뜻하며, 대운·세운에 따른 시기별 변화가 아닙니다. [동주 기준 전환 기록](docs/same_pillar_root_migration.md)에 이전 응답과의 차이를 정리했습니다.
 
 | 필드 | 의미 |
 | --- | --- |
 | `analysis_scope` | `"natal"`: 원국 분석 |
-| `rule_version` | `"1.0.0"`: 기존 판정 규칙을 최초로 명시한 버전 |
+| `rule_version` | 현행 `"3.0.0"`: 동주 통근 점수 양수면 실, 0이면 허투. 명시적 전주 회귀 입력은 `"1.0.0"` |
+| `root_scope` | 현행 `"same_pillar_only"`. 기존 회귀 프로필은 `"all_four_branches_weighted"` |
 | `pillars` | `year`, `month`, `day`, `hour` 천간별 분석 |
-| `shared_roots` | 둘 이상의 천간이 공유하는 지지별 뿌리와 각 천간의 기여도·최종 상태 |
+| `shared_roots` | 현행 동주 기준에서는 각 천간의 뿌리가 자기 지지이므로 빈 배열. 기존 전주 회귀 프로필의 공통 뿌리 설명 필드 유지 |
 | `impact_groups` | 충·형·천 관계별로 기여도가 제외된 뿌리 위치와 영향을 받은 천간 목록 |
 | `real_count` | 관계 반영 후 실(實)인 천간 수 |
 | `transformed_empty_count` | 실에서 변허(變虛)로 분류된 천간 수 |
 | `hollow_penetrate_count` | 허투(虛透)인 천간 수 |
-| `weak_count` | 허(虛)인 천간 수. 네 종류의 개수 합은 4 |
+| `weak_count` | 기존 전주 회귀 프로필의 허(虛) 천간 수. 현행 동주 프로필에서는 항상 0이며, 네 종류의 개수 합은 4 |
 | `overall_status` | 실제 상태 분포와 통근에 영향을 준 관계 요약 |
 
-`pillars.*`의 기존 `position`, `char`, `ten_star`, `score`, `original_status`, `current_status`, `is_transformed`, `reason`, `meaning` 필드는 유지합니다. 동일한 통근·관계 입력에서 허실 점수와 판정 규칙은 기존과 동일하며, 설명 문구는 구조와 근거 중심으로 변경했습니다. 관계 수집의 누락 수정으로 입력 근거가 달라지는 경우는 위 변경 내역을 참고하세요.
+`pillars.*`의 `position`, `char`, `ten_star`, `score`, `original_status`, `current_status`, `is_transformed`, `reason`, `meaning` 필드는 유지하지만 **점수와 상태는 동주 범위 전환으로 달라질 수 있습니다.** [전환 기록](docs/same_pillar_root_migration.md)의 세 달력 원국을 참고하세요.
 
-- `score`: 관계 반영 **전** 통근 총점. 확률이나 정규화된 0~1 점수가 아닙니다.
+- `score`: 관계 반영 **전 동주 통근 점수**. 위치 가중치를 곱하지 않은 `ROOT_STRENGTH` 계수이며 타주 지원 점수는 합산하지 않습니다. 확률이나 정규화된 0~1 점수가 아닙니다.
 - `effective_score`: 관계에 연결된 뿌리를 제외하고 남은 개별 통근 점수의 합.
 - `root_evidence`: 뿌리별 `pillar`, `position`, `branch_char`, `score`, `is_affected`, `effective_score`, `interactions`.
 - `root_evidence[].interactions`: 해당 뿌리에 영향을 준 충·형·천의 `type`, `name`, `from_pillar`, `to_pillar`, `weight`, `is_adjacent`. 가중치와 인접성은 근거로 공개하지만 v1 감점에는 사용하지 않습니다. 동일 항목은 중복 표시하지 않습니다.
@@ -260,15 +265,21 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 - `root_structure.primary_root_pillars`: 관계 반영 전 개별 기여도가 가장 큰 뿌리 위치. 동점이면 모두 포함하고 뿌리가 없으면 빈 목록입니다.
 - `root_structure.remaining_root_pillars`: 관계 반영 후 양의 기여도가 남은 뿌리 위치.
 - `root_structure.excluded_root_pillars`: 충·형·천로 기여도가 제외된 뿌리 위치.
-- `root_structure.remaining_support`: 잔여 점수만으로 분류한 `none`(0), `below_threshold`(0 초과 0.5 미만), `meets_threshold`(0.5 이상). 변화 이력을 포함하는 `current_status`와 구별합니다.
+- `root_structure.remaining_support`: 현행 동주 프로필에서 잔여 기여도 `none`(0) 또는 `present`(0 초과). 전주 v1 회귀 프로필에만 `below_threshold`(0 초과 0.5 미만), `meets_threshold`(0.5 이상)를 사용합니다. 변화 이력을 포함하는 `current_status`와 구별합니다.
 
-`shared_roots[]`는 `root_pillar`, `branch_char`, `is_affected`, `interactions`, `dependents`를 제공합니다. `dependents[]`의 `stem_pillar`, `score`, `effective_score`, `current_status`로 같은 뿌리가 각 천간에 기여한 정도와 최종 결과를 확인합니다. 같은 지지 글자가 반복되어도 **위치가 다르면 다른 뿌리**입니다.
+기존 전주 회귀 프로필의 `shared_roots[]`는 `root_pillar`, `branch_char`, `is_affected`, `interactions`, `dependents`를 제공합니다. 현행 동주 기준의 원국 응답에서는 공유 뿌리로 합산하지 않습니다.
 
 `impact_groups[]`는 `interaction`, `affected_root_pillars`, `affected_stem_pillars`를 제공합니다. 같은 관계의 양쪽에 뿌리가 있거나 여러 천간이 연결돼도 위치 목록은 중복 집계하지 않습니다. 이는 기존 근거의 영향 범위를 모은 것으로, 특정 관계 하나가 단독으로 변허를 일으켰다는 판정이나 새로운 감점이 아닙니다.
 
-예를 들어 년간·월간이 월지 뿌리를 공유하고 해당 뿌리가 제외되었을 때, 년간은 일지에 잔여 점수 `0.6`이 있어 실을 유지하고 월간은 시지에 `0.3`만 남아 변허로 분류될 수 있습니다. `overall_status`는 공통 뿌리를 먼저 설명하고 각 천간의 잔존 기반과 결과를 이어서 요약합니다.
+다음 점수 사례는 **전주 v1 회귀 입력의 참고 기록**이다. 현행 동주 v3에서는 한 천간에 다른 기둥의 뿌리를 합산하지 않는다.
 
-**v1 판정 규칙과 한계**
+**현행 동주 v3의 허실 판정**
+
+1. 동주 통근 점수가 `0`이면 허투, 양수면 실입니다. 약한 통근도 실로 분류하고 점수로 강도를 별도 표시합니다.
+2. 충·형·천에 연결된 동주 뿌리의 기여도를 잠정 규칙에 따라 전부 제외합니다. 실이었으나 잔여 기여도가 `0`이면 변허입니다.
+3. 원래 허투인 천간은 타주 지원이 있더라도 허투를 유지합니다. `weak_count`는 현행 프로필에서 `0`입니다.
+
+**전주 v1 회귀 규칙과 한계(아래 전주 예시는 v1 참고)**
 
 1. 원점수가 `0.5` 이상이면 실, `0`이면 허투, 그 사이이면 허입니다.
 2. 지지 충·형·천에 참여한 양쪽 지지의 뿌리 기여도를 모두 `0`으로 취급합니다. 관계 유형별 손상률, 거리별 감점, 합에 따른 회복, 파는 반영하지 않습니다.
@@ -276,7 +287,7 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 4. 원래 허·허투는 분류를 유지합니다. 따라서 원래 허인 천간의 잔여 점수가 `0`이어도 허투나 변허로 바뀌지 않습니다.
 5. 원점수와 개별 뿌리 점수는 상위 통근 계산기에서 각각 소수 둘째 자리로 반올림합니다. 이 때문에 뿌리 점수 합과 원점수가 미세하게 다를 수 있습니다. 기존 판정 호환성을 위해 잔여 합산값은 추가 반올림 없이 비교·반환합니다.
 
-**수치·상태 계약 (`rule_version: "1.0.0"` 유지)**
+**전주 v1 수치·상태 계약의 회귀 기록 (`rule_version: "1.0.0"`)**
 
 내부 통근 계산은 Python `float`를 사용합니다. 총점은 반올림 전 개별 기여도를 합친 뒤 `round(total, 2)`로 반환하고, 뿌리별 점수는 각각 `round(contribution, 2)`로 반환합니다. 허실의 최초 분류는 반환된 총점으로 판정하고, 잔여 점수는 반환된 개별 점수를 년·월·일·시 순서로 합산합니다. epsilon 보정이나 판정 직전 반올림은 적용하지 않습니다. 예를 들어 계산값 `0.49999999999999994`는 `0.5` 미만입니다. 화면에서 소수 자릿수를 줄여 표시하더라도 상태를 표시값으로 재계산하지 않습니다.
 
@@ -288,7 +299,7 @@ AI 챗봇/상담 에이전트가 풍부한 해석 프롬프트와 정밀한 명�
 | 허 | 관계 유무·잔여 점수와 무관 | 허 | `maintained` |
 | 허투 | 관계 유무·잔여 점수와 무관 | 허투 | `maintained` |
 
-`remaining_support`는 위 전이표와 독립적으로 잔여 점수를 나타냅니다. 따라서 `current_status: "허(虛)"`와 `remaining_support: "none"`이 함께 나올 수 있습니다. 점수 정밀도, 임계값 또는 전이 규칙 변경은 향후 판정 버전 변경으로 다루며, 이번 구조 정보 추가는 기존 판정 버전을 유지합니다.
+전주 v1의 `remaining_support`는 위 전이표와 독립적으로 잔여 점수를 나타냅니다. 따라서 회귀 프로필에서는 `current_status: "허(虛)"`와 `remaining_support: "none"`이 함께 나올 수 있습니다. 현행 동주 v3에서는 `0.5` 임계값을 사용하지 않습니다.
 
 가상 통근 입력에 대한 `pillars.year`의 점수·근거 예시(일부 필드 발췌):
 

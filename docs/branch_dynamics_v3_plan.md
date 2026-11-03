@@ -16,6 +16,12 @@
 
 **통근 범위 명시(2026-11-03):** [19쌍 규칙 검토](./root_strength_rule_review.md) 결과, 현 `ROOT_STRENGTH`의 양의 항목은 상세 지장간에 동오행 글자가 있는 구조와 일치하지만 16쌍은 정확한 글자가 다르다. 段建業 명의 교재의 동주 통근 설명과 현 네 지지 가중 계산은 적용 범위가 달라 [관계 조회](../schemas/character_relation_index.py)의 `root_scope: all_four_branches_weighted`로 표시한다. 조회 버전은 `1.3-draft`다. 계수·허실 임계값은 변경하지 않는다.
 
+**동주 통근 결정(2026-11-04):** 사용자 결정에 따라 [전환 기록](./same_pillar_root_migration.md)의 동주 기준을 원국 통근·허투와 [관계 조회](../schemas/character_relation_index.py)의 `stem_state`에 적용했다. 타주 지지의 이전 가중 지원은 별도 `external_support_*`로 표시하고 실·허투 판정 및 오행의 통근 입력에 합산하지 않는다. 허실 규칙 버전은 `2.0.0`, 조회 버전은 `1.4-draft`다. 위 `1.3-draft` 단락은 변경 전 범위의 검토 기록이다.
+
+**동주 위치 가중치 제거(2026-11-04):** 후속 결정으로 동주 통근 여부를 양의 계수 존재로 명시하고, 동주 점수에서는 기둥 위치 가중치를 제거했다. 위치·거리 가중 계산은 타주 지원과 전주 회귀 옵션에만 남는다. 현행 허실 규칙 버전은 `2.1.0`, 관계 조회 버전은 `1.5-draft`다. 위 `2.0.0`·`1.4-draft` 표기는 최초 동주 전환 당시의 기록이다.
+
+**동주 허실 경계 제거(2026-11-04):** 동주 점수 `0`은 허투, 양수는 점수 크기에 관계없이 실로 판정한다. 약한 통근의 크기는 점수에 유지한다. 활성 관계로 동주 뿌리의 잔여 기여도가 계산상 `0`이 되면 변허를 표시한다. 현행 허실 규칙 버전은 `3.0.0`, 관계 조회 계약은 `1.6-draft`다. 위 `2.1.0`·`1.5-draft`는 직전 상태의 기록이다.
+
 [사용자 목표 출력 트리](./branch_dynamics_v3.json)를 **최신 목표 계약**으로 삼는다. 이 파일은 주석이 들어간 JSONC 형식의 설계 샘플이며, 현재 API 응답은 아니다. [이전 출력 초안](./branch_dynamics_target_contract.md)과 충돌하는 경우 v3를 우선 검토한다. 예시의 `null`, 빈 배열, 관계 ID와 가상 값은 확정된 계산 결과가 아니라 구현할 상태와 자료형을 설명한다.
 
 v3의 범위는 `meta`·`chart_context`·`stem_dynamics`·`branch_dynamics`·`interaction_resolution`·`work_dynamics`·`llm_interpretation_payload`다. 기존 [응답 스키마](../schemas/saju_analysis.py)에는 이 전체 트리가 없고 `advanced_analysis.branch_dynamics`만 일부 구현되어 있다. 기존 [계산기](../services/branch_dynamics.py)는 지지 세력·쌍별 잠재 작용량·삼합/방합 구조를 내지만 경합 판정이나 작공을 계산하지 않는다.

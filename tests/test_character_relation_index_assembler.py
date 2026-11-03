@@ -74,9 +74,21 @@ class CharacterRelationAssemblerTests(unittest.TestCase):
         self.assertEqual(result['characters']['month.stem']['stem_state'][
             'original_status'], '실(實)')
         self.assertEqual(result['characters']['month.stem']['stem_state'][
+            'root_score'], 0.2)
+        self.assertTrue(result['characters']['month.stem']['stem_state'][
+            'has_same_pillar_root'])
+        self.assertEqual(result['characters']['month.stem']['stem_state'][
             'current_status'], '변허(變虛)')
         self.assertEqual(result['characters']['month.stem']['stem_state'][
-            'root_scope'], 'all_four_branches_weighted')
+            'external_support_score'], 1.3)
+        self.assertEqual(result['characters']['month.stem']['stem_state'][
+            'root_scope'], 'same_pillar_only')
+        self.assertEqual(result['characters']['year.stem']['stem_state'][
+            'original_status'], '허투(虛透)')
+        self.assertFalse(result['characters']['year.stem']['stem_state'][
+            'has_same_pillar_root'])
+        self.assertEqual(result['characters']['year.stem']['stem_state'][
+            'external_support_score'], 0.21)
 
     def test_repeated_and_suppressed_groups_and_ziwu_direction(self):
         for stems, branches in (
@@ -127,6 +139,7 @@ class CharacterRelationAssemblerTests(unittest.TestCase):
         for pillar in ('year', 'month', 'day', 'hour'):
             state = result['characters'][f'{pillar}.stem']['stem_state']
             self.assertEqual(state['root_score'], 0)
+            self.assertFalse(state['has_same_pillar_root'])
             self.assertEqual(state['original_status'], '허투(虛透)')
             self.assertEqual(state['current_status'], '허투(虛透)')
             self.assertEqual(state['validation_status'], 'provisional')
@@ -151,6 +164,7 @@ class CharacterRelationAssemblerTests(unittest.TestCase):
                 self.assertEqual(state['root_score'], score)
                 self.assertEqual(state['original_status'], status)
                 self.assertEqual(state['root_branch_ids'], root_ids)
+                self.assertEqual(state['has_same_pillar_root'], bool(root_ids))
 
     def test_mixed_or_changed_source_results_are_rejected(self):
         source = inputs('乙己己庚', '巳丑未午')

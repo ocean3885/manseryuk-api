@@ -350,7 +350,8 @@ def _transmission_rows(stems, branches, analysis):
 def _stem_states(stems, branches, matrix, analysis, xu_shi):
     roots = [
         {'점수': analysis['pillars'][pillar]['stem']['score'],
-         '통근정보': analysis['pillars'][pillar]['stem']['root_info']}
+         '통근정보': analysis['pillars'][pillar]['stem']['root_info'],
+         '통근범위': analysis['pillars'][pillar]['stem']['root_scope']}
         for pillar in PILLARS
     ]
     calculated = analyze_xu_shi_dynamics(stems, branches, stems[2], roots, matrix)
@@ -363,18 +364,33 @@ def _stem_states(stems, branches, matrix, analysis, xu_shi):
         original = analysis['pillars'][pillar]['stem']
         if item['char'] != original['char'] or item['score'] != original['score']:
             raise ValueError(f'{pillar}: 천간 허실과 원국의 통근 근거가 다릅니다.')
+        if (source['root_scope'] != 'same_pillar_only'
+                or original['root_scope'] != 'same_pillar_only'):
+            raise ValueError(f'{pillar}: 동주 통근 범위가 아닙니다.')
+        has_same_pillar_root = bool(item['root_evidence'])
+        if original['same_pillar_root_exists'] != has_same_pillar_root:
+            raise ValueError(f'{pillar}: 동주 통근 여부와 근거가 다릅니다.')
+        external_info = original['external_support_info']
+        if original['external_support_score'] < 0:
+            raise ValueError(f'{pillar}: 타주 지원 점수가 잘못되었습니다.')
         result[f'{pillar}.stem'] = {
             'original_status': item['original_status'],
             'current_status': item['current_status'],
             'root_score': item['score'],
+            'has_same_pillar_root': has_same_pillar_root,
             'remaining_score': item['effective_score'],
             'root_branch_ids': [f"{root['pillar']}.branch"
                                 for root in item['root_evidence']],
             'affected_root_branch_ids': [f"{root['pillar']}.branch"
                                          for root in item['root_evidence']
                                          if root['is_affected']],
+            'external_support_score': original['external_support_score'],
+            'external_support_branch_ids': [
+                f"{PILLARS[('년', '월', '일', '시').index(root['position'])]}.branch"
+                for root in external_info
+            ],
             'source_rule_version': source['rule_version'],
-            'root_scope': 'all_four_branches_weighted',
+            'root_scope': 'same_pillar_only',
             'validation_status': 'provisional',
         }
     return result
@@ -413,7 +429,7 @@ def assemble_character_relation_index(stems, branches, interactions, analysis,
         for participant in row['participants']:
             characters[participant]['relation_ids'].append(row['relation_id'])
     return CharacterRelationIndex.model_validate({
-        'schema_version': '1.3-draft', 'characters': characters, 'relations': rows,
+        'schema_version': '1.6-draft', 'characters': characters, 'relations': rows,
         'coverage': {
             'rule_scope': 'registered_rules_partial',
             'transmission_basis': 'jijanggan_detailed_exact_match',

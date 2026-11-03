@@ -52,22 +52,35 @@ class StemRootingState(_ContractModel):
     original_status: Literal['실(實)', '허(虛)', '허투(虛透)']
     current_status: Literal['실(實)', '허(虛)', '허투(虛透)', '변허(變虛)']
     root_score: float
+    has_same_pillar_root: bool
     remaining_score: float
     root_branch_ids: list[CharacterId]
     affected_root_branch_ids: list[CharacterId]
+    external_support_score: float
+    external_support_branch_ids: list[CharacterId]
     source_rule_version: str
-    root_scope: Literal['all_four_branches_weighted']
+    root_scope: Literal['same_pillar_only']
     validation_status: Literal['provisional']
 
     @model_validator(mode='after')
     def check_roots(self):
         if (self.root_score < 0 or self.remaining_score < 0
+                or self.external_support_score < 0
                 or any(not item.endswith('.branch') for item in self.root_branch_ids)
+                or any(not item.endswith('.branch')
+                       for item in self.external_support_branch_ids)
                 or any(item not in self.root_branch_ids
                        for item in self.affected_root_branch_ids)
                 or len(self.root_branch_ids) != len(set(self.root_branch_ids))
-                or len(self.affected_root_branch_ids) != len(set(self.affected_root_branch_ids))):
+                or len(self.affected_root_branch_ids) != len(set(self.affected_root_branch_ids))
+                or len(self.external_support_branch_ids) != len(
+                    set(self.external_support_branch_ids))
+                or set(self.root_branch_ids) & set(self.external_support_branch_ids)):
             raise ValueError('천간 통근의 점수·지지 근거가 맞지 않습니다.')
+        if (self.has_same_pillar_root != bool(self.root_branch_ids)
+                or (self.has_same_pillar_root and self.root_score <= 0)
+                or (not self.has_same_pillar_root and self.root_score != 0)):
+            raise ValueError('동주 통근 여부와 근거가 맞지 않습니다.')
         return self
 
 
@@ -196,7 +209,7 @@ class DetectionCoverage(_ContractModel):
 
 
 class CharacterRelationIndex(_ContractModel):
-    schema_version: Literal['1.3-draft']
+    schema_version: Literal['1.6-draft']
     characters: dict[CharacterId, CharacterNode]
     relations: list[CharacterRelation]
     coverage: DetectionCoverage

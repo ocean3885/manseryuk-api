@@ -6,15 +6,15 @@
 
 ```json
 {
-  "schema_version": "1.3-draft",
+  "schema_version": "1.6-draft",
   "characters": {
-    "year.stem": {"char": "乙", "relation_ids": ["stem:control:year:month"], "stem_state": {"original_status": "허(虛)", "current_status": "허(虛)", "root_score": 0.21, "remaining_score": 0.0, "root_branch_ids": ["day.branch"], "affected_root_branch_ids": ["day.branch"], "source_rule_version": "1.0.0", "root_scope": "all_four_branches_weighted", "validation_status": "provisional"}},
+    "year.stem": {"char": "乙", "relation_ids": ["stem:control:year:month"], "stem_state": {"original_status": "허투(虛透)", "current_status": "허투(虛透)", "root_score": 0.0, "has_same_pillar_root": false, "remaining_score": 0.0, "root_branch_ids": [], "affected_root_branch_ids": [], "external_support_score": 0.21, "external_support_branch_ids": ["day.branch"], "source_rule_version": "3.0.0", "root_scope": "same_pillar_only", "validation_status": "provisional"}},
     "year.branch": {"char": "巳", "relation_ids": []},
-    "month.stem": {"char": "己", "relation_ids": ["stem:control:year:month"], "stem_state": {"original_status": "실(實)", "current_status": "변허(變虛)", "root_score": 1.7, "remaining_score": 0.35, "root_branch_ids": ["year.branch", "month.branch", "day.branch", "hour.branch"], "affected_root_branch_ids": ["month.branch", "day.branch", "hour.branch"], "source_rule_version": "1.0.0", "root_scope": "all_four_branches_weighted", "validation_status": "provisional"}},
+    "month.stem": {"char": "己", "relation_ids": ["stem:control:year:month"], "stem_state": {"original_status": "실(實)", "current_status": "변허(變虛)", "root_score": 0.2, "has_same_pillar_root": true, "remaining_score": 0.0, "root_branch_ids": ["month.branch"], "affected_root_branch_ids": ["month.branch"], "external_support_score": 1.3, "external_support_branch_ids": ["year.branch", "day.branch", "hour.branch"], "source_rule_version": "3.0.0", "root_scope": "same_pillar_only", "validation_status": "provisional"}},
     "month.branch": {"char": "丑", "relation_ids": []},
-    "day.stem": {"char": "己", "relation_ids": [], "stem_state": {"original_status": "실(實)", "current_status": "변허(變虛)", "root_score": 2.34, "remaining_score": 0.14, "root_branch_ids": ["year.branch", "month.branch", "day.branch", "hour.branch"], "affected_root_branch_ids": ["month.branch", "day.branch", "hour.branch"], "source_rule_version": "1.0.0", "root_scope": "all_four_branches_weighted", "validation_status": "provisional"}},
+    "day.stem": {"char": "己", "relation_ids": [], "stem_state": {"original_status": "실(實)", "current_status": "변허(變虛)", "root_score": 1.0, "has_same_pillar_root": true, "remaining_score": 0.0, "root_branch_ids": ["day.branch"], "affected_root_branch_ids": ["day.branch"], "external_support_score": 0.84, "external_support_branch_ids": ["year.branch", "month.branch", "hour.branch"], "source_rule_version": "3.0.0", "root_scope": "same_pillar_only", "validation_status": "provisional"}},
     "day.branch": {"char": "未", "relation_ids": []},
-    "hour.stem": {"char": "庚", "relation_ids": [], "stem_state": {"original_status": "허(虛)", "current_status": "허(虛)", "root_score": 0.28, "remaining_score": 0.08, "root_branch_ids": ["year.branch", "month.branch"], "affected_root_branch_ids": ["month.branch"], "source_rule_version": "1.0.0", "root_scope": "all_four_branches_weighted", "validation_status": "provisional"}},
+    "hour.stem": {"char": "庚", "relation_ids": [], "stem_state": {"original_status": "허투(虛透)", "current_status": "허투(虛透)", "root_score": 0.0, "has_same_pillar_root": false, "remaining_score": 0.0, "root_branch_ids": [], "affected_root_branch_ids": [], "external_support_score": 0.28, "external_support_branch_ids": ["year.branch", "month.branch"], "source_rule_version": "3.0.0", "root_scope": "same_pillar_only", "validation_status": "provisional"}},
     "hour.branch": {"char": "午", "relation_ids": []}
   },
   "relations": [
@@ -54,9 +54,9 @@
 
 | 필드 | 이 단계의 뜻과 검증 |
 | --- | --- |
-| `schema_version` | 독립 조회 계약의 버전 `1.3-draft`. 투출과 천간 허실 근거를 포함. 지지 v3·현행 API 버전과 혼합하지 않음 |
+| `schema_version` | 독립 조회 계약의 버전 `1.6-draft`. 동주 통근 여부·무가중 점수와 타주 가중 지원을 분리. 동주 양의 통근은 점수 크기에 관계없이 실로 표시. 지지 v3·현행 API 버전과 혼합하지 않음 |
 | `characters` | `year/month/day/hour × stem/branch` 정확히 8개. 실제 천간/지지 한 글자와 중앙 관계 ID 참조 목록. 같은 글자도 위치별로 별개 |
-| `characters[천간].stem_state` | 기존 허실 계산의 `original_status / current_status`, 통근 원점수/잔여점수, 뿌리 지지/영향받은 지지 위치, 규칙 버전과 `root_scope: all_four_branches_weighted`. 지지 글자에는 `null`. `provisional`은 임시 통근·관계 반영 모델의 상태 |
+| `characters[천간].stem_state` | 동주 기준 허실의 `original_status / current_status`, 위치 가중치 없는 통근 원점수/잔여점수, 명시적 `has_same_pillar_root`, 동주 뿌리, 별도 `external_support_score / external_support_branch_ids`, 규칙 버전과 `root_scope: same_pillar_only`. 지지 글자에는 `null`. `provisional`은 임시 계수·뿌리 영향 모델의 상태 |
 | `relations[].relation_id` | 한 원국 안의 유일한 관계 ID. 쌍·동주 관계는 유형과 위치로 구성; 그룹은 기존 v3 그룹 ID를 재사용할 수 있음 |
 | `type`·`participants` | `stem`/`branch` 쌍은 해당 종류 두 글자, `same_pillar`는 같은 기둥의 간·지, `group`은 지지 3~4개. 참여 순서는 연·월·일·시 |
 | `activation_status`·`status_reason` | 탐지·후보·성립·조건부·억제 사실. 조건부·억제는 이유 필수. 이 상태는 실제 영향량의 완성 여부가 아님 |
@@ -75,12 +75,12 @@
 
 [120개 천간·지지 조합의 교차 대조](./transmission_rooting_alignment_audit.md)에서 글자 일치만 3쌍, 통근 인정만 16쌍을 확인했다. 네 통제 원국의 `relation-index`에서도 투출 관계와 허실 원상태가 서로 다른 판정으로 유지된다.
 
-[불일치 19쌍 규칙 검토](./root_strength_rule_review.md)는 통근만 인정한 16쌍이 모두 **같은 오행의 다른 지장간 글자**를 갖고, 글자 일치만 한 3쌍이 모두 **戊 초기 `7/30`**임을 확인했다. 이는 코드 자료의 분류이지 각 계수의 승인 근거가 아니다. 段建業 명의 교재가 동주 통근을 말하는 데 비해 현 계산은 네 지지 가중치를 쓰므로 `root_scope`를 명시한다.
+[불일치 19쌍 규칙 검토](./root_strength_rule_review.md)는 통근만 인정한 16쌍이 모두 **같은 오행의 다른 지장간 글자**를 갖고, 글자 일치만 한 3쌍이 모두 **戊 초기 `7/30`**임을 확인했다. 이는 코드 자료의 분류이지 각 계수의 승인 근거가 아니다. [동주 기준 전환](./same_pillar_root_migration.md)에 따라 현재 허실은 동주 지지로 판정하며 타주 지원은 별도 값이다.
 
 - [기존 투출 판정](../services/analysis.py)은 지지의 지장간과 원국 네 천간의 **동일 글자**를 대조한다. 반복된 천간을 `all_stems.index()`로 첫 위치에만 연결하던 문제를 고쳐 **모든 일치 위치**를 기록한다. 지지의 `jijanggan`, `transmitted`, `hidden`은 이제 [지지 세력 계산](../services/branch_dynamics.py)이 사용하는 `JIJANGGAN_DETAILED`의 글자·초기/중기/정기 표기를 함께 사용한다.
 - 기존 `ZHI_ZANG`에는 없지만 상세표에는 들어 있는 글자는 **子의 壬, 卯의 甲, 午의 丙, 酉의 庚, 亥의 戊**다. 이 다섯 지지에서 새 투출 후보·기존 원국 응답의 지장간 목록이 달라질 수 있다. 상세표를 프로젝트 내부 기준으로 택한 것이며 학파 전체의 지장간 체계를 검증한 것은 아니다. 응답의 `coverage.transmission_basis`가 적용 표를 드러낸다.
 - 투출 관계 `cross_layer:transmission:<지지 위치>:<천간 위치>`는 지지 전체가 해당 천간에 힘을 주었다는 뜻이 아니라, **그 지지의 특정 지장간 글자가 천간에 드러난 사실**이다. `hidden_stem`·출처 지지·대상 천간·원본 분석 위치를 기록한다. 예를 들어 `乙巳·己丑·己未·庚午`의 일지 未 속 己는 **월간 己와 일간 己의 두 위치**를 각각 가리킨다.
-- [기존 통근 계산](../services/analysis.py)은 별도 `ROOT_STRENGTH`·위치·거리 가중치로 천간의 근 점수를 만든다. [허실 분석](../services/xu_shi.py)은 원점수 `0`을 허투, `0.5` 이상을 실, 그 사이를 허로 분류하고, **활성** 충·천·형으로 영향을 받은 뿌리를 제외한 뒤 원래 실이던 천간의 변허 가능성을 표시한다. 격위 자형의 `candidate_only`는 뿌리 영향에서 제외한다. 따라서 **투출 관계 유무와 실·허투 판정은 등가가 아니다.** `stem_state.validation_status: provisional`은 이 기존 점수·전근 제외 규칙이 임상 확정 모델이 아님을 표시한다.
+- [현재 통근 계산](../services/analysis.py)은 `ROOT_STRENGTH`의 **동주 지지 계수 자체**를 통근 점수로 쓰고, 다른 지지의 기존 위치·거리 가중 지원은 `external_support_*`에 둔다. [허실 분석](../services/xu_shi.py) v3은 동주 원점수 `0`을 허투, 양수는 실로 분류한다. **활성** 충·천·형이 동주 뿌리에 닿아 계산상 잔여 기여도가 `0`이 되면 변허를 표시한다. 격위 자형의 `candidate_only`는 뿌리 영향에서 제외한다. 따라서 **투출 관계 유무, 동주 통근, 타주 지원은 별도 사실**이다. `stem_state.validation_status: provisional`은 계수·전근 제외가 임상 확정 모델이 아님을 표시한다.
 - 조회 조립기는 [기존 허실 결과](../services/xu_shi.py)의 네 천간 상태를 글자별 `stem_state`에 옮기며, 원국·통근 근거로 재계산한 값과 다르면 거부한다. 지지 글자의 `stem_state`는 `null`이다. 다음 단계의 새 수치 모델이 검증되기 전에는 이 상태를 관계별 손상량이나 지지 최종 세력으로 합산하지 않는다.
 
 조회 계약에는 `effect_calculation_status`, 잠재 강도, 피해량을 두지 않는다. 이 단계에서 사용자의 관심은 **관계가 어디서 발견되고 어떤 상태인지**이며, 후속 계산 결과는 기존 지지 v3 관계/세력 층위가 맡는다. [원국 비교 예시](./eight_character_relation_lookup_example.md)에 있던 `effect_calculation_status`는 설명용이므로 이번 최소 계약에서 제외했다.
@@ -109,7 +109,7 @@
 | 다자 구조 | 삼합 4종, 방합 4종, 삼형 2종 | 반복 지지의 두 성립 조합, 중신 중복, 삼합 억제와 잔존 반합, 격위 삼형 | 그룹 한 건과 3~4개 참여 위치, 각 세 글자 조합의 참조 무결성 |
 | 천간 쌍 | 규칙표의 천간합 5쌍·충 4쌍·극 11개 방향 규칙을 여섯 위치 쌍의 정·역순에 배치 | 같은 천간 반복, 합과 극 등 복수 후보, 기존 극 목록 밖 조합에 임의 극 생성 금지 | 합·충의 미평가 상태를 `detected`로 보존, 극의 오행 방향과 위치별 ID 검사 |
 | 동주 오행·자합 | 네 기둥의 천간·지지 관계와 자합 규칙표 9개 후보 | 자합 조건 未형 충족/미충족, 辰충 차단, 후보 없는 간지 | 같은 기둥의 간·지만 참여; 자합 `active`와 실제 합화/세력 변화 구분 |
-| 투출·통근 상태 | 12지지의 상세 지장간과 10천간의 반복 위치 대조 | 한 지장간이 두 천간 위치에 드러나는 경우, 원점수 0/0.5 경계, 충·천·형 반영 후 변허 | 지장간 표·투출 관계·허실 원본 근거 일치. 투출과 통근 상태의 별도 ID/필드 유지 |
+| 투출·통근 상태 | 12지지의 상세 지장간과 10천간의 반복 위치 대조 | 한 지장간이 두 천간 위치에 드러나는 경우, 동주 원점수 0/양수 경계, 충·천·형 반영 후 변허; 전주 v1 회귀의 0.5 경계 | 지장간 표·투출 관계·허실 원본 근거 일치. 투출과 통근 상태의 별도 ID/필드 유지 |
 | 공통 조회 불변 조건 | 연·월·일·시 × 천간·지지 정확히 8개 | 반복 글자·다중 관계·조건부/억제/후보의 혼재 | 관계 ID 유일, 참여 글자·위치·방향 유효, `relation_ids`가 중앙 목록에서 정확히 역산됨 |
 
 지지 78쌍의 이전 전수 결과는 [별도 감사](./branch_relation_candidate_audit.md)에 있지만, **이 8글자 계약을 연결한 뒤 다시 검증해야** 1단계 완료를 주장할 수 있다. 천간 5/4/11과 자합 9는 [현행 규칙 파일](../services/relation_rules.py)의 항목 수이며 교리 전체의 목록이라고 주장하지 않는다. 현행 규칙 밖 천간 生·동기, 다른 기둥 천간↔지지 직접 관계, 일반적인 지장간 피해·入墓는 이 전수 검사로 자동 완성되지 않는다. 필요한 탐지 규칙은 별도 근거 검토 후 확장한다.
@@ -137,4 +137,4 @@
 
 독립 조회 관계에는 매트릭스에 없는 지지 생·극, 동주 간지, 천간극 등이 포함되므로 관계 수가 더 많다. 세 날짜 모두 **원본 매트릭스의 각 ID가 조회 결과의 `source_refs`에서 정확히 한 번 등장**했고, 원본에 성립 상태가 있는 관계는 그 상태와 일치했다. 완성 삼합 안의 구조 전용 반합처럼 v3가 성립 상태를 의도적으로 바꾸는 경우만 원본의 `potential`과 다른 `candidate_only`로 보존한다. 이 세 날짜는 상태 매핑의 실제 사례 검증이며 모든 달력 원국의 명리 판정 검증은 아니다.
 
-**다음 작업 권장:** 프로젝트 상세 지장간 표의 투출 범위와 기존 `ROOT_STRENGTH`의 간접 통근·허실 기준을 사례별로 확인한다. 두 표의 결과가 다르다는 사실을 오류로 단순 취급하지 않고, 어떤 상태가 글자 일치이고 어떤 상태가 점수 모형인지 구분한다. 현재 허실 v1의 활성 충·천·형에 따른 **뿌리 전체 제외**도 실제 작용량 모델이 아니므로 후속 검증 대상으로 둔다. 그 뒤 천간 生·동기 등 미지원 탐지 유형을 확장한다.
+**다음 작업 권장:** [동주 기준 전환](./same_pillar_root_migration.md)의 통근 인정 조합과 뿌리 강도 계수를 검토한다. 특히 활성 충·천·형에 따른 **동주 뿌리 전체 제외**가 과도한지 사례로 확인한다. 천간 生·동기 등 미지원 탐지는 그 뒤에 확장한다.

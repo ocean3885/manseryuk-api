@@ -5,7 +5,7 @@ from pathlib import Path
 import unittest
 
 from schemas.saju_analysis import XuShiDynamics
-from services.analysis import analyze_advanced_tonggeun
+from services.analysis import analyze_advanced_tonggeun, analyze_palja_integrated
 from services.interaction_matrix import build_interaction_matrix
 from services.xu_shi import analyze_xu_shi_dynamics
 
@@ -29,6 +29,82 @@ def analyze(score, roots, interactions=(), repeat=False):
 
 
 class XuShiTests(unittest.TestCase):
+    def test_same_pillar_absence_is_hollow_despite_other_pillar_support(self):
+        stems, branches = list('甲甲甲甲'), list('酉寅酉酉')
+        roots = analyze_advanced_tonggeun(stems, branches)
+        self.assertEqual(roots[0]['통근범위'], 'same_pillar_only')
+        self.assertEqual(roots[0]['점수'], 0)
+        self.assertFalse(roots[0]['동주통근여부'])
+        self.assertEqual(roots[0]['통근정보'], [])
+        self.assertEqual(roots[0]['타주지원점수'], 1.0)
+        self.assertEqual([item['position'] for item in roots[0]['타주지원정보']],
+                         ['월'])
+        result = analyze_xu_shi_dynamics(
+            stems, branches, stems[2], roots,
+            build_interaction_matrix(stems, branches, stems[2])['matrix'])
+        self.assertEqual(result['root_scope'], 'same_pillar_only')
+        self.assertEqual(result['rule_version'], '3.0.0')
+        self.assertEqual(result['pillars']['year']['original_status'], '허투(虛透)')
+
+    def test_same_pillar_root_status_ignores_external_support_when_damaged(self):
+        stems, branches = list('甲甲甲甲'), list('寅申寅酉')
+        roots = analyze_advanced_tonggeun(stems, branches)
+        self.assertEqual(roots[0]['점수'], 1.0)
+        self.assertTrue(roots[0]['동주통근여부'])
+        self.assertEqual([item['position'] for item in roots[0]['통근정보']],
+                         ['년'])
+        self.assertGreater(roots[0]['타주지원점수'], 0)
+        result = analyze_xu_shi_dynamics(
+            stems, branches, stems[2], roots,
+            build_interaction_matrix(stems, branches, stems[2])['matrix'])
+        self.assertEqual(result['pillars']['year']['original_status'], '실(實)')
+        self.assertEqual(result['pillars']['year']['current_status'], '변허(變虛)')
+        self.assertEqual([root['pillar'] for root in
+                          result['pillars']['year']['root_evidence']], ['year'])
+
+    def test_same_pillar_root_score_does_not_depend_on_pillar_position(self):
+        stems, branches = list('甲甲甲甲'), list('辰辰辰辰')
+        roots = analyze_advanced_tonggeun(stems, branches)
+        self.assertEqual([item['동주통근여부'] for item in roots], [True] * 4)
+        self.assertEqual([item['점수'] for item in roots], [0.3] * 4)
+        self.assertEqual([item['상태'] for item in roots], ['실(實)'] * 4)
+        self.assertEqual([item['통근정보'][0]['score'] for item in roots], [0.3] * 4)
+        legacy = analyze_advanced_tonggeun(
+            stems, branches, scope='all_four_branches_weighted')
+        self.assertEqual(legacy[1]['통근정보'][1]['score'], 0.6)
+
+    def test_weak_same_pillar_root_is_real_until_its_only_root_is_excluded(self):
+        stems, branches = list('甲甲甲甲'), list('辰戌酉酉')
+        roots = analyze_advanced_tonggeun(stems, branches)
+        self.assertEqual(roots[0]['점수'], 0.3)
+        self.assertEqual(roots[0]['상태'], '실(實)')
+        result = analyze_xu_shi_dynamics(
+            stems, branches, stems[2], roots,
+            build_interaction_matrix(stems, branches, stems[2])['matrix'])
+        year = result['pillars']['year']
+        self.assertEqual(year['original_status'], '실(實)')
+        self.assertEqual(year['current_status'], '변허(變虛)')
+        self.assertEqual(year['root_structure']['remaining_support'], 'none')
+        self.assertEqual(year['effective_score'], 0)
+        self.assertEqual(result['weak_count'], 0)
+
+    def test_weak_same_pillar_root_without_affecting_relation_stays_real(self):
+        stems, branches = list('甲甲甲甲'), list('辰酉酉酉')
+        roots = analyze_advanced_tonggeun(stems, branches)
+        result = analyze_xu_shi_dynamics(stems, branches, stems[2], roots, [])
+        year = result['pillars']['year']
+        self.assertEqual(year['original_status'], '실(實)')
+        self.assertEqual(year['current_status'], '실(實)')
+        self.assertEqual(year['root_structure']['remaining_support'], 'present')
+        self.assertIn('뿌리 강도는 점수로', year['meaning'])
+
+    def test_root_count_summary_does_not_claim_chart_strength(self):
+        analysis = analyze_palja_integrated(list('甲甲甲甲'), list('辰辰辰辰'))
+        summary = analysis['summary']['total_energy_balance']
+        self.assertIn('동주 통근 4개', summary)
+        self.assertIn('신강·신약 미판정', summary)
+        self.assertNotIn('신강(身強)', summary)
+
     def test_distant_self_punishment_candidate_does_not_remove_root(self):
         stems, branches = list('甲甲甲甲'), list('辰丑辰酉')
         matrix = build_interaction_matrix(stems, branches, '甲')['matrix']
@@ -118,7 +194,8 @@ class XuShiTests(unittest.TestCase):
 
     def test_upstream_total_and_root_rounding_are_preserved(self):
         stems, branches = list('己甲癸辛'), list('子寅卯寅')
-        tgs = analyze_advanced_tonggeun(stems, branches)
+        tgs = analyze_advanced_tonggeun(stems, branches,
+                                         scope='all_four_branches_weighted')
         result = analyze_xu_shi_dynamics(stems, branches, stems[2], tgs, [])
         pillar = result['pillars']['month']
         self.assertEqual(pillar['score'], 2.73)
@@ -220,7 +297,8 @@ class XuShiTests(unittest.TestCase):
             with self.subTest(stems=case['stems'], branches=case['branches']):
                 stems, branches = list(case['stems']), list(case['branches'])
                 result = analyze_xu_shi_dynamics(
-                    stems, branches, stems[2], analyze_advanced_tonggeun(stems, branches),
+                    stems, branches, stems[2], analyze_advanced_tonggeun(
+                        stems, branches, scope='all_four_branches_weighted'),
                     build_interaction_matrix(stems, branches, stems[2])['matrix'],
                 )
                 pillars = [result['pillars'][key] for key in PILLARS]

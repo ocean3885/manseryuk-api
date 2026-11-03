@@ -20,11 +20,14 @@ def payload(stems='乙己己庚', branches='巳丑未午', relations=()):
                 'original_status': '허투(虛透)',
                 'current_status': '허투(虛透)',
                 'root_score': 0.0,
+                'has_same_pillar_root': False,
                 'remaining_score': 0.0,
                 'root_branch_ids': [],
                 'affected_root_branch_ids': [],
-                'source_rule_version': '1.0.0',
-                'root_scope': 'all_four_branches_weighted',
+                'external_support_score': 0.0,
+                'external_support_branch_ids': [],
+                'source_rule_version': '3.0.0',
+                'root_scope': 'same_pillar_only',
                 'validation_status': 'provisional',
             } if component == 'stem' else None),
         }
@@ -36,7 +39,7 @@ def payload(stems='乙己己庚', branches='巳丑未午', relations=()):
             characters[participant]['relation_ids'].append(row['relation_id'])
     assert set(characters) == set(CHARACTER_IDS)
     return {
-        'schema_version': '1.3-draft', 'characters': characters, 'relations': rows,
+        'schema_version': '1.6-draft', 'characters': characters, 'relations': rows,
         'coverage': {
             'rule_scope': 'registered_rules_partial',
             'transmission_basis': 'jijanggan_detailed_exact_match',
@@ -61,6 +64,13 @@ def relation(relation_id, kind, participants, *, status='detected',
 
 
 class CharacterRelationIndexTests(unittest.TestCase):
+    def test_same_pillar_root_flag_must_match_root_evidence(self):
+        incorrect = payload()
+        incorrect['characters']['month.stem']['stem_state'][
+            'has_same_pillar_root'] = True
+        with self.assertRaisesRegex(ValidationError, '동주 통근 여부'):
+            CharacterRelationIndex.model_validate(incorrect)
+
     def test_same_character_different_positions_have_distinct_relations(self):
         rows = [
             relation('stem:control:year:month', 'control',

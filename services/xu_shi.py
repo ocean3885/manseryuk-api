@@ -5,6 +5,7 @@ PILLAR_KEYS = ['year', 'month', 'day', 'hour']
 POSITION_NAMES = ['년', '월', '일', '시']
 REAL_THRESHOLD = 0.5
 RULE_VERSION = '1.0.0'  # 기존 판정 규칙을 최초로 명시한 버전
+SAME_PILLAR_RULE_VERSION = '3.0.0'
 AFFECTING_TYPES = ('충(沖)', '천(穿)', '형(刑)')
 
 
@@ -17,10 +18,19 @@ def analyze_xu_shi_dynamics(
 ) -> Dict[str, Any]:
     """원국의 관계 반영 전후 허실과 판정 근거를 반환한다.
 
-    v1은 기존 규칙을 유지한다. 충·형·천에 연결된 뿌리의 기여도를
+    동주 통근에서는 타주 지지의 지원을 뿌리로 합산하지 않는다.
+    v1 회귀 입력은 기존 전주 규칙을 유지한다. 충·형·천에 연결된 뿌리의 기여도를
     전부 제외하며, 원래 실인 천간만 잔여 점수에 따라 변허로 전이한다.
     대운·세운 또는 관계별 손상률을 계산하지 않는다.
     """
+    scopes = {item.get('통근범위', 'all_four_branches_weighted')
+              for item in tonggeun_results}
+    if len(scopes) != 1 or not scopes <= {
+            'same_pillar_only', 'all_four_branches_weighted'}:
+        raise ValueError('천간별 통근 범위가 일치해야 합니다.')
+    root_scope = scopes.pop()
+    rule_version = (SAME_PILLAR_RULE_VERSION if root_scope == 'same_pillar_only'
+                    else RULE_VERSION)
     pillars_xu_shi: Dict[str, Any] = {}
     relations_by_pillar: Dict[str, list] = {key: [] for key in PILLAR_KEYS}
     for item in interaction_matrix:
@@ -53,7 +63,9 @@ def analyze_xu_shi_dynamics(
         tg = tonggeun_results[i]
         base_score = tg.get('점수', 0)
         ten_star = '일간(본인)' if i == 2 else get_ten_star_stem(day_stem, stem_char)
-        if base_score >= REAL_THRESHOLD:
+        if root_scope == 'same_pillar_only':
+            original_status = '실(實)' if base_score > 0 else '허투(虛透)'
+        elif base_score >= REAL_THRESHOLD:
             original_status = '실(實)'
         elif base_score == 0:
             original_status = '허투(虛透)'
@@ -64,6 +76,8 @@ def analyze_xu_shi_dynamics(
         intact_score = 0.0
         for root in tg.get('통근정보', []):
             position = root.get('position')
+            if root_scope == 'same_pillar_only' and position != pos_name:
+                raise ValueError(f'{p_key}: 타주 지원이 동주 통근에 섞였습니다.')
             # 통근 계산기가 생성하는 네 위치만 기존 판정과 동일하게 사용한다.
             if position not in POSITION_NAMES:
                 continue
@@ -85,17 +99,25 @@ def analyze_xu_shi_dynamics(
 
         affected_roots = [root for root in root_evidence if root['is_affected']]
         current_status = original_status
-        if original_status == '실(實)' and affected_roots and intact_score < REAL_THRESHOLD:
+        root_lost = (intact_score == 0 if root_scope == 'same_pillar_only'
+                     else intact_score < REAL_THRESHOLD)
+        if original_status == '실(實)' and affected_roots and root_lost:
             current_status = '변허(變虛)'
         is_transformed = current_status != original_status
-        root_structure = _describe_pillar_roots(root_evidence, intact_score)
+        root_structure = _describe_pillar_roots(root_evidence, intact_score, root_scope)
 
         # 원점수/개별 근 점수는 상위 통근 계산기에서 각각 반올림된다.
         # 판정 호환성을 위해 잔여 합산값에 추가 반올림을 적용하지 않는다.
-        transition_reasons = [
-            f'관계 반영 전 통근 점수 {base_score}로 {original_status} 분류 '
-            f'(실 기준 {REAL_THRESHOLD} 이상, 허투 기준 0).'
-        ]
+        if root_scope == 'same_pillar_only':
+            transition_reasons = [
+                f'동주 통근 점수 {base_score}로 {original_status} 분류 '
+                '(실 기준 0 초과, 허투 기준 0; 뿌리 강도는 점수로 별도 표시).'
+            ]
+        else:
+            transition_reasons = [
+                f'관계 반영 전 통근 점수 {base_score}로 {original_status} 분류 '
+                f'(실 기준 {REAL_THRESHOLD} 이상, 허투 기준 0).'
+            ]
         for root in affected_roots:
             types = ', '.join(dict.fromkeys(rel['type'] for rel in root['interactions']))
             transition_reasons.append(
@@ -105,11 +127,18 @@ def analyze_xu_shi_dynamics(
         if not affected_roots:
             transition_reasons.append('통근처에 반영할 충·형·천 관계가 없습니다.')
         if original_status == '실(實)' and affected_roots:
-            comparison = '미만' if is_transformed else '이상'
-            transition_reasons.append(
-                f'잔여 통근 점수 {intact_score}가 기준 {REAL_THRESHOLD} {comparison}이므로 '
-                f'{current_status}으로 판정합니다.'
-            )
+            if root_scope == 'same_pillar_only':
+                transition_reasons.append(
+                    f'잔여 통근 점수 {intact_score}가 '
+                    f'{"0이므로" if is_transformed else "0보다 크므로"} '
+                    f'{current_status}으로 판정합니다.'
+                )
+            else:
+                comparison = '미만' if is_transformed else '이상'
+                transition_reasons.append(
+                    f'잔여 통근 점수 {intact_score}가 기준 {REAL_THRESHOLD} {comparison}이므로 '
+                    f'{current_status}으로 판정합니다.'
+                )
         elif original_status == '허(虛)' and affected_roots:
             transition_reasons.append(
                 f'잔여 통근 점수는 {intact_score}입니다. 원래 허인 천간은 '
@@ -132,7 +161,7 @@ def analyze_xu_shi_dynamics(
             'transition_code': 'real_to_empty' if is_transformed else 'maintained',
             'root_structure': root_structure,
             'reason': ' '.join(transition_reasons),
-            'meaning': _generate_xu_shi_meaning(ten_star, current_status),
+            'meaning': _generate_xu_shi_meaning(ten_star, current_status, root_scope),
         }
 
     counts = {
@@ -168,7 +197,8 @@ def analyze_xu_shi_dynamics(
 
     return {
         'analysis_scope': 'natal',
-        'rule_version': RULE_VERSION,
+        'rule_version': rule_version,
+        'root_scope': root_scope,
         'pillars': pillars_xu_shi,
         'shared_roots': shared_roots,
         'impact_groups': impact_groups,
@@ -180,7 +210,8 @@ def analyze_xu_shi_dynamics(
     }
 
 
-def _describe_pillar_roots(roots: List[Dict[str, Any]], effective_score: float) -> Dict[str, Any]:
+def _describe_pillar_roots(roots: List[Dict[str, Any]], effective_score: float,
+                           root_scope: str) -> Dict[str, Any]:
     """점수 판정을 바꾸지 않고 주요 뿌리와 잔존 기반을 기술한다."""
     largest = max((root['score'] for root in roots), default=0)
     return {
@@ -188,6 +219,8 @@ def _describe_pillar_roots(roots: List[Dict[str, Any]], effective_score: float) 
         'remaining_root_pillars': [root['pillar'] for root in roots if root['effective_score'] > 0],
         'excluded_root_pillars': [root['pillar'] for root in roots if root['is_affected']],
         'remaining_support': (
+            ('present' if effective_score > 0 else 'none')
+            if root_scope == 'same_pillar_only' else
             'meets_threshold' if effective_score >= REAL_THRESHOLD
             else 'below_threshold' if effective_score > 0 else 'none'
         ),
@@ -238,7 +271,7 @@ def _collect_root_groups(pillars: Dict[str, Any]):
     return [roots_by_pillar[p] for p in PILLAR_KEYS if p in roots_by_pillar], impact_groups
 
 
-def _generate_xu_shi_meaning(ten_star: str, current: str) -> str:
+def _generate_xu_shi_meaning(ten_star: str, current: str, root_scope: str) -> str:
     """계산된 사실과 구분된 전통적 상징 해석. 능력·성과를 예측하지 않는다."""
     domains = {
         '일간(본인)': '자신과 주체성',
@@ -256,4 +289,7 @@ def _generate_xu_shi_meaning(ten_star: str, current: str) -> str:
         '허투(虛透)': '계산상 통근 없이 천간에 드러난 상징으로 살펴볼 수 있습니다',
         '허(虛)': '관계 반영 전부터 통근 기반이 기준에 미달하는 구조로 살펴볼 수 있습니다',
     }
+    if root_scope == 'same_pillar_only':
+        interpretations['실(實)'] = '동주 통근이 있는 구조로 살펴볼 수 있습니다. 뿌리 강도는 점수로 따로 확인합니다'
+        interpretations['변허(變虛)'] = '관계 반영 전에는 동주 통근이 있었으나 계산상 뿌리 기여도가 남지 않은 구조로 살펴볼 수 있습니다'
     return f'전통적 해석 참고: {domain}의 영역에서 {interpretations[current]}. 실제 능력·성과나 직업 적합성을 뜻하지 않습니다.'

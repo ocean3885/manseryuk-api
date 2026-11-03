@@ -47,8 +47,14 @@ def get_transmitted_info(branch, branch_idx, all_stems, day_stem):
         'hidden': hidden
     }
 
-def analyze_advanced_tonggeun(cheongans, jijis):
-    # 1. 지지 위치별 가중치 (연, 월, 일, 시)
+def analyze_advanced_tonggeun(cheongans, jijis, *, scope='same_pillar_only'):
+    """동주 통근을 판정하고 타주 지지의 기존 가중 지원은 별도로 기록한다.
+
+    all_four_branches_weighted는 기존 허실 v1 자료의 회귀 비교용이다.
+    """
+    if scope not in ('same_pillar_only', 'all_four_branches_weighted'):
+        raise ValueError('지원하지 않는 통근 판정 범위입니다.')
+    # 전주 회귀 계산과 타주 지원에만 적용하는 지지 위치별 가중치 (연, 월, 일, 시)
     pos_weights = [1.0, 2.0, 1.5, 1.0]
     
     # 2. 거리별 감쇠 비율 (차이 0, 1, 2, 3)
@@ -61,8 +67,11 @@ def analyze_advanced_tonggeun(cheongans, jijis):
 
     for i in range(4):  # 천간 위치 순회
         target_kan = cheongans[i]
+        same_pillar_root_exists = ROOT_STRENGTH.get(target_kan, {}).get(jijis[i], 0) > 0
         total_score = 0
         root_details = []  # 이 천간의 통근 상세 정보
+        external_score = 0.0
+        external_details = []
         
         for j in range(4):  # 지지 위치 순회
             target_jiji = jijis[j]
@@ -72,29 +81,42 @@ def analyze_advanced_tonggeun(cheongans, jijis):
             
             if base_power > 0:
                 distance = abs(i - j)
-                calc_score = base_power * pos_weights[j] * dist_decay[distance]
-                total_score += calc_score
+                calc_score = (base_power if scope == 'same_pillar_only' and j == i
+                              else base_power * pos_weights[j] * dist_decay[distance])
                 
                 main_stem = next(item['char'] for item in JIJANGGAN_DETAILED[target_jiji]
                                  if item['type'] == '정기')
                 ten_star = get_ten_star_stem(day_stem, main_stem)
                 
-                root_details.append({
+                detail = {
                     "branch_char": target_jiji,
                     "position": positions[j],
                     "ten_star": ten_star,
                     "score": round(calc_score, 2)
-                })
+                }
+                if j != i:
+                    external_score += calc_score
+                    external_details.append(detail)
+                if scope == 'all_four_branches_weighted' or j == i:
+                    total_score += calc_score
+                    root_details.append(detail)
         
-        # 맹파식 허실 판정 (임계점 0.5 기준)
-        status = "실(實)" if total_score >= 0.5 else "허(虛)"
+        if scope == 'same_pillar_only':
+            status = '실(實)' if same_pillar_root_exists else '허투(虛透)'
+        else:
+            status = ('실(實)' if total_score >= 0.5 else
+                      '허투(虛透)' if total_score == 0 else '허(虛)')
         
         results.append({
             "위치": positions[i],
             "글자": target_kan,
             "점수": round(total_score, 2),
             "상태": status,
-            "통근정보": root_details   
+            "통근정보": root_details,
+            "통근범위": scope,
+            "동주통근여부": same_pillar_root_exists,
+            "타주지원점수": round(external_score, 2),
+            "타주지원정보": external_details,
         })
 
     return results
@@ -188,7 +210,11 @@ def analyze_palja_integrated(stems, branches):
                 "root_info": tonggeun_results[i]['통근정보'],
                 "status": tonggeun_results[i]['상태'],
                 "unseong": get_unseong(stem_char, branch_char),
-                "relations": stem_relations
+            "relations": stem_relations,
+            "root_scope": tonggeun_results[i]['통근범위'],
+                "same_pillar_root_exists": tonggeun_results[i]['동주통근여부'],
+            "external_support_score": tonggeun_results[i]['타주지원점수'],
+            "external_support_info": tonggeun_results[i]['타주지원정보'],
             },
             "branch": {
                 "char": branch_char,
@@ -200,14 +226,12 @@ def analyze_palja_integrated(stems, branches):
             "jahab": jahab_info
         }
 
-    # 전체 통근 점수/상태 바탕 세력 요약
-    sil_count = sum(1 for t in tonggeun_results if t['상태'] == '실(實)')
-    if sil_count >= 3:
-        energy_balance = "신강(身強) 세력 우세"
-    elif sil_count == 2:
-        energy_balance = "중화(中和) 균형 기세"
-    else:
-        energy_balance = "신약(身弱) 세력 약화"
+    # 동주 통근 개수만으로 원국 전체의 신강·신약을 단정하지 않는다.
+    rooted_count = sum(t['동주통근여부'] for t in tonggeun_results)
+    energy_balance = (
+        f'천간 동주 통근 {rooted_count}개·무근 {4 - rooted_count}개 '
+        '(원국 전체 신강·신약 미판정)'
+    )
 
     return {
         "summary": {

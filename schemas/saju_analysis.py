@@ -242,7 +242,7 @@ class XuShiRootStructure(BaseModel):
     primary_root_pillars: List[str]
     remaining_root_pillars: List[str]
     excluded_root_pillars: List[str]
-    remaining_support: Literal['none', 'below_threshold', 'meets_threshold']
+    remaining_support: Literal['none', 'present', 'below_threshold', 'meets_threshold']
 
 
 class XuShiRootDependent(BaseModel):
@@ -286,6 +286,7 @@ class PillarXuShi(BaseModel):
 class XuShiDynamics(BaseModel):
     analysis_scope: Literal['natal']
     rule_version: str
+    root_scope: Literal['same_pillar_only', 'all_four_branches_weighted']
     pillars: Dict[str, PillarXuShi]
     shared_roots: List[XuShiSharedRoot]
     impact_groups: List[XuShiImpactGroup]

@@ -7,12 +7,40 @@ from sqlalchemy.orm import Session
 
 from routers.root import get_calenda_data
 from schemas.saju_analysis import SajuAnalysisResponse
+from services.analysis import analyze_advanced_tonggeun
+from services.xu_shi import analyze_xu_shi_dynamics
 
 DB_PATH = Path(__file__).resolve().parents[1] / 'manseryuk.db'
 
 
 @unittest.skipUnless(DB_PATH.is_file(), '통합 검증에 필요한 달력 DB가 없습니다.')
 class XuShiIntegrationTests(unittest.TestCase):
+    def test_old_cross_pillar_root_is_external_support_in_new_response(self):
+        engine = create_engine(f'sqlite:///file:{DB_PATH}?mode=ro&uri=true')
+        try:
+            with Session(engine) as session:
+                response = get_calenda_data(1990, '1', '1', 12, 0, 'sol', '남', session)
+            details = response['analysis']['details']
+            pillars = ('year', 'month', 'day', 'hour')
+            stems = [details[pillar]['stem']['char'] for pillar in pillars]
+            branches = [details[pillar]['branch']['char'] for pillar in pillars]
+            legacy = analyze_xu_shi_dynamics(
+                stems, branches, stems[2],
+                analyze_advanced_tonggeun(
+                    stems, branches, scope='all_four_branches_weighted'),
+                response['advanced_analysis']['interactions']['matrix'],
+            )
+            current = response['advanced_analysis']['xu_shi_dynamics']
+            self.assertEqual(legacy['pillars']['month']['score'], 1.11)
+            self.assertEqual(legacy['pillars']['month']['original_status'], '실(實)')
+            self.assertEqual(current['pillars']['month']['score'], 0)
+            self.assertEqual(current['pillars']['month']['original_status'],
+                             '허투(虛透)')
+            self.assertEqual(details['month']['stem']['external_support_score'], 1.11)
+            self.assertEqual(current['root_scope'], 'same_pillar_only')
+        finally:
+            engine.dispose()
+
     def test_previously_failing_group_relation_date_returns_full_response(self):
         engine = create_engine(f'sqlite:///file:{DB_PATH}?mode=ro&uri=true')
         try:
@@ -53,11 +81,12 @@ class XuShiIntegrationTests(unittest.TestCase):
             self.assertTrue(any(p.startswith('【빈주 계산 범위】') for p in advanced['ai_consultation_prompts']))
             xu_shi = advanced['xu_shi_dynamics']
             self.assertEqual(xu_shi, result['advanced_analysis']['xu_shi_dynamics'])
-            self.assertTrue(xu_shi['shared_roots'])
-            for group in xu_shi['shared_roots']:
-                for dependent in group['dependents']:
-                    pillar = xu_shi['pillars'][dependent['stem_pillar']]
-                    self.assertTrue(any(root['pillar'] == group['root_pillar'] for root in pillar['root_evidence']))
+            self.assertEqual(xu_shi['rule_version'], '3.0.0')
+            self.assertEqual(xu_shi['root_scope'], 'same_pillar_only')
+            self.assertFalse(xu_shi['shared_roots'])
+            for pillar, state in xu_shi['pillars'].items():
+                self.assertTrue(all(root['pillar'] == pillar
+                                    for root in state['root_evidence']))
         finally:
             engine.dispose()
 
