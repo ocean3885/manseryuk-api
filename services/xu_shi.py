@@ -26,6 +26,10 @@ def analyze_xu_shi_dynamics(
     for item in interaction_matrix:
         if item.get('category') != '지지' or item.get('type') not in AFFECTING_TYPES:
             continue
+        # 실제 매트릭스의 후보 자형(candidate_only)은 뿌리 손상으로 계산하지 않는다.
+        # 상태 필드가 없는 기존 직접 함수 입력은 이전 호환 의미를 유지한다.
+        if item.get('activation_status') not in (None, 'active'):
+            continue
         from_p = item.get('from_pillar')
         to_p = item.get('to_pillar')
         if from_p not in PILLAR_KEYS or to_p not in PILLAR_KEYS:

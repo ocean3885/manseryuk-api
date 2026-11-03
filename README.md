@@ -51,6 +51,16 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 GET http://localhost:8000/?year=1995&month=5&day=12&hour=14&min=30&sl=sol&gen=남
 ```
 
+### `GET /relation-index` - 원국 8글자 관계 조회 (초안)
+
+`GET /`과 같은 `year`, `month`, `day`, `hour`, `min`, `sl`, `gen` 파라미터를 받습니다.
+
+```http
+GET http://localhost:8000/relation-index?year=1995&month=5&day=12&hour=14&min=30&sl=sol&gen=남
+```
+
+응답에는 `schema_version: "1.3-draft"`, 위치별 여덟 글자의 `characters`, 관계 본문 `relations`, 지원 범위를 설명하는 `coverage`가 있습니다. 각 글자의 `relation_ids`는 관계 본문을 참조합니다. `cross_layer:transmission:*`은 지장간과 실제 천간 글자가 일치해 투출된 **위치별 사실**입니다. 천간의 `stem_state`에는 기존 허실 분석의 원상태·현재상태, 통근/잔여 점수와 뿌리 지지 위치를 구분해 담습니다. `root_scope: all_four_branches_weighted`는 허실 점수가 **네 지지 전체와 거리 가중치**에서 나왔음을 명시합니다. 통근 점수·변허 판정은 잠정 모델의 기존 값을 옮긴 것이며, 투출 여부와 같은 판정이 아닙니다. `coverage.detected_only_relation_ids`는 후보만 발견하고 성립 여부를 아직 판정하지 않은 관계 ID입니다. `coverage.not_evaluated_mechanisms`는 현 규칙 범위 밖의 기전을 기록합니다. 관계의 `activation_status`는 탐지·성립 상태이며 세력 변화량이나 피해 확정값이 아닙니다. 이 경로는 기존 원국 분석의 결과로 조회 자료를 만들며, 기존 `GET /` 응답 형식에는 필드를 추가하지 않습니다. [8글자 관계 조회 계약](docs/character_relation_index_contract.md)에 지원 유형과 미지원 범위를 기록했습니다.
+
 ---
 
 ## 📊 응답 데이터 구조 (Response Structure)
@@ -127,6 +137,10 @@ GET http://localhost:8000/?year=1995&month=5&day=12&hour=14&min=30&sl=sol&gen=�
 ### 7. `analysis` (전통 명리 분석 요약)
 - `summary`: 천간/지지 상호작용 및 오행 균형 요약 문장 리스트
 - `details`: 신살, 형충회합 등의 세부 데이터
+
+`details[기둥].branch.jijanggan/transmitted/hidden`은 지지 세력 계산과 같은 상세 지장간 표를 기준으로 합니다. 같은 지장간 글자가 천간의 두 위치에 보이면 `transmitted`에도 위치별 두 항목이 나옵니다. 기존 첫 위치만 표시하던 응답과 결과가 달라질 수 있으며, 투출 사실은 천간의 실·허 판정과 구분합니다.
+
+허실의 관계 반영에서는 `active`인 충·천·형만 뿌리 영향으로 봅니다. 격위 자형의 `candidate_only`는 뿌리 점수에서 제외하지 않습니다. 실·허투·변허의 기존 점수 기준과 뿌리 전체 제외 방식은 잠정 모델입니다.
 
 ---
 

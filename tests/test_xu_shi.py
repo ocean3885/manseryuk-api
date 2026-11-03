@@ -29,6 +29,22 @@ def analyze(score, roots, interactions=(), repeat=False):
 
 
 class XuShiTests(unittest.TestCase):
+    def test_distant_self_punishment_candidate_does_not_remove_root(self):
+        stems, branches = list('甲甲甲甲'), list('辰丑辰酉')
+        matrix = build_interaction_matrix(stems, branches, '甲')['matrix']
+        self_punishment = next(item for item in matrix
+                               if item['type'] == '형(刑)' and
+                               item['participants'] == ['year', 'day'])
+        self.assertEqual(self_punishment['activation_status'], 'candidate_only')
+        roots = [{'점수': 0.8, '통근정보': [
+            {'position': '년', 'branch_char': '辰', 'score': 0.8},
+        ]}] + [{'점수': 0, '통근정보': []} for _ in range(3)]
+        result = analyze_xu_shi_dynamics(stems, branches, '甲', roots, matrix)
+        year = result['pillars']['year']
+        self.assertEqual(year['original_status'], '실(實)')
+        self.assertEqual(year['current_status'], '실(實)')
+        self.assertFalse(year['root_evidence'][0]['is_affected'])
+
     def test_shared_root_has_different_outcomes_with_remaining_support(self):
         tgs = [
             {'점수': 1.4, '통근정보': [root(1, 0.8), root(2, 0.6)]},

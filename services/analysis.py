@@ -1,6 +1,5 @@
-from services.constants import ROOT_STRENGTH, UNSEONG_DATA, JIJANGGAN
+from services.constants import ROOT_STRENGTH, UNSEONG_DATA, JIJANGGAN_DETAILED
 from services.branch_relations import get_relations_for_branch
-from services.constants import ZHI_ZANG
 from services.calculator import get_ten_star_stem, get_ten_star_branch
 from services.stem_relations import get_relations_for_stem
 from services.relations import check_jahab
@@ -9,18 +8,18 @@ def get_unseong(cheongan, jiji):
     return UNSEONG_DATA.get(cheongan, {}).get(jiji, "입력 오류")
 
 def get_jijanggan(jiji_ch):
-    return JIJANGGAN.get(jiji_ch, [])
+    return [item['char'] for item in JIJANGGAN_DETAILED.get(jiji_ch, [])]
 
 def get_transmitted_info(branch, branch_idx, all_stems, day_stem):
     """투간된 지장간과 그렇지 않은 지장간을 분리하여 반환"""
-    jijanggan_list = ZHI_ZANG[branch]
-    position_labels = ['본기', '중기', '말기']
+    jijanggan_list = JIJANGGAN_DETAILED[branch]
     
     transmitted = []
     hidden = []
     
-    for idx, stem in enumerate(jijanggan_list):
-        pos_label = position_labels[idx] if idx < len(position_labels) else f'{idx+1}기'
+    for hidden_stem in jijanggan_list:
+        stem = hidden_stem['char']
+        pos_label = hidden_stem['type']
         ten_star = get_ten_star_stem(day_stem, stem)
         
         info = {
@@ -29,12 +28,17 @@ def get_transmitted_info(branch, branch_idx, all_stems, day_stem):
             'stem_ten_star': ten_star
         }
         
-        if stem in all_stems:
-            info['stem_idx'] = all_stems.index(stem)
-            info['from'] = branch
-            info['from_idx'] = branch_idx
-            info['from_ten_star'] = get_ten_star_branch(day_stem, branch)
-            transmitted.append(info)
+        matching_indices = [i for i, visible_stem in enumerate(all_stems)
+                            if visible_stem == stem]
+        if matching_indices:
+            for stem_idx in matching_indices:
+                transmitted.append({
+                    **info,
+                    'stem_idx': stem_idx,
+                    'from': branch,
+                    'from_idx': branch_idx,
+                    'from_ten_star': get_ten_star_branch(day_stem, branch),
+                })
         else:
             hidden.append(info)
     
@@ -71,7 +75,8 @@ def analyze_advanced_tonggeun(cheongans, jijis):
                 calc_score = base_power * pos_weights[j] * dist_decay[distance]
                 total_score += calc_score
                 
-                main_stem = ZHI_ZANG[target_jiji][0]  # 본기
+                main_stem = next(item['char'] for item in JIJANGGAN_DETAILED[target_jiji]
+                                 if item['type'] == '정기')
                 ten_star = get_ten_star_stem(day_stem, main_stem)
                 
                 root_details.append({

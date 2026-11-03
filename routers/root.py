@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from core.dependencies import get_db
 from services.saju_orchestrator import get_full_saju_data
+from services.character_relation_index import assemble_character_relation_index_from_response
+from schemas.character_relation_index import CharacterRelationIndex
 from schemas.saju_analysis import SajuAnalysisResponse
 
 router = APIRouter()
@@ -45,4 +47,20 @@ def get_calenda_data(
 
     result = get_full_saju_data(year, clean_month, clean_day, hour, min, sl, gen, db)
     return result
+
+
+@router.get('/relation-index', response_model=CharacterRelationIndex)
+def get_relation_index(
+    year: int,
+    month: str,
+    day: str,
+    hour: int,
+    min: int,
+    sl: str,
+    gen: str,
+    db: Session = Depends(get_db),
+):
+    """기존 원국 분석에서 관계 사실만 조회한다."""
+    response = get_calenda_data(year, month, day, hour, min, sl, gen, db)
+    return assemble_character_relation_index_from_response(response)
 
