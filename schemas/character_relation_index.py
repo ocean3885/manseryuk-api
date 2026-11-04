@@ -88,6 +88,7 @@ class StemRootingState(_ContractModel):
 
 class RelationSource(_ContractModel):
     system: Literal[
+        'cycle_relation_rules',
         'interaction_matrix', 'branch_dynamics',
         'branch_dynamics_v3', 'analysis_details',
     ]

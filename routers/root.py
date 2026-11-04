@@ -7,8 +7,23 @@ from schemas.character_relation_index import CharacterRelationIndex
 from schemas.saju_analysis import SajuAnalysisResponse
 from schemas.character_details import CharacterDetails
 from services.character_details import assemble_character_details
+from schemas.cycle_analysis import CycleAnalysis
+from services.cycle_analysis import assemble_cycle_analysis
 
 router = APIRouter()
+
+
+@router.get('/cycle-analysis', response_model=CycleAnalysis)
+def get_cycle_analysis(
+    year: int, month: str, day: str, hour: int, min: int, sl: str, gen: str,
+    daewoon_index: int | None = None, sewoon_year: int | None = None,
+    db: Session = Depends(get_db),
+):
+    """선택한 운의 글자와 소속 간 관계 후보를 조회한다. 통근 영향은 미평가다."""
+    if (daewoon_index is None) == (sewoon_year is None):
+        raise HTTPException(400, 'daewoon_index 또는 sewoon_year 중 하나만 지정하세요.')
+    response = get_calenda_data(year, month, day, hour, min, sl, gen, db)
+    return assemble_cycle_analysis(response, daewoon_index=daewoon_index, sewoon_year=sewoon_year)
 
 
 @router.get('/character-details', response_model=CharacterDetails)

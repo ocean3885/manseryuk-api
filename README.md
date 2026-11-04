@@ -34,6 +34,10 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## 📡 API 엔드포인트 규격 (API Reference)
 
+### `GET /cycle-analysis` — 선택한 대운·세운 연결
+
+기존 사주 입력에 `daewoon_index` 또는 `sewoon_year` 중 하나를 추가합니다. 대운은 원국+대운 10글자, 세운은 원국+해당 대운+세운 12글자를 반환합니다. 첫 대운 이전에는 원국+세운 10글자입니다. 운의 기본 속성·지장간과 **원국↔대운·원국↔세운·대운↔세운의 쌍별·다자 관계 후보 및 투간**을 제공합니다. 관계 성립·통근 영향은 미평가입니다. 연도 단위 선택이며 정밀 교운 날짜·입춘 시각을 판정하지 않습니다. [선택·기간 계약](docs/cycle_analysis_contract.md)을 참고하세요.
+
 ### `GET /character-details` — 글자별 통합 정보
 
 `GET /`와 같은 생년월일·시간·양음력·성별 파라미터를 받습니다. 원국 8글자의 기본 속성·지장간·통근·투간·관계를 `characters`, `relations`, `contexts`로 통합 제공합니다. ID에 소속을 포함하여 이후 대운·세운 어댑터를 확장할 수 있으며, 현재 대운·세운 관계는 미평가입니다. [응답 및 확장 계약](docs/character_details_contract.md)을 참고하세요.

@@ -12,7 +12,7 @@ class AnalysisContext(Contract):
     scope: Literal['natal', 'daewoon', 'sewoon']
     instance: str = Field(pattern=r'^[A-Za-z0-9_]+$')
     label: str
-    calculation_status: Literal['calculated', 'not_evaluated']
+    calculation_status: Literal['calculated', 'candidates_detected', 'not_evaluated']
     selection: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -136,7 +136,8 @@ class CharacterDetails(Contract):
                 raise ValueError('다자 조합이 참여 글자를 벗어났습니다.')
             if row.activation_status in ('conditional', 'suppressed') and not row.status_reason:
                 raise ValueError('조건부·억제 사유가 필요합니다.')
-        calculated = {c.scope for c in self.contexts.values() if c.calculation_status == 'calculated'}
+        calculated = {c.scope for c in self.contexts.values()
+                      if c.calculation_status in ('calculated', 'candidates_detected')}
         if (set(self.coverage.calculated_scopes) != calculated
                 or set(self.coverage.not_evaluated_scopes) != {'natal', 'daewoon', 'sewoon'} - calculated):
             raise ValueError('계산 범위와 분석 소속이 맞지 않습니다.')
