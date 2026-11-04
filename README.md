@@ -34,6 +34,10 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## 📡 API 엔드포인트 규격 (API Reference)
 
+### `GET /character-details` — 글자별 통합 정보
+
+`GET /`와 같은 생년월일·시간·양음력·성별 파라미터를 받습니다. 원국 8글자의 기본 속성·지장간·통근·투간·관계를 `characters`, `relations`, `contexts`로 통합 제공합니다. ID에 소속을 포함하여 이후 대운·세운 어댑터를 확장할 수 있으며, 현재 대운·세운 관계는 미평가입니다. [응답 및 확장 계약](docs/character_details_contract.md)을 참고하세요.
+
 ### `GET /` - 사주 만세력 및 AI 분석 데이터 조회
 
 #### 요청 파라미터 (Query Parameters)

@@ -5,8 +5,19 @@ from services.saju_orchestrator import get_full_saju_data
 from services.character_relation_index import assemble_character_relation_index_from_response
 from schemas.character_relation_index import CharacterRelationIndex
 from schemas.saju_analysis import SajuAnalysisResponse
+from schemas.character_details import CharacterDetails
+from services.character_details import assemble_character_details
 
 router = APIRouter()
+
+
+@router.get('/character-details', response_model=CharacterDetails)
+def get_character_details(
+    year: int, month: str, day: str, hour: int, min: int, sl: str, gen: str,
+    db: Session = Depends(get_db),
+):
+    """원국 글자별 속성·통근·투간·관계를 소속이 있는 공통 구조로 조회한다."""
+    return assemble_character_details(get_calenda_data(year, month, day, hour, min, sl, gen, db))
 
 @router.get("/", response_model=SajuAnalysisResponse)
 def get_calenda_data(
