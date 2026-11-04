@@ -1,5 +1,7 @@
 # 통근·허투 동주 기준 전환
 
+> 2026-11-04 현행 변경: 동주 허실 v4는 관련 관계 기록과 통근 영향 판정을 분리합니다. 활성 관계만으로 점수를 제외하거나 변허로 전환하지 않습니다. 아래 v3의 관계 반영·변허 사례는 이전 동작 기록입니다. [현행 계약](./root_relation_separation.md)을 참고하세요.
+
 적용일: 2026-11-04. 사용자 결정에 따라 **천간의 통근과 허투는 같은 기둥의 지지에서만 판단**한다. 다른 세 지지의 기존 지원 경로는 `external_support`로 분리해 보존한다. [통근 계산기](../services/analysis.py)의 기본 범위가 `same_pillar_only`이고, [허실 계산기](../services/xu_shi.py)의 현행 원국 응답은 `rule_version: 3.0.0`, `root_scope: same_pillar_only`를 출력한다. 기존 전주 합산은 회귀 비교를 위해서만 명시적 `all_four_branches_weighted` 옵션과 v1 규칙 버전으로 남긴다.
 
 ## 판정·출력 의미

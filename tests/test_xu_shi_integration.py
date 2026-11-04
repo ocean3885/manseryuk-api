@@ -81,7 +81,7 @@ class XuShiIntegrationTests(unittest.TestCase):
             self.assertTrue(any(p.startswith('【빈주 계산 범위】') for p in advanced['ai_consultation_prompts']))
             xu_shi = advanced['xu_shi_dynamics']
             self.assertEqual(xu_shi, result['advanced_analysis']['xu_shi_dynamics'])
-            self.assertEqual(xu_shi['rule_version'], '3.0.0')
+            self.assertEqual(xu_shi['rule_version'], '4.0.0')
             self.assertEqual(xu_shi['root_scope'], 'same_pillar_only')
             self.assertFalse(xu_shi['shared_roots'])
             for pillar, state in xu_shi['pillars'].items():
@@ -100,6 +100,12 @@ class XuShiIntegrationTests(unittest.TestCase):
             xu_shi = advanced['xu_shi_dynamics']
             self.assertEqual(xu_shi, result['advanced_analysis']['xu_shi_dynamics'])
             self.assertEqual(xu_shi['analysis_scope'], 'natal')
+            for state in xu_shi['pillars'].values():
+                self.assertEqual(state['root_impact_status'], 'not_evaluated')
+                self.assertIsNone(state['root_impact_score'])
+                self.assertEqual(state['score'], state['effective_score'])
+                self.assertEqual(state['original_status'], state['current_status'])
+            self.assertTrue(any(p['related_interactions'] for p in xu_shi['pillars'].values()))
             self.assertTrue(any(p['root_evidence'] for p in xu_shi['pillars'].values()))
             prompts = [p for p in advanced['ai_consultation_prompts'] if p.startswith('【원국 허실】')]
             self.assertEqual(len(prompts), 1)

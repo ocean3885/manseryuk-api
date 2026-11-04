@@ -56,7 +56,7 @@ class CharacterRelationIndexIntegrationTests(unittest.TestCase):
         original = SajuAnalysisResponse.model_validate(old.json())
         index = CharacterRelationIndex.model_validate(new.json())
         self.assertEqual(len(index.characters), 8)
-        self.assertEqual(index.schema_version, '1.6-draft')
+        self.assertEqual(index.schema_version, '1.7-draft')
         self.assertNotIn('relation_index', old.json()['advanced_analysis'])
         legacy_ids = {item['relation_id'] for item in
                       old.json()['advanced_analysis']['interactions']['matrix']}
@@ -72,6 +72,10 @@ class CharacterRelationIndexIntegrationTests(unittest.TestCase):
                 'pillars'][pillar]
             self.assertEqual(stem_state.original_status, old_state['original_status'])
             self.assertEqual(stem_state.current_status, old_state['current_status'])
+            self.assertEqual(stem_state.root_impact_status, 'not_evaluated')
+            self.assertIsNone(stem_state.root_impact_score)
+            self.assertEqual(stem_state.remaining_score, stem_state.root_score)
+            self.assertEqual(stem_state.affected_root_branch_ids, [])
             self.assertEqual(stem_state.root_score, old_state['score'])
             self.assertEqual(stem_state.has_same_pillar_root,
                              bool(old_state['root_evidence']))

@@ -49,6 +49,8 @@ class CharacterNode(_ContractModel):
 
 
 class StemRootingState(_ContractModel):
+    root_impact_status: Literal['not_evaluated'] = 'not_evaluated'
+    root_impact_score: None = None
     original_status: Literal['실(實)', '허(虛)', '허투(虛透)']
     current_status: Literal['실(實)', '허(虛)', '허투(虛透)', '변허(變虛)']
     root_score: float
@@ -209,7 +211,7 @@ class DetectionCoverage(_ContractModel):
 
 
 class CharacterRelationIndex(_ContractModel):
-    schema_version: Literal['1.6-draft']
+    schema_version: Literal['1.7-draft']
     characters: dict[CharacterId, CharacterNode]
     relations: list[CharacterRelation]
     coverage: DetectionCoverage

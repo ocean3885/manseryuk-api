@@ -29,6 +29,38 @@ def analyze(score, roots, interactions=(), repeat=False):
 
 
 class XuShiTests(unittest.TestCase):
+    def test_relations_are_preserved_without_assuming_root_damage(self):
+        stems, branches = list('甲甲甲甲'), list('寅酉酉酉')
+        roots = analyze_advanced_tonggeun(stems, branches)
+        matrix = [
+            relation(kind, relation_id=f'review:{i}', activation_status=state)
+            for i, (kind, state) in enumerate([
+                ('충(沖)', 'active'), ('형(刑)', 'candidate_only'),
+                ('천(穿)', 'active'), ('파(破)', 'active'),
+                ('육합(六合)', 'conditional'), ('반합(半合)', 'suppressed'),
+            ])
+        ]
+        matrix.append(dict(category='지지', type='삼합(三合)', name='그룹',
+                           relation_id='review:group', from_pillar='all', to_pillar='all',
+                           participants=['year', 'month', 'day'], activation_status='active'))
+        result = analyze_xu_shi_dynamics(stems, branches, stems[2], roots, matrix)
+        year = result['pillars']['year']
+        self.assertEqual(year['related_interactions'], matrix)
+        self.assertEqual(year['effective_score'], 1.0)
+        self.assertEqual(year['current_status'], '실(實)')
+        self.assertEqual(year['root_impact_status'], 'not_evaluated')
+        self.assertIsNone(year['root_impact_score'])
+        self.assertFalse(year['is_transformed'])
+        self.assertEqual(year['root_structure']['excluded_root_pillars'], [])
+        self.assertEqual(result['impact_groups'], [])
+        # 무근 기둥에도 관련 관계가 남으며, 다자 구조는 모든 참여 위치에 연결된다.
+        month = result['pillars']['month']
+        self.assertEqual(month['current_status'], '허투(虛透)')
+        self.assertEqual(month['related_interactions'], matrix)
+        self.assertEqual(result['pillars']['day']['related_interactions'], [matrix[-1]])
+        self.assertEqual(result['pillars']['hour']['related_interactions'], [])
+        self.assertEqual(XuShiDynamics.model_validate(result).model_dump(mode='json'), result)
+
     def test_same_pillar_absence_is_hollow_despite_other_pillar_support(self):
         stems, branches = list('甲甲甲甲'), list('酉寅酉酉')
         roots = analyze_advanced_tonggeun(stems, branches)
@@ -43,7 +75,7 @@ class XuShiTests(unittest.TestCase):
             stems, branches, stems[2], roots,
             build_interaction_matrix(stems, branches, stems[2])['matrix'])
         self.assertEqual(result['root_scope'], 'same_pillar_only')
-        self.assertEqual(result['rule_version'], '3.0.0')
+        self.assertEqual(result['rule_version'], '4.0.0')
         self.assertEqual(result['pillars']['year']['original_status'], '허투(虛透)')
 
     def test_same_pillar_root_status_ignores_external_support_when_damaged(self):
@@ -58,7 +90,7 @@ class XuShiTests(unittest.TestCase):
             stems, branches, stems[2], roots,
             build_interaction_matrix(stems, branches, stems[2])['matrix'])
         self.assertEqual(result['pillars']['year']['original_status'], '실(實)')
-        self.assertEqual(result['pillars']['year']['current_status'], '변허(變虛)')
+        self.assertEqual(result['pillars']['year']['current_status'], '실(實)')
         self.assertEqual([root['pillar'] for root in
                           result['pillars']['year']['root_evidence']], ['year'])
 
@@ -73,7 +105,7 @@ class XuShiTests(unittest.TestCase):
             stems, branches, scope='all_four_branches_weighted')
         self.assertEqual(legacy[1]['통근정보'][1]['score'], 0.6)
 
-    def test_weak_same_pillar_root_is_real_until_its_only_root_is_excluded(self):
+    def test_weak_same_pillar_root_is_preserved_with_clash(self):
         stems, branches = list('甲甲甲甲'), list('辰戌酉酉')
         roots = analyze_advanced_tonggeun(stems, branches)
         self.assertEqual(roots[0]['점수'], 0.3)
@@ -83,9 +115,9 @@ class XuShiTests(unittest.TestCase):
             build_interaction_matrix(stems, branches, stems[2])['matrix'])
         year = result['pillars']['year']
         self.assertEqual(year['original_status'], '실(實)')
-        self.assertEqual(year['current_status'], '변허(變虛)')
-        self.assertEqual(year['root_structure']['remaining_support'], 'none')
-        self.assertEqual(year['effective_score'], 0)
+        self.assertEqual(year['current_status'], '실(實)')
+        self.assertEqual(year['root_structure']['remaining_support'], 'present')
+        self.assertEqual(year['effective_score'], 0.3)
         self.assertEqual(result['weak_count'], 0)
 
     def test_weak_same_pillar_root_without_affecting_relation_stays_real(self):

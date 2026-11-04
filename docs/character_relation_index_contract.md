@@ -1,5 +1,7 @@
 # 원국 8글자 관계 조회 최소 계약
 
+> 현행 조회 스키마는 `1.7-draft`, 허실 원본 규칙은 `4.0.0`입니다. `stem_state.root_impact_status=not_evaluated`, `root_impact_score=null`이며 관계로 인한 자동 점수 제외는 하지 않습니다. 관계는 중앙 목록 및 지지 글자의 `relation_ids`에서 조회합니다. 아래 이전 버전의 손상·변허 설명보다 [현행 계약](./root_relation_separation.md)을 우선합니다.
+
 작성일: 2026-11-03. [탐지 구현 현황](./interaction_detection_implementation_audit.md)과 [실제 원국 조회 비교](./eight_character_relation_lookup_example.md)를 바탕으로 만든 **탐지 단계의 독립 계약**이다. [계약 모델](../schemas/character_relation_index.py)과 [읽기 전용 조립기](../services/character_relation_index.py)를 마련했다. 현재 별도 `GET /relation-index` 경로에서 제공한다. 기존 통근 점수·허실 상태는 출처와 함께 읽어오지만 관계별 새 세력 변화량·손상량·빈주 귀속은 계산하지 않는다.
 
 ## 자료 형태와 조회 방식

@@ -267,6 +267,9 @@ class XuShiImpactGroup(BaseModel):
 
 
 class PillarXuShi(BaseModel):
+    related_interactions: List[Dict[str, Any]] = Field(default_factory=list)
+    root_impact_status: Literal['not_evaluated', 'legacy_evaluated'] = 'legacy_evaluated'
+    root_impact_score: Optional[float] = None
     position: str
     char: str
     ten_star: str

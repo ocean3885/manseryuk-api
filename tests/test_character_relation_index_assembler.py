@@ -78,7 +78,7 @@ class CharacterRelationAssemblerTests(unittest.TestCase):
         self.assertTrue(result['characters']['month.stem']['stem_state'][
             'has_same_pillar_root'])
         self.assertEqual(result['characters']['month.stem']['stem_state'][
-            'current_status'], '변허(變虛)')
+            'current_status'], '실(實)')
         self.assertEqual(result['characters']['month.stem']['stem_state'][
             'external_support_score'], 1.3)
         self.assertEqual(result['characters']['month.stem']['stem_state'][

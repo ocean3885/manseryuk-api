@@ -376,6 +376,8 @@ def _stem_states(stems, branches, matrix, analysis, xu_shi):
         result[f'{pillar}.stem'] = {
             'original_status': item['original_status'],
             'current_status': item['current_status'],
+            'root_impact_status': item['root_impact_status'],
+            'root_impact_score': item['root_impact_score'],
             'root_score': item['score'],
             'has_same_pillar_root': has_same_pillar_root,
             'remaining_score': item['effective_score'],
@@ -429,7 +431,7 @@ def assemble_character_relation_index(stems, branches, interactions, analysis,
         for participant in row['participants']:
             characters[participant]['relation_ids'].append(row['relation_id'])
     return CharacterRelationIndex.model_validate({
-        'schema_version': '1.6-draft', 'characters': characters, 'relations': rows,
+        'schema_version': '1.7-draft', 'characters': characters, 'relations': rows,
         'coverage': {
             'rule_scope': 'registered_rules_partial',
             'transmission_basis': 'jijanggan_detailed_exact_match',

@@ -39,7 +39,7 @@ def payload(stems='乙己己庚', branches='巳丑未午', relations=()):
             characters[participant]['relation_ids'].append(row['relation_id'])
     assert set(characters) == set(CHARACTER_IDS)
     return {
-        'schema_version': '1.6-draft', 'characters': characters, 'relations': rows,
+        'schema_version': '1.7-draft', 'characters': characters, 'relations': rows,
         'coverage': {
             'rule_scope': 'registered_rules_partial',
             'transmission_basis': 'jijanggan_detailed_exact_match',

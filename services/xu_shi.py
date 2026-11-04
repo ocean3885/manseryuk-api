@@ -5,7 +5,7 @@ PILLAR_KEYS = ['year', 'month', 'day', 'hour']
 POSITION_NAMES = ['년', '월', '일', '시']
 REAL_THRESHOLD = 0.5
 RULE_VERSION = '1.0.0'  # 기존 판정 규칙을 최초로 명시한 버전
-SAME_PILLAR_RULE_VERSION = '3.0.0'
+SAME_PILLAR_RULE_VERSION = '4.0.0'
 AFFECTING_TYPES = ('충(沖)', '천(穿)', '형(刑)')
 
 
@@ -16,11 +16,11 @@ def analyze_xu_shi_dynamics(
     tonggeun_results: List[Dict[str, Any]],
     interaction_matrix: List[Dict[str, Any]]
 ) -> Dict[str, Any]:
-    """원국의 관계 반영 전후 허실과 판정 근거를 반환한다.
+    """원국 통근 판정과 관련 관계 근거를 반환한다.
 
     동주 통근에서는 타주 지지의 지원을 뿌리로 합산하지 않는다.
-    v1 회귀 입력은 기존 전주 규칙을 유지한다. 충·형·천에 연결된 뿌리의 기여도를
-    전부 제외하며, 원래 실인 천간만 잔여 점수에 따라 변허로 전이한다.
+    동주 v4는 관계의 통근 영향을 미평가로 두고 점수와 상태를 유지한다.
+    v1 회귀 입력에만 기존 전주 충·형·천 제외와 변허 전이를 적용한다.
     대운·세운 또는 관계별 손상률을 계산하지 않는다.
     """
     scopes = {item.get('통근범위', 'all_four_branches_weighted')
@@ -29,6 +29,9 @@ def analyze_xu_shi_dynamics(
             'same_pillar_only', 'all_four_branches_weighted'}:
         raise ValueError('천간별 통근 범위가 일치해야 합니다.')
     root_scope = scopes.pop()
+    if root_scope == 'same_pillar_only':
+        return _analyze_same_pillar(stems, branches, day_stem, tonggeun_results,
+                                    interaction_matrix)
     rule_version = (SAME_PILLAR_RULE_VERSION if root_scope == 'same_pillar_only'
                     else RULE_VERSION)
     pillars_xu_shi: Dict[str, Any] = {}
@@ -148,6 +151,9 @@ def analyze_xu_shi_dynamics(
             transition_reasons.append(f'기존 규칙에 따라 {original_status}을 유지합니다.')
 
         pillars_xu_shi[p_key] = {
+            'related_interactions': [],
+            'root_impact_status': 'legacy_evaluated',
+            'root_impact_score': None,
             'position': f'{pos_name}간',
             'char': stem_char,
             'ten_star': ten_star,
@@ -207,6 +213,57 @@ def analyze_xu_shi_dynamics(
         'hollow_penetrate_count': counts['허투(虛透)'],
         'weak_count': counts['허(虛)'],
         'overall_status': ' '.join(summary_parts),
+    }
+
+
+def _analyze_same_pillar(stems, branches, day_stem, roots, matrix):
+    """동주 통근과 관계 기록을 분리하고 관계의 통근 영향은 미평가한다."""
+    pillars = {}
+    for i, key in enumerate(PILLAR_KEYS):
+        tg = roots[i]
+        score = tg.get('점수', 0)
+        status = '실(實)' if score > 0 else '허투(虛透)'
+        related = []
+        for relation in matrix:
+            participants = relation.get('participants') or [
+                relation.get('from_pillar'), relation.get('to_pillar')]
+            if relation.get('category') == '지지' and key in participants:
+                # 후보·조건부·억제와 다자 구조도 원본 상태/참여 위치를 보존한다.
+                if relation not in related:
+                    related.append(dict(relation))
+        evidence = []
+        for root in tg.get('통근정보', []):
+            if root.get('position') != POSITION_NAMES[i]:
+                raise ValueError(f'{key}: 타주 지원이 동주 통근에 섞였습니다.')
+            evidence.append({
+                'pillar': key, 'position': POSITION_NAMES[i],
+                'branch_char': branches[i], 'score': root['score'],
+                'is_affected': False, 'effective_score': root['score'],
+                'interactions': [],
+            })
+        ten_star = '일간(본인)' if i == 2 else get_ten_star_stem(day_stem, stems[i])
+        reasons = [f'동주 통근 점수 {score}로 {status} 분류. 뿌리 강도는 점수로 별도 표시.',
+                   '관련 지지 관계는 별도 기록하며 통근 약화·소멸 여부는 미평가입니다.']
+        pillars[key] = {
+            'position': f'{POSITION_NAMES[i]}간', 'char': stems[i], 'ten_star': ten_star,
+            'score': score, 'effective_score': score,
+            'root_evidence': evidence, 'related_interactions': related,
+            'root_impact_status': 'not_evaluated', 'root_impact_score': None,
+            'transition_reasons': reasons, 'original_status': status,
+            'current_status': status, 'is_transformed': False, 'transition_code': 'maintained',
+            'root_structure': _describe_pillar_roots(evidence, score, 'same_pillar_only'),
+            'reason': ' '.join(reasons),
+            'meaning': _generate_xu_shi_meaning(ten_star, status, 'same_pillar_only'),
+        }
+    real = sum(p['score'] > 0 for p in pillars.values())
+    return {
+        'analysis_scope': 'natal', 'rule_version': SAME_PILLAR_RULE_VERSION,
+        'root_scope': 'same_pillar_only', 'pillars': pillars,
+        'shared_roots': [], 'impact_groups': [], 'real_count': real,
+        'transformed_empty_count': 0, 'hollow_penetrate_count': 4 - real, 'weak_count': 0,
+        'overall_status': f'동주 통근 기준 실(實) {real}개, 허투(虛透) {4-real}개입니다. '
+                          '합·충·형·파·천 등 관련 관계를 별도로 기록했습니다. '
+                          '관계에 의한 통근 약화·소멸은 미평가이며 변허를 자동 판정하지 않습니다.',
     }
 
 
