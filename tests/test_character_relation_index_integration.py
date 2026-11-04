@@ -103,7 +103,10 @@ class CharacterRelationIndexIntegrationTests(unittest.TestCase):
         relation = self.client.get('/relation-index', params=invalid)
         self.assertEqual(original.status_code, 400)
         self.assertEqual(relation.status_code, original.status_code)
-        self.assertEqual(relation.json(), original.json())
+        original_error, relation_error = original.json(), relation.json()
+        self.assertTrue(original_error.pop('example').startswith('/?'))
+        self.assertTrue(relation_error.pop('example').startswith('/relation-index?'))
+        self.assertEqual(relation_error, original_error)
 
     def test_three_calendar_charts_match_all_matrix_ids_and_known_statuses(self):
         for query in QUERIES:

@@ -1,8 +1,8 @@
 # 원국 8글자 관계 조회 최소 계약
 
-> 현행 조회 스키마는 `1.7-draft`, 허실 원본 규칙은 `4.0.0`입니다. `stem_state.root_impact_status=not_evaluated`, `root_impact_score=null`이며 관계로 인한 자동 점수 제외는 하지 않습니다. 관계는 중앙 목록 및 지지 글자의 `relation_ids`에서 조회합니다. 아래 이전 버전의 손상·변허 설명보다 [현행 계약](./root_relation_separation.md)을 우선합니다.
+> 현행 조회 스키마는 `1.7-draft`, 허실 원본 규칙은 `4.0.0`입니다. `stem_state.root_impact_status=not_evaluated`, `root_impact_score=null`이며 관계로 인한 자동 점수 제외는 하지 않습니다. 관계는 중앙 목록 및 지지 글자의 `relation_ids`에서 조회합니다. 아래 이전 버전의 손상·변허 설명보다 [현행 계약](root_relation_separation.md)을 우선합니다.
 
-작성일: 2026-11-03. [탐지 구현 현황](./interaction_detection_implementation_audit.md)과 [실제 원국 조회 비교](./eight_character_relation_lookup_example.md)를 바탕으로 만든 **탐지 단계의 독립 계약**이다. [계약 모델](../schemas/character_relation_index.py)과 [읽기 전용 조립기](../services/character_relation_index.py)를 마련했다. 현재 별도 `GET /relation-index` 경로에서 제공한다. 기존 통근 점수·허실 상태는 출처와 함께 읽어오지만 관계별 새 세력 변화량·손상량·빈주 귀속은 계산하지 않는다.
+작성일: 2026-11-03. [탐지 구현 현황](interaction_detection_implementation_audit.md)과 [실제 원국 조회 비교](eight_character_relation_lookup_example.md)를 바탕으로 만든 **탐지 단계의 독립 계약**이다. [계약 모델](../schemas/character_relation_index.py)과 [읽기 전용 조립기](../services/character_relation_index.py)를 마련했다. 현재 별도 `GET /relation-index` 경로에서 제공한다. 기존 통근 점수·허실 상태는 출처와 함께 읽어오지만 관계별 새 세력 변화량·손상량·빈주 귀속은 계산하지 않는다.
 
 ## 자료 형태와 조회 방식
 
@@ -75,9 +75,9 @@
 
 ## 투출과 통근·허실의 분리
 
-[120개 천간·지지 조합의 교차 대조](./transmission_rooting_alignment_audit.md)에서 글자 일치만 3쌍, 통근 인정만 16쌍을 확인했다. 네 통제 원국의 `relation-index`에서도 투출 관계와 허실 원상태가 서로 다른 판정으로 유지된다.
+[120개 천간·지지 조합의 교차 대조](transmission_rooting_alignment_audit.md)에서 글자 일치만 3쌍, 통근 인정만 16쌍을 확인했다. 네 통제 원국의 `relation-index`에서도 투출 관계와 허실 원상태가 서로 다른 판정으로 유지된다.
 
-[불일치 19쌍 규칙 검토](./root_strength_rule_review.md)는 통근만 인정한 16쌍이 모두 **같은 오행의 다른 지장간 글자**를 갖고, 글자 일치만 한 3쌍이 모두 **戊 초기 `7/30`**임을 확인했다. 이는 코드 자료의 분류이지 각 계수의 승인 근거가 아니다. [동주 기준 전환](./same_pillar_root_migration.md)에 따라 현재 허실은 동주 지지로 판정하며 타주 지원은 별도 값이다.
+[불일치 19쌍 규칙 검토](root_strength_rule_review.md)는 통근만 인정한 16쌍이 모두 **같은 오행의 다른 지장간 글자**를 갖고, 글자 일치만 한 3쌍이 모두 **戊 초기 `7/30`**임을 확인했다. 이는 코드 자료의 분류이지 각 계수의 승인 근거가 아니다. [동주 기준 전환](same_pillar_root_migration.md)에 따라 현재 허실은 동주 지지로 판정하며 타주 지원은 별도 값이다.
 
 - [기존 투출 판정](../services/analysis.py)은 지지의 지장간과 원국 네 천간의 **동일 글자**를 대조한다. 반복된 천간을 `all_stems.index()`로 첫 위치에만 연결하던 문제를 고쳐 **모든 일치 위치**를 기록한다. 지지의 `jijanggan`, `transmitted`, `hidden`은 이제 [지지 세력 계산](../services/branch_dynamics.py)이 사용하는 `JIJANGGAN_DETAILED`의 글자·초기/중기/정기 표기를 함께 사용한다.
 - 기존 `ZHI_ZANG`에는 없지만 상세표에는 들어 있는 글자는 **子의 壬, 卯의 甲, 午의 丙, 酉의 庚, 亥의 戊**다. 이 다섯 지지에서 새 투출 후보·기존 원국 응답의 지장간 목록이 달라질 수 있다. 상세표를 프로젝트 내부 기준으로 택한 것이며 학파 전체의 지장간 체계를 검증한 것은 아니다. 응답의 `coverage.transmission_basis`가 적용 표를 드러낸다.
@@ -85,7 +85,7 @@
 - [현재 통근 계산](../services/analysis.py)은 `ROOT_STRENGTH`의 **동주 지지 계수 자체**를 통근 점수로 쓰고, 다른 지지의 기존 위치·거리 가중 지원은 `external_support_*`에 둔다. [허실 분석](../services/xu_shi.py) v3은 동주 원점수 `0`을 허투, 양수는 실로 분류한다. **활성** 충·천·형이 동주 뿌리에 닿아 계산상 잔여 기여도가 `0`이 되면 변허를 표시한다. 격위 자형의 `candidate_only`는 뿌리 영향에서 제외한다. 따라서 **투출 관계 유무, 동주 통근, 타주 지원은 별도 사실**이다. `stem_state.validation_status: provisional`은 계수·전근 제외가 임상 확정 모델이 아님을 표시한다.
 - 조회 조립기는 [기존 허실 결과](../services/xu_shi.py)의 네 천간 상태를 글자별 `stem_state`에 옮기며, 원국·통근 근거로 재계산한 값과 다르면 거부한다. 지지 글자의 `stem_state`는 `null`이다. 다음 단계의 새 수치 모델이 검증되기 전에는 이 상태를 관계별 손상량이나 지지 최종 세력으로 합산하지 않는다.
 
-조회 계약에는 `effect_calculation_status`, 잠재 강도, 피해량을 두지 않는다. 이 단계에서 사용자의 관심은 **관계가 어디서 발견되고 어떤 상태인지**이며, 후속 계산 결과는 기존 지지 v3 관계/세력 층위가 맡는다. [원국 비교 예시](./eight_character_relation_lookup_example.md)에 있던 `effect_calculation_status`는 설명용이므로 이번 최소 계약에서 제외했다.
+조회 계약에는 `effect_calculation_status`, 잠재 강도, 피해량을 두지 않는다. 이 단계에서 사용자의 관심은 **관계가 어디서 발견되고 어떤 상태인지**이며, 후속 계산 결과는 기존 지지 v3 관계/세력 층위가 맡는다. [원국 비교 예시](eight_character_relation_lookup_example.md)에 있던 `effect_calculation_status`는 설명용이므로 이번 최소 계약에서 제외했다.
 
 ## ID와 기존 출력의 대응
 
@@ -114,7 +114,7 @@
 | 투출·통근 상태 | 12지지의 상세 지장간과 10천간의 반복 위치 대조 | 한 지장간이 두 천간 위치에 드러나는 경우, 동주 원점수 0/양수 경계, 충·천·형 반영 후 변허; 전주 v1 회귀의 0.5 경계 | 지장간 표·투출 관계·허실 원본 근거 일치. 투출과 통근 상태의 별도 ID/필드 유지 |
 | 공통 조회 불변 조건 | 연·월·일·시 × 천간·지지 정확히 8개 | 반복 글자·다중 관계·조건부/억제/후보의 혼재 | 관계 ID 유일, 참여 글자·위치·방향 유효, `relation_ids`가 중앙 목록에서 정확히 역산됨 |
 
-지지 78쌍의 이전 전수 결과는 [별도 감사](./branch_relation_candidate_audit.md)에 있지만, **이 8글자 계약을 연결한 뒤 다시 검증해야** 1단계 완료를 주장할 수 있다. 천간 5/4/11과 자합 9는 [현행 규칙 파일](../services/relation_rules.py)의 항목 수이며 교리 전체의 목록이라고 주장하지 않는다. 현행 규칙 밖 천간 生·동기, 다른 기둥 천간↔지지 직접 관계, 일반적인 지장간 피해·入墓는 이 전수 검사로 자동 완성되지 않는다. 필요한 탐지 규칙은 별도 근거 검토 후 확장한다.
+지지 78쌍의 이전 전수 결과는 [별도 감사](branch_relation_candidate_audit.md)에 있지만, **이 8글자 계약을 연결한 뒤 다시 검증해야** 1단계 완료를 주장할 수 있다. 천간 5/4/11과 자합 9는 [현행 규칙 파일](../services/relation_rules.py)의 항목 수이며 교리 전체의 목록이라고 주장하지 않는다. 현행 규칙 밖 천간 生·동기, 다른 기둥 천간↔지지 직접 관계, 일반적인 지장간 피해·入墓는 이 전수 검사로 자동 완성되지 않는다. 필요한 탐지 규칙은 별도 근거 검토 후 확장한다.
 
 ## 현재 검증과 다음 구현
 
@@ -139,4 +139,4 @@
 
 독립 조회 관계에는 매트릭스에 없는 지지 생·극, 동주 간지, 천간극 등이 포함되므로 관계 수가 더 많다. 세 날짜 모두 **원본 매트릭스의 각 ID가 조회 결과의 `source_refs`에서 정확히 한 번 등장**했고, 원본에 성립 상태가 있는 관계는 그 상태와 일치했다. 완성 삼합 안의 구조 전용 반합처럼 v3가 성립 상태를 의도적으로 바꾸는 경우만 원본의 `potential`과 다른 `candidate_only`로 보존한다. 이 세 날짜는 상태 매핑의 실제 사례 검증이며 모든 달력 원국의 명리 판정 검증은 아니다.
 
-**다음 작업 권장:** [동주 기준 전환](./same_pillar_root_migration.md)의 통근 인정 조합과 뿌리 강도 계수를 검토한다. 특히 활성 충·천·형에 따른 **동주 뿌리 전체 제외**가 과도한지 사례로 확인한다. 천간 生·동기 등 미지원 탐지는 그 뒤에 확장한다.
+**현재 개발 기준:** 관계와 통근 영향을 분리하며 자동 제외·변허를 재도입하지 않는다. 수치 연구의 다음 작업은 재개 지시가 아니다. [현행 문서 목록](README.md)을 따른다.

@@ -21,7 +21,7 @@ def detect_cycle_relations(characters):
             return
         rid = 'cycle:' + family + ':' + kind + ':' + '|'.join(members)
         fact = kind in ('transmission', 'generate', 'control', 'same_branch')
-        rows[rid] = dict(
+        row = dict(
             relation_id=rid, source_relation_id=rid, type=kind, participants=members,
             context_ids=contexts, activation_status='detected' if fact else 'candidate_only',
             status_reason='cycle_presence_only_activation_and_impact_not_evaluated',
@@ -29,10 +29,13 @@ def detect_cycle_relations(characters):
             formation_candidates=[members] if formation else [],
             rule_ids=[f'cycle:presence:{table}:{CYCLE_RELATION_RULE_VERSION}',
                       f'cycle:registered_tables:{rules.RULE_VERSION}'],
-            source_refs=[dict(system='cycle_relation_rules', location=(
+            source_refs=[dict(system='cycle_relation_rules', relation_id=None, location=(
                 f'services.constants.{table}' if table == 'JIJANGGAN_DETAILED' else
                 f'services.cycle_relations.{table}' if table == 'BRANCH_REPEAT_PRESENCE' else
                 f'services.relation_rules.{table}'))])
+        if rid in rows and rows[rid] != row:
+            raise ValueError(f'운 관계 ID에 서로 다른 결과가 겹쳤습니다: {rid}')
+        rows[rid] = row
 
     stems = [key for key in nodes if characters[key]['kind'] == 'stem']
     branches = [key for key in nodes if characters[key]['kind'] == 'branch']
@@ -99,7 +102,11 @@ def detect_cycle_relations(characters):
 
 def attach_cycle_relations(graph):
     """Attach detected rows once and rebuild reverse references for every participant."""
-    graph['relations'].update(detect_cycle_relations(graph['characters']))
+    detected = detect_cycle_relations(graph['characters'])
+    # Reattachment after a context change must not retain old cycle edges.
+    graph['relations'] = {rid: row for rid, row in graph['relations'].items()
+                          if not rid.startswith('cycle:')}
+    graph['relations'].update(detected)
     for key, node in graph['characters'].items():
         node['relation_ids'] = [rid for rid, row in graph['relations'].items() if key in row['participants']]
         node['transmission_relation_ids'] = [rid for rid in node['relation_ids']
@@ -115,6 +122,7 @@ def attach_cycle_relations(graph):
     graph['coverage']['not_evaluated_scopes'] = [scope for scope in ('natal', 'daewoon', 'sewoon') if scope not in present]
     graph['coverage']['detected_only_relation_ids'] = [rid for rid, row in graph['relations'].items()
                                                       if row['activation_status'] == 'detected']
-    graph['coverage']['not_evaluated_mechanisms'] += [
+    graph['coverage']['not_evaluated_mechanisms'] = list(dict.fromkeys(
+        graph['coverage']['not_evaluated_mechanisms'] + [
         'cycle_relation_activation', 'cycle_relation_competition', 'cycle_power_effects',
-        'cycle_rooting', 'cycle_internal_relations', 'cross_context_stem_branch_element']
+        'cycle_rooting', 'cycle_internal_relations', 'cross_context_stem_branch_element']))

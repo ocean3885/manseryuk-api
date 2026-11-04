@@ -16,20 +16,13 @@ from services.bin_zhu import analyze_bin_zhu_dynamics
 from services.branch_dynamics import analyze_branch_dynamics
 from services.five_elements import analyze_five_elements
 from services.special_stars import analyze_special_stars
+from services.birth_input import validate_birth_input
+from core.api_errors import ApiError
 
 
 def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl: str, gen: str, db: Session):
-    # sl 매핑 (sol -> 양력, lun -> 음력, lun_y -> 음력윤달)
+    month, day = validate_birth_input(year, month, day, hour, min, sl, gen)
     if sl == "sol":
-        calendar_type_str = "양력"
-    elif sl == "lun":
-        calendar_type_str = "음력"
-    elif sl == "lun_y":
-        calendar_type_str = "음력윤달"
-    else:
-        raise HTTPException(status_code=400, detail="Invalid sl value. Use 'sol', 'lun', or 'lun_y'")
-
-    if calendar_type_str == "양력":
         birthdata = db.query(CalendaData).filter(
             CalendaData.cd_sy == year,
             CalendaData.cd_sm == month,
@@ -39,16 +32,17 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
         birthdata = db.query(CalendaData).filter(
             CalendaData.cd_ly == year,
             CalendaData.cd_lm == month,
-            CalendaData.cd_ld == day
+            CalendaData.cd_ld == day,
+            CalendaData.cd_leap_month == (1 if sl == 'lun_y' else 0),
         ).all()
 
     if not birthdata:
-        raise HTTPException(status_code=404, detail="Data not found")
+        raise ApiError(404, 'calendar_date_not_found', '요청한 양력 또는 음력 평달·윤달 날짜가 달력 DB에 없습니다.',
+                       constraints={'fields': ['year', 'month', 'day', 'sl']})
 
-    if calendar_type_str == "음력윤달" and len(birthdata) > 1:
-        data = birthdata[1]
-    else:
-        data = birthdata[0]
+    if len(birthdata) != 1:
+        raise HTTPException(500, '요청한 날짜의 달력 데이터가 중복되어 있습니다.')
+    data = birthdata[0]
 
     # ── 날짜 및 4주 기본값 추출 ──
     year_gan_kr  = data.cd_kyganjee[0]
@@ -67,8 +61,8 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
 
     # ── 시간 간지 변환 ──
     time_zodiac = determine_zodiac_hour_str(str(hour), str(min))
-    if len(time_zodiac) > 1:  # 에러 문자열이면 기본값 자(子)시 처리
-        time_zodiac = "자"
+    if time_zodiac not in ('자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해'):
+        raise HTTPException(500, '검증된 출생 시간의 시지 계산에 실패했습니다.')
 
     time_ji_kr  = time_zodiac
     time_gan_kr = get_time_gan(day_gan_kr, time_ji_kr)

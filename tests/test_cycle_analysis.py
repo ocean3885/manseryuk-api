@@ -84,6 +84,23 @@ class CycleAnalysisTests(unittest.TestCase):
         with self.assertRaises(HTTPException):
             assemble_cycle_analysis(response, sewoon_year=after)
 
+    def test_current_daewoon_and_annual_selection_share_all_start_years(self):
+        from services.daewoon import build_daewoon
+        source = self.response['daewoon']
+        data = [source['direction'], [p['gan'] for p in source['list']],
+                [p['ji'] for p in source['list']]]
+        for item in source['list']:
+            year = item['start_year']
+            if year not in {a['year'] for a in self.response['cycles']['future_100']}:
+                continue
+            with self.subTest(year=year):
+                built = build_daewoon(data, source['start_age'], 1995,
+                                      current_year=year, day_stem='癸')
+                response = deepcopy(self.response)
+                response['daewoon'] = built
+                graph = assemble_cycle_analysis(response, sewoon_year=year)
+                self.assertEqual(graph['selection']['daewoon_index'], built['current']['index'])
+
     def test_http_selection_contract_and_existing_route(self):
         def readonly_db():
             with Session(self.engine) as session:

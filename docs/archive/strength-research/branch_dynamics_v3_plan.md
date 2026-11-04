@@ -1,35 +1,37 @@
 # 지지 작용 v3 단계별 개발 계획
 
+> **보관 자료 / 중단 연구 기록** — 이 문서의 개발 순서·다음 작업·계수 제안은 현행 지침이 아닙니다. 2026-11-04 기준 자료를 보존하며, 현재 작업은 [현행 문서 목록](../../README.md)을 따릅니다. 명시적 요청 없이 수치 계산·손상률 연구를 재개하지 않습니다.
+
 ## 기준과 목표
 
-**최신 작업 순서(2026-11-03 점검 반영):** 작용 탐지·성립 조건·근거 기록을 먼저 완성하고, 세력 형성·강화·약화와 최종 집계의 추가 수치화는 이후에 진행한다. 기존 잠정 계산은 보존한다. [8글자 작용 탐지 현황표](./interaction_detection_implementation_audit.md)에 현재 코드·출력·테스트를 대조했다. 1단계 조회 계약은 8글자를 대상으로 권장하되, 각 관계 유형의 지원 범위를 명시한다. 천간극·동주 자합 등 기존 별도 경로를 중앙 목록·글자별 참조로 연결하는 계약이 다음 구현 단위다. A·D 후보 자료 추가와 새 구조 계수는 후속 과제다.
+**최신 작업 순서(2026-11-03 점검 반영):** 작용 탐지·성립 조건·근거 기록을 먼저 완성하고, 세력 형성·강화·약화와 최종 집계의 추가 수치화는 이후에 진행한다. 기존 잠정 계산은 보존한다. [8글자 작용 탐지 현황표](../../interaction_detection_implementation_audit.md)에 현재 코드·출력·테스트를 대조했다. 1단계 조회 계약은 8글자를 대상으로 권장하되, 각 관계 유형의 지원 범위를 명시한다. 천간극·동주 자합 등 기존 별도 경로를 중앙 목록·글자별 참조로 연결하는 계약이 다음 구현 단위다. A·D 후보 자료 추가와 새 구조 계수는 후속 과제다.
 
-**최소 조회 계약(2026-11-03):** [8글자 관계 조회 계약](./character_relation_index_contract.md)에 독립 모델과 유형별 검증 범위를 기록했다. 기존 지지 v3 ID를 우선 활용하고 천간·동주 출처를 위치별 관계로 정규화한다. 조회 계약에는 작용량·빈주 결과를 넣지 않는다. 다음 단위는 읽기 전용 생산 조립기이며 현행 API·지지 v3 출력의 변경 시점은 실제 소비자 확인 후 결정한다.
+**최소 조회 계약(2026-11-03):** [8글자 관계 조회 계약](../../character_relation_index_contract.md)에 독립 모델과 유형별 검증 범위를 기록했다. 기존 지지 v3 ID를 우선 활용하고 천간·동주 출처를 위치별 관계로 정규화한다. 조회 계약에는 작용량·빈주 결과를 넣지 않는다. 다음 단위는 읽기 전용 생산 조립기이며 현행 API·지지 v3 출력의 변경 시점은 실제 소비자 확인 후 결정한다.
 
-**읽기 전용 조립(2026-11-03):** [조립기](../services/character_relation_index.py)가 현행 세 출력의 지지·천간·동주 탐지 사실을 대조해 [8글자 조회 계약](./character_relation_index_contract.md)으로 옮긴다. 지지 v3 정형 ID를 사용하되 현행 매트릭스 ID를 출처로 보존한다. 원본 값을 수정하지 않고, 수치 집계를 추가하지 않는다. 실제 API·v3 응답은 그대로다. 다음에는 기존 소비자와 중복 출력 범위를 확인해 제공 위치를 정한다.
+**읽기 전용 조립(2026-11-03):** [조립기](../../../services/character_relation_index.py)가 현행 세 출력의 지지·천간·동주 탐지 사실을 대조해 [8글자 조회 계약](../../character_relation_index_contract.md)으로 옮긴다. 지지 v3 정형 ID를 사용하되 현행 매트릭스 ID를 출처로 보존한다. 원본 값을 수정하지 않고, 수치 집계를 추가하지 않는다. 실제 API·v3 응답은 그대로다. 다음에는 기존 소비자와 중복 출력 범위를 확인해 제공 위치를 정한다.
 
-**별도 조회(2026-11-03):** [루트 라우터](../routers/root.py)는 기존 `GET /`를 유지하고 `GET /relation-index`를 새로 제공한다. 초안 8글자 관계 조회만 별도 반환하므로 기존 응답 필드와 지지 v3 스키마를 변경하지 않는다. [계약의 응답 연결 기록](./character_relation_index_contract.md)과 읽기 전용 HTTP 통합 테스트를 참조한다. 다음 단계는 다른 원국 교차 검증과 탐지 지원 범위의 명시다.
+**별도 조회(2026-11-03):** [루트 라우터](../../../routers/root.py)는 기존 `GET /`를 유지하고 `GET /relation-index`를 새로 제공한다. 초안 8글자 관계 조회만 별도 반환하므로 기존 응답 필드와 지지 v3 스키마를 변경하지 않는다. [계약의 응답 연결 기록](../../character_relation_index_contract.md)과 읽기 전용 HTTP 통합 테스트를 참조한다. 다음 단계는 다른 원국 교차 검증과 탐지 지원 범위의 명시다.
 
-**지원 범위 표시(2026-11-03):** 세 실제 날짜의 원본 관계 ID·알려진 성립 상태를 새 조회와 대조했고, [조회 계약](./character_relation_index_contract.md)의 `coverage`에 `detected` 관계 목록과 현재 미평가 기전을 명시했다. 조회 스키마는 `1.1-draft`이며 이 변경은 지지 v3 출력 및 기존 루트 응답에 영향을 주지 않는다. 다음에는 미지원 관계의 탐지 규칙 범위를 결정한다.
+**지원 범위 표시(2026-11-03):** 세 실제 날짜의 원본 관계 ID·알려진 성립 상태를 새 조회와 대조했고, [조회 계약](../../character_relation_index_contract.md)의 `coverage`에 `detected` 관계 목록과 현재 미평가 기전을 명시했다. 조회 스키마는 `1.1-draft`이며 이 변경은 지지 v3 출력 및 기존 루트 응답에 영향을 주지 않는다. 다음에는 미지원 관계의 탐지 규칙 범위를 결정한다.
 
-**투출·허실 조회(2026-11-03):** [관계 조회 계약](./character_relation_index_contract.md)을 `1.2-draft`로 확장했다. 지장간의 동일 글자 투출은 반복된 천간 위치마다 별도 관계로 기록하고, 천간의 실·허·허투·변허는 기존 통근/허실 모델의 원점수·잔여점수 및 뿌리 근거와 함께 글자별 상태로 둔다. 상세 지장간 표를 투출·지지 세력의 공통 기준으로 사용하되, 통근 점수와 충·천·형에 따른 전근 제외는 기존 잠정 규칙으로 표시한다. 지지 v3의 최종 세력 계산에는 이 값을 새로 가산하지 않는다.
+**투출·허실 조회(2026-11-03):** [관계 조회 계약](../../character_relation_index_contract.md)을 `1.2-draft`로 확장했다. 지장간의 동일 글자 투출은 반복된 천간 위치마다 별도 관계로 기록하고, 천간의 실·허·허투·변허는 기존 통근/허실 모델의 원점수·잔여점수 및 뿌리 근거와 함께 글자별 상태로 둔다. 상세 지장간 표를 투출·지지 세력의 공통 기준으로 사용하되, 통근 점수와 충·천·형에 따른 전근 제외는 기존 잠정 규칙으로 표시한다. 지지 v3의 최종 세력 계산에는 이 값을 새로 가산하지 않는다.
 
-**통근 범위 명시(2026-11-03):** [19쌍 규칙 검토](./root_strength_rule_review.md) 결과, 현 `ROOT_STRENGTH`의 양의 항목은 상세 지장간에 동오행 글자가 있는 구조와 일치하지만 16쌍은 정확한 글자가 다르다. 段建業 명의 교재의 동주 통근 설명과 현 네 지지 가중 계산은 적용 범위가 달라 [관계 조회](../schemas/character_relation_index.py)의 `root_scope: all_four_branches_weighted`로 표시한다. 조회 버전은 `1.3-draft`다. 계수·허실 임계값은 변경하지 않는다.
+**통근 범위 명시(2026-11-03):** [19쌍 규칙 검토](../../root_strength_rule_review.md) 결과, 현 `ROOT_STRENGTH`의 양의 항목은 상세 지장간에 동오행 글자가 있는 구조와 일치하지만 16쌍은 정확한 글자가 다르다. 段建業 명의 교재의 동주 통근 설명과 현 네 지지 가중 계산은 적용 범위가 달라 [관계 조회](../../../schemas/character_relation_index.py)의 `root_scope: all_four_branches_weighted`로 표시한다. 조회 버전은 `1.3-draft`다. 계수·허실 임계값은 변경하지 않는다.
 
-**동주 통근 결정(2026-11-04):** 사용자 결정에 따라 [전환 기록](./same_pillar_root_migration.md)의 동주 기준을 원국 통근·허투와 [관계 조회](../schemas/character_relation_index.py)의 `stem_state`에 적용했다. 타주 지지의 이전 가중 지원은 별도 `external_support_*`로 표시하고 실·허투 판정 및 오행의 통근 입력에 합산하지 않는다. 허실 규칙 버전은 `2.0.0`, 조회 버전은 `1.4-draft`다. 위 `1.3-draft` 단락은 변경 전 범위의 검토 기록이다.
+**동주 통근 결정(2026-11-04):** 사용자 결정에 따라 [전환 기록](../../same_pillar_root_migration.md)의 동주 기준을 원국 통근·허투와 [관계 조회](../../../schemas/character_relation_index.py)의 `stem_state`에 적용했다. 타주 지지의 이전 가중 지원은 별도 `external_support_*`로 표시하고 실·허투 판정 및 오행의 통근 입력에 합산하지 않는다. 허실 규칙 버전은 `2.0.0`, 조회 버전은 `1.4-draft`다. 위 `1.3-draft` 단락은 변경 전 범위의 검토 기록이다.
 
 **동주 위치 가중치 제거(2026-11-04):** 후속 결정으로 동주 통근 여부를 양의 계수 존재로 명시하고, 동주 점수에서는 기둥 위치 가중치를 제거했다. 위치·거리 가중 계산은 타주 지원과 전주 회귀 옵션에만 남는다. 현행 허실 규칙 버전은 `2.1.0`, 관계 조회 버전은 `1.5-draft`다. 위 `2.0.0`·`1.4-draft` 표기는 최초 동주 전환 당시의 기록이다.
 
 **동주 허실 경계 제거(2026-11-04):** 동주 점수 `0`은 허투, 양수는 점수 크기에 관계없이 실로 판정한다. 약한 통근의 크기는 점수에 유지한다. 활성 관계로 동주 뿌리의 잔여 기여도가 계산상 `0`이 되면 변허를 표시한다. 현행 허실 규칙 버전은 `3.0.0`, 관계 조회 계약은 `1.6-draft`다. 위 `2.1.0`·`1.5-draft`는 직전 상태의 기록이다.
 
-[사용자 목표 출력 트리](./branch_dynamics_v3.json)를 **최신 목표 계약**으로 삼는다. 이 파일은 주석이 들어간 JSONC 형식의 설계 샘플이며, 현재 API 응답은 아니다. [이전 출력 초안](./branch_dynamics_target_contract.md)과 충돌하는 경우 v3를 우선 검토한다. 예시의 `null`, 빈 배열, 관계 ID와 가상 값은 확정된 계산 결과가 아니라 구현할 상태와 자료형을 설명한다.
+[사용자 목표 출력 트리](branch_dynamics_v3.json)를 **최신 목표 계약**으로 삼는다. 이 파일은 주석이 들어간 JSONC 형식의 설계 샘플이며, 현재 API 응답은 아니다. [이전 출력 초안](branch_dynamics_target_contract.md)과 충돌하는 경우 v3를 우선 검토한다. 예시의 `null`, 빈 배열, 관계 ID와 가상 값은 확정된 계산 결과가 아니라 구현할 상태와 자료형을 설명한다.
 
-v3의 범위는 `meta`·`chart_context`·`stem_dynamics`·`branch_dynamics`·`interaction_resolution`·`work_dynamics`·`llm_interpretation_payload`다. 기존 [응답 스키마](../schemas/saju_analysis.py)에는 이 전체 트리가 없고 `advanced_analysis.branch_dynamics`만 일부 구현되어 있다. 기존 [계산기](../services/branch_dynamics.py)는 지지 세력·쌍별 잠재 작용량·삼합/방합 구조를 내지만 경합 판정이나 작공을 계산하지 않는다.
+v3의 범위는 `meta`·`chart_context`·`stem_dynamics`·`branch_dynamics`·`interaction_resolution`·`work_dynamics`·`llm_interpretation_payload`다. 기존 [응답 스키마](../../../schemas/saju_analysis.py)에는 이 전체 트리가 없고 `advanced_analysis.branch_dynamics`만 일부 구현되어 있다. 기존 [계산기](../../../services/branch_dynamics.py)는 지지 세력·쌍별 잠재 작용량·삼합/방합 구조를 내지만 경합 판정이나 작공을 계산하지 않는다.
 
-**개발 우선순위 보완(2026-11-02):** [지지 작용 목표·검증표](./branch_dynamics_acceptance_matrix.md)의 층위별 완료 기준과 사례 대조를 다음 관계별 산식 확장보다 먼저 검토한다. 이 계획의 단계별 스키마·조립 작업은 목표 출력 형식을 만드는 절차이며, 해석·세력 모델의 타당성 검증을 대체하지 않는다.
-**계약 보완(3.3-draft):** [축미충 A~D 전문가 검토 양식](./chouwei_expert_review_sheet.md)을 마련하고, 목표 출력 트리의 각 지지에 `post_effect_power`·`post_effect_status`를 추가했다. 현재 조립기는 `null / not_calculated`만 출력한다. 아래 상태 의미와 수치 조건을 먼저 고정한 것이며, 최종 세력 계산기나 지장간 손상 판정을 구현한 것은 아니다.
+**개발 우선순위 보완(2026-11-02):** [지지 작용 목표·검증표](branch_dynamics_acceptance_matrix.md)의 층위별 완료 기준과 사례 대조를 다음 관계별 산식 확장보다 먼저 검토한다. 이 계획의 단계별 스키마·조립 작업은 목표 출력 형식을 만드는 절차이며, 해석·세력 모델의 타당성 검증을 대체하지 않는다.
+**계약 보완(3.3-draft):** [축미충 A~D 전문가 검토 양식](chouwei_expert_review_sheet.md)을 마련하고, 목표 출력 트리의 각 지지에 `post_effect_power`·`post_effect_status`를 추가했다. 현재 조립기는 `null / not_calculated`만 출력한다. 아래 상태 의미와 수치 조건을 먼저 고정한 것이며, 최종 세력 계산기나 지장간 손상 판정을 구현한 것은 아니다.
 
-**출처 경로 출력 계약(3.4-draft):** [내부 출처 경로 계약](./branch_influence_path_contract.md)을 v3 초안에 연결했다. `branch_dynamics.influence_paths[]`에 경로 본문을 한 번 기록하고 `branch_strengths[기둥].influence_path_ids[]`에는 해당 지지를 대상으로 하는 경로 ID만 둔다. 기존 `strength_evidence.surroundings[]`는 같은 일반 보정의 호환 보기이며, [계약 검사기](../schemas/branch_dynamics_v3_contract.py)가 둘의 수치·계상 상태 일치를 검사한다. 따라서 두 필드를 합산하지 않는다. 구조·지장간 후보는 수치 `null`을 유지한다. JSON 설계 샘플의 빈 경로 목록은 가상 원국의 **골격**이며, 실제 조립기에서는 주변 출처 12경로와 해당 구조 후보를 채운다. 현재 API·최종 세력값은 변경하지 않았다.
+**출처 경로 출력 계약(3.4-draft):** [내부 출처 경로 계약](../../branch_influence_path_contract.md)을 v3 초안에 연결했다. `branch_dynamics.influence_paths[]`에 경로 본문을 한 번 기록하고 `branch_strengths[기둥].influence_path_ids[]`에는 해당 지지를 대상으로 하는 경로 ID만 둔다. 기존 `strength_evidence.surroundings[]`는 같은 일반 보정의 호환 보기이며, [계약 검사기](../../../schemas/branch_dynamics_v3_contract.py)가 둘의 수치·계상 상태 일치를 검사한다. 따라서 두 필드를 합산하지 않는다. 구조·지장간 후보는 수치 `null`을 유지한다. JSON 설계 샘플의 빈 경로 목록은 가상 원국의 **골격**이며, 실제 조립기에서는 주변 출처 12경로와 해당 구조 후보를 채운다. 현재 API·최종 세력값은 변경하지 않았다.
 
 ## 구현 전 계약 정합성 확인
 
@@ -55,15 +57,15 @@ v3의 범위는 `meta`·`chart_context`·`stem_dynamics`·`branch_dynamics`·`in
 | `provisional` | 관련 기여를 빠짐없이 계상했지만 적어도 한 모델·계수가 잠정 | 유한한 0 이상 숫자, 잠정 상태와 근거가 필요 |
 | `resolved` | 적용한 규칙 프로필에서 관련 기여·차단·중복 경로가 모두 확정 | 유한한 0 이상 숫자와 전체 근거가 필요 |
 
-`3.3-draft`에서 이 필드를 추가했고, 현재 `3.4-draft`의 [작용 후 세력 완성 조건](./branch_post_effect_completeness.md)은 **상태·숫자 짝과 지지별 미해결 항목**을 검사한다. `not_calculated`·`incomplete`에 0을 비롯한 숫자를 넣을 수 없고, `incomplete`에는 실제 차단 근거가 필요하다. `provisional`·`resolved`는 차단 근거가 없어야 하며 유한한 0 이상 숫자가 필요하지만, **전체 집계식·출처 추적이 아직 없으므로 현 계약은 그 상태의 숫자 출력을 계속 거부한다.** 조립기는 네 지지 모두 `null / not_calculated`를 발행한다. 미탐지 기전의 모델 적용 범위도 향후 집계 근거에 포함해야 한다.
+`3.3-draft`에서 이 필드를 추가했고, 현재 `3.4-draft`의 [작용 후 세력 완성 조건](../../branch_post_effect_completeness.md)은 **상태·숫자 짝과 지지별 미해결 항목**을 검사한다. `not_calculated`·`incomplete`에 0을 비롯한 숫자를 넣을 수 없고, `incomplete`에는 실제 차단 근거가 필요하다. `provisional`·`resolved`는 차단 근거가 없어야 하며 유한한 0 이상 숫자가 필요하지만, **전체 집계식·출처 추적이 아직 없으므로 현 계약은 그 상태의 숫자 출력을 계속 거부한다.** 조립기는 네 지지 모두 `null / not_calculated`를 발행한다. 미탐지 기전의 모델 적용 범위도 향후 집계 근거에 포함해야 한다.
 
-[지지별 집계 추적 설계안](./branch_post_effect_trace_contract.md)은 `after_stem_power`를 참조 시작점으로 삼고, 포함·제외·대체 경로, 실제 적용량 참조, 공식·반올림 정책 및 모델 적용 범위를 기록하도록 한다. 표시용 `effective_power`에서 반올림된 개별 보정률을 역산해 빼지 않는다. 이 추적은 **설계안**으로, 현재 v3 출력 스키마에 새 필드를 추가하거나 숫자 상태를 허용하지 않는다.
+[지지별 집계 추적 설계안](branch_post_effect_trace_contract.md)은 `after_stem_power`를 참조 시작점으로 삼고, 포함·제외·대체 경로, 실제 적용량 참조, 공식·반올림 정책 및 모델 적용 범위를 기록하도록 한다. 표시용 `effective_power`에서 반올림된 개별 보정률을 역산해 빼지 않는다. 이 추적은 **설계안**으로, 현재 v3 출력 스키마에 새 필드를 추가하거나 숫자 상태를 허용하지 않는다.
 
-[내부 추적 골격](../services/branch_post_effect_gate.py)은 현재 일반 배경 경로 ID, 지지별 차단 근거와 잠정 적용량이 존재하는 관계 ID만 묶는다. 내부 `readiness_status: incomplete / no_known_blockers`는 v3 `post_effect_status: not_calculated`와 다른 정보다. 공식·재조정 세력·최종 적용량을 생성하지 않으며, v3 출력에도 아직 연결하지 않는다.
+[내부 추적 골격](../../../services/branch_post_effect_gate.py)은 현재 일반 배경 경로 ID, 지지별 차단 근거와 잠정 적용량이 존재하는 관계 ID만 묶는다. 내부 `readiness_status: incomplete / no_known_blockers`는 v3 `post_effect_status: not_calculated`와 다른 정보다. 공식·재조정 세력·최종 적용량을 생성하지 않으며, v3 출력에도 아직 연결하지 않는다.
 
-[주변 보정 재생 검증](./branch_ambient_replay_audit.md)은 표시용 소수 6자리 이전의 출처별 비율을 재계산하고, 합계의 `±0.35` 상한과 최종 소수 4자리 반올림 순서로 기존 `effective_power`를 재생했다. 출처의 `after_stem_power` 자체는 이미 소수 4자리다. 현재 계수에서는 세 출처의 비율 합이 상한에 도달할 수 없지만 상한 처리 순서를 유지한다. 이 검증은 구조·충 작용 후 세력을 계산하지 않는다.
+[주변 보정 재생 검증](../../branch_ambient_replay_audit.md)은 표시용 소수 6자리 이전의 출처별 비율을 재계산하고, 합계의 `±0.35` 상한과 최종 소수 4자리 반올림 순서로 기존 `effective_power`를 재생했다. 출처의 `after_stem_power` 자체는 이미 소수 4자리다. 현재 계수에서는 세 출처의 비율 합이 상한에 도달할 수 없지만 상한 처리 순서를 유지한다. 이 검증은 구조·충 작용 후 세력을 계산하지 않는다.
 
-같은 [내부 검증기](../services/branch_ambient_replay.py)는 현재 포함된 일반 배경 경로 ID의 일부만 선택해 진단값을 재생할 수 있다. A의 쌍·그룹 상대 제외값과 D의 두 申 위치별 제외값을 기존 계산과 대조했다. 이 선택은 경로를 실제로 억제·대체한다는 해석 결정이 아니며, 현재 출력의 `effective_power`나 `post_effect_power`를 변경하지 않는다.
+같은 [내부 검증기](../../../services/branch_ambient_replay.py)는 현재 포함된 일반 배경 경로 ID의 일부만 선택해 진단값을 재생할 수 있다. A의 쌍·그룹 상대 제외값과 D의 두 申 위치별 제외값을 기존 계산과 대조했다. 이 선택은 경로를 실제로 억제·대체한다는 해석 결정이 아니며, 현재 출력의 `effective_power`나 `post_effect_power`를 변경하지 않는다.
 
 ### 관계 수치의 상태 계약
 
@@ -83,9 +85,9 @@ v3의 범위는 `meta`·`chart_context`·`stem_dynamics`·`branch_dynamics`·`in
 
 **子午충 이전 시범 산식 검증(참고 기록):** 앞서 한 충의 후보 손실 비율을 `충 계수 k × 거리 가중치 d × (들어오는 잠재 강도 ÷ 양방향 잠재 강도 합)²`로 검토했다. 이때 양쪽을 독립 공격 방향으로 계산했으나, 사용자 해석 기준은 **子가 午를 공격하고 午가 충격을 받으며, 午가 강할 때 子의 자기 손실이 커질 수 있다**는 것이다. 따라서 이 대칭식과 아래 수치는 子午충의 최종 적용량이나 `k` 선택 근거로 사용하지 않는다. 이후 子→午의 일차 충격과 子의 단일 자기 손실을 따로 산출하도록 v3를 변경했다.
 
-**子午충의 잠정 출력 계약:** [세력 변화 설계](./ziwu_clash_effect_design.md)은 午의 일차 충격과 子의 자기 손실을 두 변화량으로 구분한다. 공격 소모와 午의 저항 때문에 커지는 손실은 子의 자기 손실 하나로 출력해 중복 가산하지 않는다. 子의 변화량은 `to_pillar`가 받는 변화량이 아니므로 `self_effects[]`에 둔다. v3 모델·조립기·계약 검사는 이 구조를 허용하며, 산식 형태와 계수의 임상 검증은 남았다.
+**子午충의 잠정 출력 계약:** [세력 변화 설계](ziwu_clash_effect_design.md)은 午의 일차 충격과 子의 자기 손실을 두 변화량으로 구분한다. 공격 소모와 午의 저항 때문에 커지는 손실은 子의 자기 손실 하나로 출력해 중복 가산하지 않는다. 子의 변화량은 `to_pillar`가 받는 변화량이 아니므로 `self_effects[]`에 둔다. v3 모델·조립기·계약 검사는 이 구조를 허용하며, 산식 형태와 계수의 임상 검증은 남았다.
 
-**시범 손실률 식(잠정 적용):** [시범 산식](./ziwu_clash_effect_design.md#시범-산식과-잠정-계수)은 子의 상대 공격 비중 `q`에서 午의 충격과 子의 단일 자기 손실을 각각 구한다. 잠정 시작값 `k_shock=0.30`, `k_base=0.02`, `k_resist=0.08`은 [관계 규칙](../services/relation_rules.py)에 보관한다. [v3 조립기](../services/branch_dynamics_v3_assembler.py)는 이 계수로 쌍별 후보 손실률을 구하고 같은 지지가 여러 子午충을 받으면 지지별 곱셈 집계 후 4자리 적용량을 비례 배분한다. 반올림 잔차는 소수부 큰 순서, 동률이면 관계 ID 순서로 배분한다. 이 값은 `provisional_calculated`로 표시하며 이전 대칭식의 계수 비교표를 재사용하지 않는다.
+**시범 손실률 식(잠정 적용):** [시범 산식](ziwu_clash_effect_design.md#시범-산식과-잠정-계수)은 子의 상대 공격 비중 `q`에서 午의 충격과 子의 단일 자기 손실을 각각 구한다. 잠정 시작값 `k_shock=0.30`, `k_base=0.02`, `k_resist=0.08`은 [관계 규칙](../../../services/relation_rules.py)에 보관한다. [v3 조립기](../../../services/branch_dynamics_v3_assembler.py)는 이 계수로 쌍별 후보 손실률을 구하고 같은 지지가 여러 子午충을 받으면 지지별 곱셈 집계 후 4자리 적용량을 비례 배분한다. 반올림 잔차는 소수부 큰 순서, 동률이면 관계 ID 순서로 배분한다. 이 값은 `provisional_calculated`로 표시하며 이전 대칭식의 계수 비교표를 재사용하지 않는다.
 
 **충 이전 세력의 입력 범위(설계 합의, 구조 효과의 수치 규칙 미정):** 子午충에서 월지 午가 木의 생을 받으면 저항 세력의 근거로, 子가 金의 생조를 받으면 공격 세력의 근거로 반영한다. 子에 金 생조가 없으면 지원 가산이 없는 것이며 부재 자체를 별도 감점하지 않는다. 월령·지장간·동주 천간과 **다른 지지** 중 실제로 작용하는 지원·제약을 근거별로 기록한 뒤, **해당 子午충의 적용 변화는 아직 반영하지 않은** 두 지지의 세력을 비교한다. 다른 기둥의 천간이 대상 지지를 직접 생·극한다고 가정해 이 세력에 가산하거나 감점하지 않는다. 같은 출처의 생조와 합 등 구조 작용을 이중 가산하지 않는다. 현재 구현의 `effective_power`는 다른 지지의 일부 생극만 개괄 반영하므로 구조 관계와 생조가 겹칠 때의 처리까지 완성된 값은 아니다. 그 중복 처리는 후속 설계 대상이다. 午의 저항에 따른 子 손실 증가는 잠정 손실률 식으로 계산한다.
 
@@ -130,11 +132,11 @@ ID는 **동일 분석 응답 안에서 고유**하다. 쌍 관계 ID는 `branch:
 
 ### 자동 계약 검사
 
-[주석 없는 v3 검증 샘플](../tests/fixtures/branch_dynamics_v3.json)은 [설계 샘플](./branch_dynamics_v3.json)의 JSON 데이터와 일치해야 한다. [계약 검사기](../schemas/branch_dynamics_v3_contract.py)는 여섯 위치 쌍, ID 형식·고유성·참조, 구조 전용 관계의 독립 작용량 금지, 미계산·조건부·완전 차단의 수치 상태, 그룹의 `not_scored`·한 구조망 정책을 검사한다. [계약 테스트](../tests/test_branch_dynamics_v3_contract.py)는 두 샘플의 동등성과 위반 사례를 확인한다.
+[주석 없는 v3 검증 샘플](../../../tests/fixtures/branch_dynamics_v3.json)은 [설계 샘플](branch_dynamics_v3.json)의 JSON 데이터와 일치해야 한다. [계약 검사기](../../../schemas/branch_dynamics_v3_contract.py)는 여섯 위치 쌍, ID 형식·고유성·참조, 구조 전용 관계의 독립 작용량 금지, 미계산·조건부·완전 차단의 수치 상태, 그룹의 `not_scored`·한 구조망 정책을 검사한다. [계약 테스트](../../../tests/test_branch_dynamics_v3_contract.py)는 두 샘플의 동등성과 위반 사례를 확인한다.
 
 검사 명령은 `python3 -m unittest discover -s tests -p test_branch_dynamics_v3_contract.py -v`다. 샘플을 바꾸면 검증용 JSON도 함께 갱신한다. 이 검사는 수치의 명리학적 타당성이나 v3 전체 필드의 상세 자료형을 아직 검증하지 않는다. 후속 단계에서 실제 응답 모델을 만들며 필수·선택 필드와 enum을 확정한다.
 
-[독립 v3 응답 모델](../schemas/branch_dynamics_v3.py)은 현재 API의 v2 응답을 변경하지 않고 필수 필드, 중첩 자료형, 일부 상태 enum을 검증한다. 최상위 모델은 위 계약 검사기를 함께 실행한다. [모델 테스트](../tests/test_branch_dynamics_v3_model.py)는 검증 샘플 왕복, 필수 필드·자료형 오류, 미등록 필드와 잘못된 참조를 확인한다. 천간 분석·작공의 활성 경로·LLM 확정 결과처럼 샘플이 비어 있는 부분은 임시 자료형이며, 해당 계산 단계를 구현할 때 구체화한다.
+[독립 v3 응답 모델](../../../schemas/branch_dynamics_v3.py)은 현재 API의 v2 응답을 변경하지 않고 필수 필드, 중첩 자료형, 일부 상태 enum을 검증한다. 최상위 모델은 위 계약 검사기를 함께 실행한다. [모델 테스트](../../../tests/test_branch_dynamics_v3_model.py)는 검증 샘플 왕복, 필수 필드·자료형 오류, 미등록 필드와 잘못된 참조를 확인한다. 천간 분석·작공의 활성 경로·LLM 확정 결과처럼 샘플이 비어 있는 부분은 임시 자료형이며, 해당 계산 단계를 구현할 때 구체화한다.
 
 ## 단계와 완료 기준
 
@@ -143,7 +145,7 @@ ID는 **동일 분석 응답 안에서 고유**하다. 쌍 관계 ID는 `branch:
 | 1. 계약 정규화 | 위 차이를 해소하고 필수/선택 필드, enum, `null`/0 의미, ID 규칙을 정의한다. 주석이 있는 설계 샘플과 기계 검증용 JSON 또는 JSON Schema를 분리한다. | 네 지지·여섯 위치 쌍·반복 조합·참조 ID를 검증하는 계약 검사 통과. v3 샘플과 이전 문서의 우선순위 명시. |
 | 2. v3 출력 골격 | 버전이 분리된 응답 모델과 조립기를 만든다. `meta`, `chart_context`, `branch_dynamics`를 먼저 채우고 `stem_dynamics`, 경합, 작공, LLM 결과는 계약상 허용된 보류 상태로 둔다. | 기존 API는 그대로 통과하고, v3 응답은 스키마 검증을 통과한다. `rule_version`은 실제 적용 규칙 버전을 가리킨다. |
 | 3. 지지별 세력 근거 | 현재 `base_power`·`after_stem_power`·`effective_power`를 v3 `strength_evidence`와 `calculation_trace`로 연결한다. `effective_contribution`, 공식 ID, 조정 내역은 실제 계산식에서 생성한다. | 월간이 월지를 생·극하거나 월지가 월간을 생하는 사례에서 값과 근거가 일치한다. 미검증 계수는 `validation_status: unverified`로 유지한다. |
-| 4. 쌍별 관계 | [관계 탐지기](../services/interaction_matrix.py)의 관계를 여섯 쌍에 위치별로 배치한다. 합·충·형·파·천·생·극의 공존, 조건 상태, 방향별 세력, 빈주 방향을 분리한다. v3 `metrics`는 실제 산출 가능한 항목만 채운다. | 子卯·卯午·午酉파, 子卯형 제외, 午未합土, 충과 극의 공존, 거리·월령 변화, `0`/`null` 사례가 검증된다. 두 방향의 주도와 받은 작용을 혼동하지 않는다. |
+| 4. 쌍별 관계 | [관계 탐지기](../../../services/interaction_matrix.py)의 관계를 여섯 쌍에 위치별로 배치한다. 합·충·형·파·천·생·극의 공존, 조건 상태, 방향별 세력, 빈주 방향을 분리한다. v3 `metrics`는 실제 산출 가능한 항목만 채운다. | 子卯·卯午·午酉파, 子卯형 제외, 午未합土, 충과 극의 공존, 거리·월령 변화, `0`/`null` 사례가 검증된다. 두 방향의 주도와 받은 작용을 혼동하지 않는다. |
 | 5. 다자 구조 | 삼합·방합·삼형의 `formation_candidates`, `component_pairs`, 중복 지지, 인접 충과 억제 사유를 출력한다. 구성 쌍과 독립 작용을 분리한다. | `亥卯未亥`의 두 위치 조합, `巳亥卯未`의 깨진 삼합과 잔존 반합, `巳午未寅`의 방합·午未 육합이 중복 힘 없이 출력된다. |
 | 6. 관계 경합 판정 | `interaction_resolution`을 독립 단계로 만든다. 경쟁 후보마다 적용 규칙과 근거를 남기고, 결정할 근거가 없으면 `unresolved`를 유지한다. | `selected_interaction_ids`, `suppressed_interaction_ids`, `unresolved_interaction_ids`가 실제 후보 ID의 부분집합이며 서로 충돌하지 않는다. `potential`을 자동으로 `active`로 승격하지 않는다. |
 | 7. 작공·LLM 자료 | 천간·지지·십신·빈주 및 경합 결과를 참조해 `work_dynamics`를 만든다. 근거가 부족하면 `pending_resolution`과 null을 유지한다. 마지막에 `llm_interpretation_payload`를 검증된 사실과 미해결 사항으로 분리해 조립한다. | 모든 작공 경로의 `source_interaction_ids`가 존재한다. 결과 귀속과 주요 경로는 근거 없이 확정되지 않는다. LLM 자료는 계산 결과를 바꾸지 않는다. |
@@ -151,18 +153,18 @@ ID는 **동일 분석 응답 안에서 고유**하다. 쌍 관계 ID는 `branch:
 
 ## 진행 원칙
 
-수치화를 재개할 때에는 [A·D 계상 검토](./chouwei_a_d_accounting_review.md)를 참고한다. 일반 生·설기와 구조 후보의 출처가 겹쳐도 자동 대체하지 않는다. 지장간 피해는 별도 대상으로 검토하되 독립 수치 계상은 미확정이다. 외부 후보 입력을 이용한 사례 자료 보존은 후속 과제이며, 현재 우선순위는 전체 작용 탐지의 구현 현황과 완료 기준 점검이다.
+수치화를 재개할 때에는 [A·D 계상 검토](chouwei_a_d_accounting_review.md)를 참고한다. 일반 生·설기와 구조 후보의 출처가 겹쳐도 자동 대체하지 않는다. 지장간 피해는 별도 대상으로 검토하되 독립 수치 계상은 미확정이다. 외부 후보 입력을 이용한 사례 자료 보존은 후속 과제이며, 현재 우선순위는 전체 작용 탐지의 구현 현황과 완료 기준 점검이다.
 
 1. 각 단계에서 **출력 계약 → 원본 규칙·계산 → 실제 사례 → 스키마/참조 검증** 순으로 마무리한다. 임의의 숫자로 null을 채우지 않는다.
-2. `interaction_resolution`은 [지지 작용 결과](../services/branch_dynamics.py)와 구조 규칙을 입력으로 사용하고, `work_dynamics`는 그 판정을 참조한다. `llm_interpretation_payload`는 마지막 표현 계층이다.
-3. 새로운 계산 규칙은 [관계 규칙 원본](../services/relation_rules.py)에 두고 조합별 조건·방향·계수의 근거와 잠정 여부를 표시한다.
-4. [기존 빈주 분석](../services/bin_zhu.py)의 합·대립 총점이나 단일 벡터를 v3 관계의 주도권으로 재사용하지 않는다. 빈주는 위치와 결과 해석의 보조 맥락이다.
+2. `interaction_resolution`은 [지지 작용 결과](../../../services/branch_dynamics.py)와 구조 규칙을 입력으로 사용하고, `work_dynamics`는 그 판정을 참조한다. `llm_interpretation_payload`는 마지막 표현 계층이다.
+3. 새로운 계산 규칙은 [관계 규칙 원본](../../../services/relation_rules.py)에 두고 조합별 조건·방향·계수의 근거와 잠정 여부를 표시한다.
+4. [기존 빈주 분석](../../../services/bin_zhu.py)의 합·대립 총점이나 단일 벡터를 v3 관계의 주도권으로 재사용하지 않는다. 빈주는 위치와 결과 해석의 보조 맥락이다.
 
 **첫 실행 단위인 계약 정규화의 기준 샘플·검사기·응답 모델을 마련했다.** 다음에는 기존 API와 분리된 v3 조립기를 만들고 실제 계산 결과에서 근거가 확인되는 필드만 채운다. 미구현 분석은 계약상 허용된 null·보류 상태로 남기고, 샘플의 가상 수치를 계산값으로 복사하지 않는다.
 
 ### v3 조립기 첫 단위: 개별 지지 세력
 
-[기초 조립기](../services/branch_dynamics_v3_assembler.py)는 기존 계산기의 결과를 입력받아 `meta`, `chart_context`, `branch_strengths`만 만든다. 전체 v3 응답이나 API 엔드포인트를 아직 만들지 않는다. 원국 네 기둥과 계산 결과의 지지·동주 천간이 일치하는지 검사한다.
+[기초 조립기](../../../services/branch_dynamics_v3_assembler.py)는 기존 계산기의 결과를 입력받아 `meta`, `chart_context`, `branch_strengths`만 만든다. 전체 v3 응답이나 API 엔드포인트를 아직 만들지 않는다. 원국 네 기둥과 계산 결과의 지지·동주 천간이 일치하는지 검사한다.
 
 | v3 필드 | 현재 원본 | 처리 |
 | --- | --- | --- |
@@ -175,39 +177,39 @@ ID는 **동일 분석 응답 안에서 고유**하다. 쌍 관계 ID는 `branch:
 | `calculation_trace.applied_adjustments` | 동주 보정량, 동주 후·주변 반영 후 세력의 차이 | 두 단계의 실제 순변화량만 기록; 주변 지지별 기여도를 역산하지 않음 |
 | `hidden_stems[].effective_contribution`, 공식 ID | 현재 원본 없음 | `null` 유지 |
 
-세력은 검증된 절대량이 아닌 잠정 상대 지표이므로 `validation_status: unverified`다. 관계별 잠재 강도나 실제 적용량은 이 세력값에서 자동 생성하지 않는다. [기초 조립기 테스트](../tests/test_branch_dynamics_v3_assembler.py)는 실제 계산 결과와 네 지지의 수치 일치, 월간이 월지를 돕거나 극하거나 설기하는 경우, 다른 원국의 결과 혼입 방지를 검증한다. 다음 단위는 여섯 쌍의 관계 후보를 v3 ID와 상태 계약으로 옮기는 작업이다.
+세력은 검증된 절대량이 아닌 잠정 상대 지표이므로 `validation_status: unverified`다. 관계별 잠재 강도나 실제 적용량은 이 세력값에서 자동 생성하지 않는다. [기초 조립기 테스트](../../../tests/test_branch_dynamics_v3_assembler.py)는 실제 계산 결과와 네 지지의 수치 일치, 월간이 월지를 돕거나 극하거나 설기하는 경우, 다른 원국의 결과 혼입 방지를 검증한다. 다음 단위는 여섯 쌍의 관계 후보를 v3 ID와 상태 계약으로 옮기는 작업이다.
 
 ### v3 조립기 두 번째 단위: 여섯 지지 쌍
 
-[기초 조립기](../services/branch_dynamics_v3_assembler.py)의 `assemble_branch_pairs_v3`는 기존 계산 결과의 여섯 위치 쌍을 고정 순서로 배치하고 관계 유형을 v3 명칭과 ID로 옮긴다. 대표 오행의 생·극 방향은 기존 계산 결과의 방향을 사용하고 해당 방향의 빈주 위치 정보를 붙인다. 같은 쌍에서 공존하는 관계의 ID도 연결한다. 형·파·충·합 등 양방향 관계의 주도 정보는 기존의 관계별 `force_dominance`와 `roles`를 잠정 근거로 유지하되, 독립적인 `direction`은 아직 확정하지 않는다. `power_before`는 해당 쌍 밖의 배경을 고려한 기존 세력 값이다.
+[기초 조립기](../../../services/branch_dynamics_v3_assembler.py)의 `assemble_branch_pairs_v3`는 기존 계산 결과의 여섯 위치 쌍을 고정 순서로 배치하고 관계 유형을 v3 명칭과 ID로 옮긴다. 대표 오행의 생·극 방향은 기존 계산 결과의 방향을 사용하고 해당 방향의 빈주 위치 정보를 붙인다. 같은 쌍에서 공존하는 관계의 ID도 연결한다. 형·파·충·합 등 양방향 관계의 주도 정보는 기존의 관계별 `force_dominance`와 `roles`를 잠정 근거로 유지하되, 독립적인 `direction`은 아직 확정하지 않는다. `power_before`는 해당 쌍 밖의 배경을 고려한 기존 세력 값이다.
 
 기존 `force`는 양방향 잠재 값이지만 조건부·차단 상태에서는 0으로 가려진다. v3의 초기 쌍별 조립에서는 일반 관계를 `pending`으로 두었다. 이후 방향별 산식을 추가하여 세력·거리·계수가 있는 관계는 `potential_calculated`로 옮겼다. 규칙상 완전 차단된 관계는 `resolved`와 방향별 `applied_power_delta: 0`, 차단 사유를 함께 기록한다. 조건부 합은 잠재량을 계산하더라도 적용량은 `null`이다. 완성 삼합 내부 반합은 독립 작용이 없는 `structural_only`, 동일 지지는 반복 사실인 `structural_only`, 자형은 인접할 때 `active`로 기록하지만 독립 작용량은 `pending`이다. 삼합이 깨진 뒤 남은 반합은 독립 후보로 유지한다.
 
-[조립기 테스트](../tests/test_branch_dynamics_v3_assembler.py)는 생·극 방향, 완성 삼합의 구성 반합, 자형·동지, 子卯·卯午·午酉파, 子卯형 제외, 午未합土, 충과 극의 공존, 조건부 합과 깨진 삼합의 잔존 반합을 확인한다. **이 결과는 쌍별 부분 조립 결과**이며 그룹·경합·작공을 포함한 전체 v3 응답으로 공개하지 않는다. 다음에는 그룹을 조립하고 내부 반합 참조와 모든 관계 ID의 정합성을 전체 계약에서 검사한다.
+[조립기 테스트](../../../tests/test_branch_dynamics_v3_assembler.py)는 생·극 방향, 완성 삼합의 구성 반합, 자형·동지, 子卯·卯午·午酉파, 子卯형 제외, 午未합土, 충과 극의 공존, 조건부 합과 깨진 삼합의 잔존 반합을 확인한다. **이 결과는 쌍별 부분 조립 결과**이며 그룹·경합·작공을 포함한 전체 v3 응답으로 공개하지 않는다. 다음에는 그룹을 조립하고 내부 반합 참조와 모든 관계 ID의 정합성을 전체 계약에서 검사한다.
 
 ### v3 조립기 세 번째 단위: 다자 구조
 
-같은 [조립기](../services/branch_dynamics_v3_assembler.py)의 `assemble_branch_groups_v3`는 기존 삼합·방합·삼형 후보를 정형 지지 순서의 그룹 ID와 위치별 성립 조합 ID로 옮긴다. 하나의 그룹에 여러 성립 조합이 있으면 `formation_candidates`에 각각 넣고, 공통 기둥은 `overlap.shared_pillars`로 기록한다. `evaluate_as_one_network`는 힘을 합산하지 않는 정책이며, 우세 조합은 아직 선정하지 않는다. 그룹의 독립 수치는 항상 `group_power: null`, `group_power_status: not_scored`다.
+같은 [조립기](../../../services/branch_dynamics_v3_assembler.py)의 `assemble_branch_groups_v3`는 기존 삼합·방합·삼형 후보를 정형 지지 순서의 그룹 ID와 위치별 성립 조합 ID로 옮긴다. 하나의 그룹에 여러 성립 조합이 있으면 `formation_candidates`에 각각 넣고, 공통 기둥은 `overlap.shared_pillars`로 기록한다. `evaluate_as_one_network`는 힘을 합산하지 않는 정책이며, 우세 조합은 아직 선정하지 않는다. 그룹의 독립 수치는 항상 `group_power: null`, `group_power_status: not_scored`다.
 
 완성 삼합 후보의 구성 반합만 `component_pairs`로 참조하며, 해당 ID가 실제 쌍 관계에 있고 `structural_only`인지 조립 시 검사한다. 반복되는 `亥卯未亥`의 두 성립 조합은 동일한 `卯未` 반합 ID를 공유한다. 억제된 삼합의 `component_pairs`는 비워 두어 독립적으로 남은 반합을 그룹 내부 작용으로 오인하지 않는다. 삼형은 세 글자가 있으면 `active` 그룹으로 기록하되, 성립 조합별 세력·방향 근거가 아직 없으므로 빈 방향 목록과 `group_power: null`을 유지한다. 구성 쌍의 관계는 각각의 조건에 따라 남긴다. 그룹의 실제 합화와 작용량은 확정하지 않는다.
 
-[조립기 테스트](../tests/test_branch_dynamics_v3_assembler.py)는 반복 삼합의 ID 공유, 억제된 삼합과 잔존 반합, 방합·삼형의 무점수 상태, 누락된 구조 반합 참조를 확인한다. `亥卯未亥`의 실제 조립 결과는 현재 [v3 전체 응답 모델](../schemas/branch_dynamics_v3.py)과 [계약 검사기](../schemas/branch_dynamics_v3_contract.py)에도 통과한다. 전체 응답의 경합·작공 부분은 아직 예시의 보류 상태를 사용해 검증했으므로, 실계산 결과의 최종 v3 응답 생성으로 해석하지 않는다. 다음은 관계 경합과 실제 적용 상태를 판정하는 단계다.
+[조립기 테스트](../../../tests/test_branch_dynamics_v3_assembler.py)는 반복 삼합의 ID 공유, 억제된 삼합과 잔존 반합, 방합·삼형의 무점수 상태, 누락된 구조 반합 참조를 확인한다. `亥卯未亥`의 실제 조립 결과는 현재 [v3 전체 응답 모델](../../../schemas/branch_dynamics_v3.py)과 [계약 검사기](../../../schemas/branch_dynamics_v3_contract.py)에도 통과한다. 전체 응답의 경합·작공 부분은 아직 예시의 보류 상태를 사용해 검증했으므로, 실계산 결과의 최종 v3 응답 생성으로 해석하지 않는다. 다음은 관계 경합과 실제 적용 상태를 판정하는 단계다.
 
 ### v3 조립기 네 번째 단위: 관계 경합의 보수적 분류
 
-[조립기](../services/branch_dynamics_v3_assembler.py)의 `assemble_interaction_resolution_v3`는 `pairwise`와 `groups`의 모든 독립 후보를 분류한다. 구조 전용 반합과 동지는 경합 후보에서 제외하고 필요한 경우 `structural_context_relation_ids`로만 연결한다. 입력에서 `active`로 확정된 쌍 관계는 활성 목록에 넣는다. 기존 관계 규칙에 완전 차단이 명시되고 `applied_power_delta: 0`과 사유가 확인된 쌍 관계, 또는 억제 사유가 명시된 그룹은 `suppressed_interaction_ids`에 넣는다. 나머지는 `unresolved_interaction_ids`에 넣으며 잠재량만으로 `active`로 올리지 않는다. 조립기 내부에서 세 목록이 구조 전용을 제외한 모든 후보를 중복 없이 덮는지 검사한다.
+[조립기](../../../services/branch_dynamics_v3_assembler.py)의 `assemble_interaction_resolution_v3`는 `pairwise`와 `groups`의 모든 독립 후보를 분류한다. 구조 전용 반합과 동지는 경합 후보에서 제외하고 필요한 경우 `structural_context_relation_ids`로만 연결한다. 입력에서 `active`로 확정된 쌍 관계는 활성 목록에 넣는다. 기존 관계 규칙에 완전 차단이 명시되고 `applied_power_delta: 0`과 사유가 확인된 쌍 관계, 또는 억제 사유가 명시된 그룹은 `suppressed_interaction_ids`에 넣는다. 나머지는 `unresolved_interaction_ids`에 넣으며 잠재량만으로 `active`로 올리지 않는다. 조립기 내부에서 세 목록이 구조 전용을 제외한 모든 후보를 중복 없이 덮는지 검사한다.
 
 한 위치 쌍에 독립 후보가 둘 이상 있으면 `resolve:<두 기둥>` 사례를 만든다. 같은 쌍에 참여하는 그룹도 경합 후보에 포함한다. 그룹의 성립 조합이 여러 개인 경우 별도 중첩 사례를 만들지만 `selected_formation_ids`를 비워 두고 한 구조망 정책을 유지한다. 이미 완전 차단된 후보의 규칙·사유는 해당 사례에 기록한다. 생·극·합·충 등 사이에서 어느 관계가 실제 주작용인지 고르는 규칙과 잠재 강도의 단일 산식은 아직 없으므로 다른 사례는 `unresolved`다. `active_interaction_ids`가 빈 것은 계산 결과의 부재를 뜻하며 관계가 실제로 없다는 판정이 아니다.
 
 이후 확정한 정책에 따라 같은 위치 쌍의 파·천·충·육합·두 지지의 형이 `active`일 때에만 생·극의 독립 적용량을 0으로 처리한다. 억제된 후보에는 규칙 ID와 성립한 구조 관계 ID를 근거로 남긴다. `interaction_resolution`은 입력에 `active`가 명시된 관계를 활성 목록과 해당 사례의 선택 목록에 기록한다. 파·충·천·두 지지의 지세형은 쌍이 있으면 거리와 무관하게 `active`, 육합은 인접 충 개입이 없을 때 `active`로 판정하며, 같은 쌍의 생·극을 억제하고 주변 세력 보정도 0으로 한다. 육합의 인접 충 개입은 기존 `conditional`·`suppressed` 조건을 유지한다. 삼형 그룹은 세 글자가 있으면 `active`로 분류하지만, 쌍별 관계를 억제하거나 독립 작용량을 더하지 않는다. 자형은 같은 辰·午·酉·亥가 인접할 때만 `active`, 격위면 `candidate_only`다. 삼형·자형의 실제 작용량은 별도 과제로 남는다.
 
-[조립기 테스트](../tests/test_branch_dynamics_v3_assembler.py)는 `亥卯未亥`의 모든 후보 포괄, 구조 반합 참조 분리, 중첩 삼합의 우세 미선정, `子卯` 파 활성과 생 억제 및 子卯형 제외, 인접·격위 파·충의 활성, 조건부 합의 미해결 유지를 검사한다. 실제 조립한 경합 결과를 포함한 `亥卯未亥` 데이터가 v3 전체 모델과 참조 계약을 통과한다. 작공·LLM 필드는 여전히 설계 샘플의 보류 상태를 이용한 검증이다. 다음에는 관계별 **잠재 강도 산식과 상태별 적용 판정 기준**을 규칙표에 명시한 뒤 `pending`인 수치의 계산 가능 범위를 좁힌다.
+[조립기 테스트](../../../tests/test_branch_dynamics_v3_assembler.py)는 `亥卯未亥`의 모든 후보 포괄, 구조 반합 참조 분리, 중첩 삼합의 우세 미선정, `子卯` 파 활성과 생 억제 및 子卯형 제외, 인접·격위 파·충의 활성, 조건부 합의 미해결 유지를 검사한다. 실제 조립한 경합 결과를 포함한 `亥卯未亥` 데이터가 v3 전체 모델과 참조 계약을 통과한다. 작공·LLM 필드는 여전히 설계 샘플의 보류 상태를 이용한 검증이다. 다음에는 관계별 **잠재 강도 산식과 상태별 적용 판정 기준**을 규칙표에 명시한 뒤 `pending`인 수치의 계산 가능 범위를 좁힌다.
 
 ### v3 조립기 다섯 번째 단위: 방향별 잠재 작용량
 
-[v3 관계 모델](../schemas/branch_dynamics_v3.py)의 `metrics`는 관계 전체의 단일 점수 대신 `directional_effects` 목록을 갖는다. 생·극은 오행상 정해진 방향 하나, 합·충·형·파·천과 독립 반합은 두 방향을 기록한다. 강한 지지가 어느 쪽인지에 따라 생·극의 오행 방향을 뒤집지 않는다. 각 방향은 `from_pillar`, `to_pillar`, `acting_domain`, `receiving_domain`, `source_capacity`, `coefficient`, `distance_weight`, `interaction_intensity`, `target_exposure`, `applied_power_delta`를 갖는다. 빈주 위치는 방향별 해석 맥락이며 힘의 산식에 들어가지 않는다.
+[v3 관계 모델](../../../schemas/branch_dynamics_v3.py)의 `metrics`는 관계 전체의 단일 점수 대신 `directional_effects` 목록을 갖는다. 생·극은 오행상 정해진 방향 하나, 합·충·형·파·천과 독립 반합은 두 방향을 기록한다. 강한 지지가 어느 쪽인지에 따라 생·극의 오행 방향을 뒤집지 않는다. 각 방향은 `from_pillar`, `to_pillar`, `acting_domain`, `receiving_domain`, `source_capacity`, `coefficient`, `distance_weight`, `interaction_intensity`, `target_exposure`, `applied_power_delta`를 갖는다. 빈주 위치는 방향별 해석 맥락이며 힘의 산식에 들어가지 않는다.
 
-[규칙 파일](../services/relation_rules.py)에 산식 ID와 v3 규칙 버전을 명시했다. `source_capacity`는 해당 쌍의 상대를 제외하고 계산한 지지 세력이다. `interaction_intensity = round(source_capacity × distance_weight × directional_coefficient, 4)`이며, `target_exposure = round(interaction_intensity × source_capacity ÷ (source_capacity + target_capacity), 4)`다. 분모가 0이면 노출 지표는 계산된 0이다. 두 값은 **미보정 상대 지표**로 실제 피해나 이익의 크기가 아니다. 다른 관계 유형의 강도는 더하지 않는다. v3 `meta.rule_version`에는 기존 세력·계수 규칙 버전과 v3 방향별 산식 버전을 함께 표시한다.
+[규칙 파일](../../../services/relation_rules.py)에 산식 ID와 v3 규칙 버전을 명시했다. `source_capacity`는 해당 쌍의 상대를 제외하고 계산한 지지 세력이다. `interaction_intensity = round(source_capacity × distance_weight × directional_coefficient, 4)`이며, `target_exposure = round(interaction_intensity × source_capacity ÷ (source_capacity + target_capacity), 4)`다. 분모가 0이면 노출 지표는 계산된 0이다. 두 값은 **미보정 상대 지표**로 실제 피해나 이익의 크기가 아니다. 다른 관계 유형의 강도는 더하지 않는다. v3 `meta.rule_version`에는 기존 세력·계수 규칙 버전과 v3 방향별 산식 버전을 함께 표시한다.
 
 기존 계산기의 조건부·억제 관계는 `force`가 상태에 따라 0으로 가려진다. v3는 가려지기 전의 세력·거리·계수로 잠재량을 다시 산출한다. 조건부 관계의 적용량은 `null`, 완전 차단으로 확인된 관계의 적용량만 양방향 또는 오행상 단일 방향에 `0`으로 기록한다. 자형은 인접 여부로 성립을 판정하지만 독립 계량 규칙은 미정이며, 공합·암합도 `pending`, `metrics: null`을 유지한다. 구조 전용 반합과 동지는 `not_applicable`, `metrics: null`이다. 잠재량 계산만으로 `active_interaction_ids`를 채우거나 실제 결과 귀속을 정하지 않는다.
 
@@ -224,4 +226,4 @@ ID는 **동일 분석 응답 안에서 고유**하다. 쌍 관계 ID는 `branch:
 }
 ```
 
-[계약 검사기](../schemas/branch_dynamics_v3_contract.py)는 방향 중복, 생·극 역방향, 미계산 상태의 숫자, 조건부 관계의 적용량 확정, 완전 차단의 0·사유 누락을 거부한다. [조립기 테스트](../tests/test_branch_dynamics_v3_assembler.py)는 월간 변화가 월지→연지의 충 잠재량을 바꾸면서도 子→午 극 방향을 유지하는지 확인한다. 다음 작업은 조합별 **실제 성립·부분 억제**를 판정할 명리 규칙과 근거를 검증하는 것이다. 그 기준이 없는 관계는 계속 미해결로 둔다.
+[계약 검사기](../../../schemas/branch_dynamics_v3_contract.py)는 방향 중복, 생·극 역방향, 미계산 상태의 숫자, 조건부 관계의 적용량 확정, 완전 차단의 0·사유 누락을 거부한다. [조립기 테스트](../../../tests/test_branch_dynamics_v3_assembler.py)는 월간 변화가 월지→연지의 충 잠재량을 바꾸면서도 子→午 극 방향을 유지하는지 확인한다. 다음 작업은 조합별 **실제 성립·부분 억제**를 판정할 명리 규칙과 근거를 검증하는 것이다. 그 기준이 없는 관계는 계속 미해결로 둔다.

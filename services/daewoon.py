@@ -2,6 +2,7 @@ from services.calculator import gan_to_hanja, ji_to_hanja
 from sqlalchemy.orm import Session
 from models.calenda_data import CalendaData
 from datetime import date
+from services.daewoon_selection import PERIOD_BASIS, select_daewoon_year, period_year_bounds
 
 CHEONGAN = ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"]
 CHEONGAN_CH = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
@@ -154,26 +155,18 @@ def build_daewoon(
 
         daewoon_list.append(item)
 
-        if item_start_age <= current_age <= item_end_age:
-            current_daewoon = {
-                "index": i,
-                "year": current_year,
-                "age": current_age,
-                "gan": gan_char,
-                "ji": ji_char,
-                "gan_detail": gan_detail,
-                "ji_detail": ji_detail,
-                "gan_ten_god": gan_tg,
-                "ji_ten_god": ji_tg,
-                "unseong": unseong,
-                "start_age": item_start_age,
-                "end_age": item_end_age,
-                "start_year": start_year,
-                "end_year": end_year
-            }
+    for position, item in enumerate(daewoon_list):
+        start, end = period_year_bounds(daewoon_list, position)
+        item.update(selection_start_year=start, selection_end_year_exclusive=end)
+    selected, selection_status = select_daewoon_year(daewoon_list, current_year)
+    if selected is not None:
+        current_daewoon = {**selected, 'year': current_year, 'age': current_age}
 
     return {
         "direction": direction,
+        "selection_year": current_year,
+        "selection_status": selection_status,
+        "period_basis": PERIOD_BASIS,
         "start_age": start_age,
         "current": current_daewoon,
         "list": daewoon_list

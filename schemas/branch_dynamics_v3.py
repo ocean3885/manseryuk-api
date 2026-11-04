@@ -1,8 +1,4 @@
-"""지지 작용 v3 목표 응답의 독립 Pydantic 모델.
-
-이 모델은 현재 API의 advanced_analysis.branch_dynamics를 변경하지 않는다.
-작공·LLM과 천간 분석의 내부 자료형은 해당 계산 단계에서 확장한다.
-"""
+"""보존된 내부 v3 모델이다. 관계 조회가 일부 조립 결과를 사용하므로 제거하지 않는다. 작공·LLM·최종 세력 확장은 중단 연구이며 현행 개발 목표가 아니다."""
 
 from typing import Any, Literal
 

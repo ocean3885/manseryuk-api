@@ -2,6 +2,7 @@
 from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from schemas.character_relation_index import ActivationStatus, RelationSource
+from schemas.cycle_relation_validation import validate_cycle_relation
 
 
 class Contract(BaseModel):
@@ -136,6 +137,8 @@ class CharacterDetails(Contract):
                 raise ValueError('다자 조합이 참여 글자를 벗어났습니다.')
             if row.activation_status in ('conditional', 'suppressed') and not row.status_reason:
                 raise ValueError('조건부·억제 사유가 필요합니다.')
+            if key.startswith('cycle:'):
+                validate_cycle_relation(row, self.characters)
         calculated = {c.scope for c in self.contexts.values()
                       if c.calculation_status in ('calculated', 'candidates_detected')}
         if (set(self.coverage.calculated_scopes) != calculated
@@ -144,4 +147,8 @@ class CharacterDetails(Contract):
         if set(self.coverage.detected_only_relation_ids) != {
                 key for key, row in self.relations.items() if row.activation_status == 'detected'}:
             raise ValueError('탐지만 완료한 관계 목록이 맞지 않습니다.')
+        for values in (self.coverage.detected_only_relation_ids, self.coverage.calculated_scopes,
+                       self.coverage.not_evaluated_scopes, self.coverage.not_evaluated_mechanisms):
+            if len(values) != len(set(values)):
+                raise ValueError('탐지 범위 목록이 중복됐습니다.')
         return self

@@ -46,7 +46,7 @@
 
 방합의 네 조합은 계절적 결속 후보로 기록하되 개별 글자 사이의 견인 방향은 `undetermined`다. 구조적 가운데 글자를 자동으로 견인 주체로 만들지 않는다. 삼합·방합이 `conditional` 또는 `suppressed`이면 그 상태를 방향 후보에도 전달한다. 이 중첩 처리와 방합 방향 보류는 프로젝트 정책이다.
 
-**현재 계산과 v3 목표의 구분:** 현재 계산기는 완성 삼합의 내부 `생지–중신`·`중신–묘고`를 국의 구성 근거로 추적하되, 별도 반합 관계나 작용량으로 출력하지 않는다. [v3 목표 출력](./branch_dynamics_v3.json)에서는 내부 반합을 `pairwise[].relations[]`에 한 번 기록하고 그룹의 `component_pairs[].relation_id`로 참조한다. 이때 `activation_status: candidate_only`, `formation_status: included_in_complete_group`, `effect_status: structural_only`, `direction: null`, `metrics: null`이며 독립 작용량과 경합 판정 대상이 아니다. 삼합이 깨져 반합만 남으면 그 반합을 독립 쌍 관계로 출력하고 잠재 작용량을 평가한다. 방합에는 독립 작용량을 부여하지 않으며, 함께 탐지된 육합 등 쌍 관계의 작용량은 유지한다. 그룹 `status: not_scored`는 현재 계산 정책에 따른 상태이고, 중신이나 방합의 가운데 글자를 자동 주도자로 판정하지 않는다.
+**현재 계산과 v3 목표의 구분:** 현재 계산기는 완성 삼합의 내부 `생지–중신`·`중신–묘고`를 국의 구성 근거로 추적하되, 별도 반합 관계나 작용량으로 출력하지 않는다. [v3 목표 출력](archive/strength-research/branch_dynamics_v3.json)에서는 내부 반합을 `pairwise[].relations[]`에 한 번 기록하고 그룹의 `component_pairs[].relation_id`로 참조한다. 이때 `activation_status: candidate_only`, `formation_status: included_in_complete_group`, `effect_status: structural_only`, `direction: null`, `metrics: null`이며 독립 작용량과 경합 판정 대상이 아니다. 삼합이 깨져 반합만 남으면 그 반합을 독립 쌍 관계로 출력하고 잠재 작용량을 평가한다. 방합에는 독립 작용량을 부여하지 않으며, 함께 탐지된 육합 등 쌍 관계의 작용량은 유지한다. 그룹 `status: not_scored`는 현재 계산 정책에 따른 상태이고, 중신이나 방합의 가운데 글자를 자동 주도자로 판정하지 않는다.
 
 **동일 지지와 자형의 v3 출력 정책:** `same_branch`는 동일 지지가 두 위치에 존재한다는 구조 사실이며 독립 작용량이 없다(`effect_status: structural_only`, `calculation_status: not_applicable`, `metrics: null`). `self_punishment`는 별도 관계로 두고 인접한 辰辰·午午·酉酉·亥亥만 `active`, 격위는 `candidate_only`로 기록한다. 두 상태 모두 독립 작용량은 미정이므로 `calculation_status: pending`, `metrics: null`이다. 현재 계산기의 자형 탐지·잠재 `force`는 실제 적용량과 구분한다.
 

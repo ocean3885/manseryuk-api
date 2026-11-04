@@ -42,7 +42,7 @@
 
 1. 子卯·卯午의 `생` 조합별 선제 차단 항목을 제거한다. 두 쌍의 파 후보와 `primary_relation`은 그대로 둔다.
 2. v2 세력·쌍별 작용과 v3 경합 출력의 실제 변화를 확인한다. 생의 잠재량이 0보다 크고 적용량은 `null`인지, 파가 후보일 때 생이 자동 억제되지 않는지 검사한다.
-3. 관련 회귀 테스트와 [규칙 문서](./mangpa_relation_rulebook.md), [v2 설명](./branch_dynamics_v2.md), [v3 계획](./branch_dynamics_v3_plan.md), [이어받기 메모](./branch_dynamics_handoff.md)를 새 정책에 맞춘다.
+3. 관련 회귀 테스트와 [규칙 문서](mangpa_relation_rulebook.md), [v2 설명](branch_dynamics_v2.md), [v3 계획](archive/strength-research/branch_dynamics_v3_plan.md), [이어받기 메모](archive/strength-research/branch_dynamics_handoff.md)를 새 정책에 맞춘다.
 4. 관계를 실제 `active`로 판정하는 조건은 다음 결정 단계에서 다룬다. 그 단계에서는 주변 생 보정의 재계산 시점과 쌍별 작용량의 중복 방지를 함께 설계한다.
 
 **2단계 종료 당시:** 정책을 확정했고, 위 1~3을 다음 구현 단계로 제안했다.

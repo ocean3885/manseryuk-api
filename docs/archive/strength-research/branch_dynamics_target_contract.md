@@ -1,8 +1,10 @@
 # 지지 작용 최종 출력 계약 초안
 
-> 이전 설계 초안이다. 최신 사용자 목표 출력은 [v3 트리](./branch_dynamics_v3.json)이며, 구현 순서는 [v3 개발 계획](./branch_dynamics_v3_plan.md)을 따른다.
+> **보관 자료 / 중단 연구 기록** — 이 문서의 개발 순서·다음 작업·계수 제안은 현행 지침이 아닙니다. 2026-11-04 기준 자료를 보존하며, 현재 작업은 [현행 문서 목록](../../README.md)을 따릅니다. 명시적 요청 없이 수치 계산·손상률 연구를 재개하지 않습니다.
 
-이 문서는 advanced_analysis.branch_dynamics의 **목표 출력**을 고정하기 위한 설계 초안이다. 아래 JSON은 값과 relation_id까지 모두 설명용 가상 사례이며, 현재 API의 실제 응답이나 검증된 명리 계수가 아니다. 기존 구현은 [v2 명세](./branch_dynamics_v2.md)와 [현재 스키마](../schemas/saju_analysis.py)를 따른다. 변경 시 이 문서의 키 의미와 사례를 함께 수정한다.
+> 이전 설계 초안이다. 최신 사용자 목표 출력은 [v3 트리](branch_dynamics_v3.json)이며, 구현 순서는 [v3 개발 계획](branch_dynamics_v3_plan.md)을 따른다.
+
+이 문서는 advanced_analysis.branch_dynamics의 **목표 출력**을 고정하기 위한 설계 초안이다. 아래 JSON은 값과 relation_id까지 모두 설명용 가상 사례이며, 현재 API의 실제 응답이나 검증된 명리 계수가 아니다. 기존 구현은 [v2 명세](../../branch_dynamics_v2.md)와 [현재 스키마](../../../schemas/saju_analysis.py)를 따른다. 변경 시 이 문서의 키 의미와 사례를 함께 수정한다.
 
 ## 경계와 불변 조건
 

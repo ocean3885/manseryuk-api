@@ -35,7 +35,7 @@
 
 아래는 **출력 제안의 일부를 보여 주는 예시**다. 현행 API 응답이 아니며, 이 네 항목 외에도 위 표의 나머지 관계와 동주 관계를 기록해야 한다. `stem:control:*` ID와 `year.stem` 같은 글자 ID는 제안 표기다. `branch:*` ID는 현재 v3 부분 조립의 표기를 사용했다.
 
-**후속 계약:** 현재 `GET /relation-index`의 [정식 조회 형태](./character_relation_index_contract.md)는 아래 부분 예시와 달리 `coverage`·천간별 `stem_state`를 필수로 포함하며, 지장간 투출 관계도 기록한다. 버전은 `1.3-draft`다.
+**후속 계약:** 현재 `GET /relation-index`의 [정식 조회 형태](character_relation_index_contract.md)는 아래 부분 예시와 달리 `coverage`·천간별 `stem_state`를 필수로 포함하며, 지장간 투출 관계도 기록한다. 버전은 `1.3-draft`다.
 
 ```json
 {

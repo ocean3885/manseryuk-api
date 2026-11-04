@@ -93,6 +93,8 @@ class CalendarInfo(BaseModel):
 
 
 class CurrentDaewoon(BaseModel):
+    selection_start_year: int
+    selection_end_year_exclusive: int
     index: int
     year: int
     age: int
@@ -113,6 +115,8 @@ class CurrentDaewoon(BaseModel):
 
 
 class DaewoonItem(BaseModel):
+    selection_start_year: int
+    selection_end_year_exclusive: int
     index: int
 
     start_age: float
@@ -131,6 +135,9 @@ class DaewoonItem(BaseModel):
 
 
 class Daewoon(BaseModel):
+    selection_year: int
+    selection_status: Literal['selected', 'before_first_period', 'after_last_period', 'unavailable']
+    period_basis: Literal['legacy_start_year_half_open']
     direction: str
     start_age: float
 

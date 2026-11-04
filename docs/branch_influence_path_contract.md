@@ -1,6 +1,8 @@
 # 지지 작용 출처 경로의 최소 자료 구조
 
-상태: **설계 계약 + v3 초안 연결**. [A·D 출처 추적](./chouwei_a_d_source_paths.md)과 [방합 내부 출처 장부](./branch_group_source_ledger.md)의 관측·미해결 항목을 한 형태로 표현한다. [내부 경로 조립기·검증기](../services/branch_influence_paths.py)가 현재 일반 보정과 관계·그룹 후보를 읽어 이 계약을 검증하고, [v3 조립기](../services/branch_dynamics_v3_assembler.py)가 중앙 경로 목록과 지지별 참조 ID를 만든다. 산식·계수·관계 판정 및 현재 API는 변경하지 않았다.
+> **보존 구현 참고**: 기존 잠정 계산·내부 모델·회귀 검사의 의미를 설명합니다. 여기에 남은 후속 수치화 제안은 현재 실행 계획이 아니며, [현행 기준](README.md)을 우선합니다.
+
+상태: **설계 계약 + v3 초안 연결**. [A·D 출처 추적](archive/strength-research/chouwei_a_d_source_paths.md)과 [방합 내부 출처 장부](branch_group_source_ledger.md)의 관측·미해결 항목을 한 형태로 표현한다. [내부 경로 조립기·검증기](../services/branch_influence_paths.py)가 현재 일반 보정과 관계·그룹 후보를 읽어 이 계약을 검증하고, [v3 조립기](../services/branch_dynamics_v3_assembler.py)가 중앙 경로 목록과 지지별 참조 ID를 만든다. 산식·계수·관계 판정 및 현재 API는 변경하지 않았다.
 
 ## 왜 한 방향의 경로가 필요한가
 
@@ -50,7 +52,7 @@
 
 ## A·D에 대입한 경로 예
 
-아래 예시의 짧은 ID는 읽기 위한 표기다. 실제 구현 시에는 같은 출처·대상에서 기전이 둘 이상인 경우에도 고유한 정형 ID를 사용한다. `null`은 미계산이고, 부호 있는 수치는 [실행으로 확인한 일반 보정](./chouwei_a_d_source_paths.md)만 적었다.
+아래 예시의 짧은 ID는 읽기 위한 표기다. 실제 구현 시에는 같은 출처·대상에서 기전이 둘 이상인 경우에도 고유한 정형 ID를 사용한다. `null`은 미계산이고, 부호 있는 수치는 [실행으로 확인한 일반 보정](archive/strength-research/chouwei_a_d_source_paths.md)만 적었다.
 
 | 사례·경로 | 출처 → 대상 | 단계·기전 | 계상·수치 | 근거와 겹침 |
 | --- | --- | --- | --- | --- |
@@ -101,5 +103,5 @@ D의 `d3`을 실제 형태로 쓰면 다음과 같다. 교재의 구조 설명�
 
 1. **완료:** [내부 조립기](../services/branch_influence_paths.py)는 [현행 `surroundings`](../schemas/branch_dynamics_v3.py)의 일반 보정률을 방향별 경로로 옮긴다. 활성 쌍별 구조와 억제되지 않은 그룹의 참여는 `undetermined / null` 후보로 만든다. 새 가산량을 만들지 않는다. 교재 A·D의 입묘·지장간 후보는 생산 규칙에 고정하지 않고 외부 검토 후보로만 받는다.
 2. **완료:** [집중 테스트](../tests/test_branch_influence_paths.py)는 A의 巳·午→未 기존 보정과 방합의 겹침, D의 두 申 위치별 음의 보정과 검토 후보, 반복·억제된 그룹, 잘못된 지장간·근거 참조·순환·중복 계상을 검사한다. Python 3.12에서 5건 통과했다.
-3. **완료(3.4-draft):** [v3 출력 골격](./branch_dynamics_v3.json)에 중앙 `branch_dynamics.influence_paths[]`와 각 지지의 `influence_path_ids[]`를 추가했다. [계약 검사기](../schemas/branch_dynamics_v3_contract.py)는 대상별 참조의 완전성, 계산된 `effective_power`의 일반 배경 3경로, 기존 `surroundings`와 경로 수치의 일치, 근거 ID를 검증한다. 같은 숫자가 두 보기에 있더라도 **같은 출처의 한 기여**이며 합산 대상 두 건이 아니다. 현재 API와 기존 세력값은 바꾸지 않았다.
-4. 구조 경로가 어느 대상에 실제 작용하는지 전문가 사례로 확정된 뒤에만 `replace`·`separate_effect`와 수치 모델을 활성화한다. [작용 후 세력 상태](./branch_dynamics_v3_plan.md)는 미해결 경로가 남으면 `incomplete`·`null`을 유지한다. 기존 `surroundings`와 중앙 경로의 중복 직렬화는 v3 소비자를 확인한 뒤 정리한다.
+3. **완료(3.4-draft):** [v3 출력 골격](archive/strength-research/branch_dynamics_v3.json)에 중앙 `branch_dynamics.influence_paths[]`와 각 지지의 `influence_path_ids[]`를 추가했다. [계약 검사기](../schemas/branch_dynamics_v3_contract.py)는 대상별 참조의 완전성, 계산된 `effective_power`의 일반 배경 3경로, 기존 `surroundings`와 경로 수치의 일치, 근거 ID를 검증한다. 같은 숫자가 두 보기에 있더라도 **같은 출처의 한 기여**이며 합산 대상 두 건이 아니다. 현재 API와 기존 세력값은 바꾸지 않았다.
+4. 구조 경로가 어느 대상에 실제 작용하는지 전문가 사례로 확정된 뒤에만 `replace`·`separate_effect`와 수치 모델을 활성화한다. [작용 후 세력 상태](archive/strength-research/branch_dynamics_v3_plan.md)는 미해결 경로가 남으면 `incomplete`·`null`을 유지한다. 기존 `surroundings`와 중앙 경로의 중복 직렬화는 v3 소비자를 확인한 뒤 정리한다.

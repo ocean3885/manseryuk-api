@@ -19,7 +19,7 @@ from services.interaction_matrix import build_interaction_matrix
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'tests' / 'fixtures' / 'branch_dynamics_v3.json'
-DESIGN = ROOT / 'docs' / 'branch_dynamics_v3.json'
+DESIGN = ROOT / 'docs' / 'archive' / 'strength-research' / 'branch_dynamics_v3.json'
 
 
 def load_fixture():

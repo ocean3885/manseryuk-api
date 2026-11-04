@@ -1,5 +1,7 @@
 # 주변 지지 보정의 반올림 전 재생 검증
 
+> **보존 구현 참고**: 기존 잠정 계산·내부 모델·회귀 검사의 의미를 설명합니다. 여기에 남은 후속 수치화 제안은 현재 실행 계획이 아니며, [현행 기준](README.md)을 우선합니다.
+
 상태: 2026-11-02 [기존 세력 계산기](../services/branch_dynamics.py)의 **현재 일반 배경 보정**을 [독립 재생 검증기](../services/branch_ambient_replay.py)로 다시 계산한 기록. 합·충·방합의 독립 효과나 지지별 작용 후 세력을 계산하지 않는다.
 
 ## 실제 계산 순서
@@ -32,7 +34,7 @@
 
 ## 남은 경계
 
-- 이 재생은 `effective_power`의 **기존 일반 배경 계산**을 확인한다. [출처 경로 계약](./branch_influence_path_contract.md)의 구조 후보를 수치로 바꾸거나 [집계 추적 계약](./branch_post_effect_trace_contract.md)의 `reconciled_pre_effect_power`를 만들지 않는다.
+- 이 재생은 `effective_power`의 **기존 일반 배경 계산**을 확인한다. [출처 경로 계약](branch_influence_path_contract.md)의 구조 후보를 수치로 바꾸거나 [집계 추적 계약](archive/strength-research/branch_post_effect_trace_contract.md)의 `reconciled_pre_effect_power`를 만들지 않는다.
 - 대체 구조가 검증되면 `after_stem_power`부터 **선택한 출처의 원시 주변 비율을 재계산**해야 한다. 현재 중앙 `influence_paths[].quantity.value`는 표시용 소수 6자리이므로 재계산의 유일한 입력으로 삼지 않는다.
 - 子午충의 적용량은 관계별 `power_before`에서 산출된다. 일반 배경의 재생이 성공해도 여러 관계의 작용량을 지지별 최종 세력으로 합산하는 공식이 검증됐다는 뜻은 아니다.
 

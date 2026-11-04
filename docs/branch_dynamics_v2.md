@@ -1,6 +1,8 @@
 # 지지 작용 분석 v2: 첫 구현 기준
 
-> 관계별 후보·활성 조건은 [맹파 지지·간지 관계 규칙표 초안](./mangpa_relation_rulebook.md)에서 재검토 중이다. 子午·子卯·卯午·午酉·辰酉와 조건부 자합을 먼저 반영했다. 남은 관계의 점수식은 여전히 실험값이다.
+> **보존 구현 참고**: 기존 잠정 계산·내부 모델·회귀 검사의 의미를 설명합니다. 여기에 남은 후속 수치화 제안은 현재 실행 계획이 아니며, [현행 기준](README.md)을 우선합니다.
+
+> 관계별 후보·활성 조건은 [맹파 지지·간지 관계 규칙표 초안](mangpa_relation_rulebook.md)에서 재검토 중이다. 子午·子卯·卯午·午酉·辰酉와 조건부 자합을 먼저 반영했다. 남은 관계의 점수식은 여전히 실험값이다.
 
 실행 규칙과 실험 계수의 단일 원본은 [`services/relation_rules.py`](../services/relation_rules.py)이다.
 
@@ -141,7 +143,7 @@
 
 ### 빈주 정보의 통합 방향 (목표 계약, 아직 미구현)
 
-최신 목표 JSON 트리는 [사용자 v3 설계 샘플](./branch_dynamics_v3.json), 단계별 구현 순서는 [v3 개발 계획](./branch_dynamics_v3_plan.md)에 기록한다. [이전 출력 계약 초안](./branch_dynamics_target_contract.md)은 비교 자료로 남긴다.
+최신 목표 JSON 트리는 [사용자 v3 설계 샘플](archive/strength-research/branch_dynamics_v3.json), 단계별 구현 순서는 [v3 개발 계획](archive/strength-research/branch_dynamics_v3_plan.md)에 기록한다. [이전 출력 계약 초안](archive/strength-research/branch_dynamics_target_contract.md)은 비교 자료로 남긴다.
 
 빈주(년·월=빈, 일·시=주)는 지지 작용의 **해석 맥락**으로 각 결과에 연결한다. 지지 관계의 존재·성립·방향·힘을 빈주 구분이나 기존 빈주 총점으로 결정하지 않는다. 현재 `pairwise[].domain_pair`는 빈–빈·주–주·빈–주 분류를 제공한다. 목표 계약에서는 `branch_strengths.<pillar>`에 해당 지지의 빈·주 영역을, `pairwise[].relations[]`에 이미 계산된 작용 방향을 영역 관점에서 읽는 근거를, `groups[].formation_evidence[]`에 참여 위치별 영역과 영역 사이 연결 여부를 배치한다. 정확한 필드명과 자료형은 출력 트리 설계 단계에서 확정한다.
 

@@ -20,7 +20,7 @@
 - `build_daewoon`은 10개 대운을 생성하고, 시작 나이에 10을 더해 다음 대운을 구성한다. 기존 표시 연도는 `출생연도 + int(나이)`로 계산한다.
 - 소수 나이에 따라 기존 `end_year`가 다음 대운 `start_year`와 겹칠 수 있다. 새 API의 **연도 단위 선택**은 `[start_year, 다음 start_year)`로 처리한다. 마지막 대운은 `[start_year, start_year+10)`이다. 따라서 다음 대운의 시작 연도는 새 대운에 속한다.
 - 응답 소속의 `selection_start_year`, `selection_end_year_exclusive`가 실제 선택 범위다. 기존 `start_age`, `end_age`, `start_year`, `end_year`는 원본 표시값으로 보존한다. `period_basis=legacy_start_year_half_open`이 이 정책을 식별한다.
-- 기존 `daewoon.current`는 `현재연도-출생연도` 정수와 소수 나이 구간을 비교하므로 전환 연도에 이 API의 선택과 다를 수 있다. 새 조회는 `current`를 사용하지 않는다. 이는 연도별 조회를 위한 명시적 대응 정책이며 실제 교운 날짜를 확정한 것이 아니다.
+- `daewoon.current`와 세운 조회는 공통 `select_daewoon_year` 함수를 사용한다. 현재 대운은 서버 현재 연도, 세운 조회는 선택한 연도를 같은 반열린 구간에 대입한다. `daewoon.selection_year`, `selection_status`, `period_basis`와 각 항목의 `selection_start_year`, `selection_end_year_exclusive`를 제공한다. 실제 교운 날짜를 확정한 것은 아니다. [공통 선택 계약](daewoon_selection_contract.md)을 참고한다.
 - `generate_future_cycles`는 출생 연도부터 출생 연도+99까지 제공한다. 1984년 甲子를 기준으로 연도 간지를 계산하고 원국 일간 기준 십신·운성을 붙인다. `age`는 세는 나이다. `daeun` 인자는 현재 이 연도 계산에 사용되지 않는다.
 - 세운은 **달력 연도 단위 간지**를 재사용하며 입춘 전후 날짜·시각을 구분하지 않는다. `sewoon_basis=calendar_year_ganzhi_no_ipchun`으로 명시한다. 날짜 기반 운 분석은 이후 별도 계약이 필요하다.
 
