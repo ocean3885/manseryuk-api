@@ -15,6 +15,7 @@
 | [운 선택 조회](cycle_analysis_contract.md) | `/cycle-analysis`, 대운 또는 세운 선택 |
 | [운 관계 탐지](cycle_relation_detection.md) | 소속 간 쌍별·다자 후보와 투간 |
 | [운 관계 감사](cycle_relation_audit.md) | 누락·중복·조회 일관성·재조립 검증 |
+| [선택 비교·구조 요약](analysis_summary_contract.md) | `/analysis-summary`, 추가·유지 관계와 근거 연결 문장 |
 
 ## 현재 우선 원칙
 

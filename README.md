@@ -36,6 +36,10 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## 📡 API 엔드포인트 규격 (API Reference)
 
+### `GET /analysis-summary` — 선택 전후 비교와 구조 요약
+
+기존 사주 입력만 보내면 원국 구조를, `daewoon_index` 또는 `sewoon_year`를 추가하면 선택한 운에서 새로 생긴 관계를 요약합니다. `comparison`은 추가·유지 관계를 구분하고, `items`는 다자 구조·쌍별 관계·투간·글자별 동시 참여를 근거 ID에 연결합니다. 원본 정보는 `graph`에서 확인할 수 있습니다. 영향·길흉은 판정하지 않습니다. [요약 응답 계약](docs/analysis_summary_contract.md)을 참고하세요.
+
 출생 날짜·시간은 모든 조회 경로에서 공통 검증합니다. 잘못된 날짜·시간 범위는 400, 달력 DB에 없는 평달·윤달 날짜는 404입니다. [입력 검증과 달력 제공 범위](docs/birth_input_validation.md)를 참고하세요.
 
 오류 응답은 공통 `code`, `errors`로 필드·원인·허용 범위를 제공합니다. [오류 응답 계약](docs/api_errors.md)을 참고하세요.
