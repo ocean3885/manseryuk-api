@@ -5,7 +5,8 @@
 해설용 별도 SQLite의 빈 기본 패턴·검색 기능은 [해설 DB 계약](docs/interpretation_database_contract.md)을 참고하세요.
 `.venv312/bin/python scripts/interpretation_rules.py init`으로 초기화합니다.
 `.venv312/bin/python scripts/interpretation_rules.py export --output <새 JSON 경로>`로 작성용 JSON을 내보냅니다.
-기존 API 응답 연결과 LLM 해설 작성은 후속 단계입니다.
+`GEMINI_API_KEY`로 빈 해설을 작성하는 명령은 [Gemini 작성 가이드](docs/interpretation_generation.md)를 참고하세요.
+생성 결과의 DB 가져오기·검토 승인과 API 응답 연결은 후속 단계입니다.
 
 > 동주 허실 v4: 통근 여부와 관련 합·충·형·파·천 기록을 분리합니다. 관계의 통근 영향은 미평가이며 자동 변허 판정은 하지 않습니다. 아래 이전 관계 반영 설명보다 [현행 계약](docs/root_relation_separation.md)을 우선합니다.
 
