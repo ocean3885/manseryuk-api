@@ -138,3 +138,36 @@ class CharacterDetailsTests(unittest.TestCase):
                 app.dependency_overrides.pop(get_db, None)
             else:
                 app.dependency_overrides[get_db] = previous
+
+    def test_presentations_and_evidence_survive_all_http_adapters(self):
+        def readonly_db():
+            with Session(self.engine) as session:
+                yield session
+        previous = app.dependency_overrides.get(get_db)
+        app.dependency_overrides[get_db] = readonly_db
+        try:
+            with TestClient(app) as client:
+                natal = client.get('/character-details', params=QUERY).json()
+                for path, selector in [('/character-details', {}),
+                                       ('/cycle-analysis', {'daewoon_index': 1}),
+                                       ('/cycle-analysis', {'sewoon_year': 2007}),
+                                       ('/analysis-summary', {'sewoon_year': 2007})]:
+                    with self.subTest(path=path, selector=selector):
+                        response = client.get(path, params={**QUERY, **selector})
+                        self.assertEqual(response.status_code, 200, response.text)
+                        graph = response.json()['graph'] if path == '/analysis-summary' else response.json()
+                        for rid, row in natal['relations'].items():
+                            self.assertEqual(graph['relations'][rid], row)
+                        for row in graph['relations'].values():
+                            self.assertIsNotNone(row['presentation'])
+                            self.assertEqual(row['presentation']['missing_evidence_codes'], [])
+                            self.assertEqual([p['character_id'] for p in row['participant_details']], row['participants'])
+                            for p in row['participant_details']:
+                                self.assertEqual(p['ten_god'], graph['characters'][p['character_id']]['attributes']['ten_god'])
+                root = natal['characters']['natal.chart.day.stem']['rooting']
+                self.assertEqual(root['reason'], self.response['advanced_analysis']['xu_shi_dynamics']['pillars']['day']['reason'])
+        finally:
+            if previous is None:
+                app.dependency_overrides.pop(get_db, None)
+            else:
+                app.dependency_overrides[get_db] = previous

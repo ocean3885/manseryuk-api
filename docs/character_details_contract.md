@@ -1,5 +1,11 @@
 # 글자별 통합 조회와 운세 확장 계약
 
+2026-11-13 부가 필드 확장: 관계별 `participant_details`, `status_reasons`,
+`element_relation`, `evidence`, `presentation` 및 통근 설명·근거를 제공한다.
+십성은 기존 원국 일간 기준 속성에서 복사한다. 기존 필드·판정·ID는 유지한다.
+[근거 계약 및 판정 범위](relation_activation_audit.md),
+[자연어 표시 계약](relation_presentation_contract.md)을 함께 참조한다.
+
 ## 현재 API
 
 `GET /character-details`는 기존 `/`와 동일한 `year`, `month`, `day`, `hour`, `min`, `sl`, `gen`을 받는다. 원국 계산을 한 번 실행하고 기존 관계 조회 조립기를 거쳐 통합 결과를 만든다. 기존 `/`, `/relation-index`는 유지한다. 새로운 명리 규칙이나 대운·세운 관계 계산을 추가한 것은 아니다.

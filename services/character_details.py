@@ -2,6 +2,8 @@
 from copy import deepcopy
 from schemas.character_details import CharacterDetails
 from services.character_relation_index import assemble_character_relation_index_from_response
+from services.character_evidence import attach_natal_evidence, attach_participant_details
+from services.relation_presentation import attach_relation_presentations
 
 
 def assemble_character_details(response):
@@ -41,7 +43,7 @@ def assemble_character_details(response):
             'rooting': rooting, 'relation_ids': ids,
             'transmission_relation_ids': [rid for rid in ids if relations[rid]['type'] == 'transmission'],
         }
-    return CharacterDetails.model_validate({
+    graph = {
         'schema_version': '1.0-draft',
         'contexts': {context_id: {'scope': 'natal', 'instance': 'chart', 'label': '원국',
                                  'calculation_status': 'calculated', 'selection': {
@@ -52,4 +54,8 @@ def assemble_character_details(response):
         'coverage': {**index['coverage'], 'calculated_scopes': ['natal'],
                      'detected_only_relation_ids': [relation_ids[rid] for rid in index['coverage']['detected_only_relation_ids']],
                      'not_evaluated_scopes': ['daewoon', 'sewoon']},
-    }).model_dump(mode='json')
+    }
+    attach_participant_details(graph)
+    attach_natal_evidence(graph, response)
+    attach_relation_presentations(graph)
+    return CharacterDetails.model_validate(graph).model_dump(mode='json')

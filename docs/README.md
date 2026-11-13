@@ -1,6 +1,6 @@
 # 문서 안내와 현행 개발 기준
 
-갱신일: 2026-11-04. 현행 API 계약을 먼저 읽고, 과거 설계의 다음 작업을 현재 개발 지시로 사용하지 않는다.
+갱신일: 2026-11-13. 현행 API 계약을 먼저 읽고, 과거 설계의 다음 작업을 현재 개발 지시로 사용하지 않는다.
 
 ## 현행 API 계약
 
@@ -12,6 +12,8 @@
 | [통근과 관계 영향 분리](root_relation_separation.md) | 동주 허실 v4, 관계 영향 미평가 |
 | [원국 관계 조회](character_relation_index_contract.md) | `/relation-index`, 현행 `1.7-draft` |
 | [글자별 통합 조회](character_details_contract.md) | `/character-details`, 소속·글자·중앙 관계 |
+| [상태·사유·근거 감사](relation_activation_audit.md) | 판정 범위·근거 연결·미평가 항목 |
+| [관계별 자연어 표시](relation_presentation_contract.md) | 근거·십성이 연결된 제목·본문·사유·평가 범위 |
 | [운 선택 조회](cycle_analysis_contract.md) | `/cycle-analysis`, 대운 또는 세운 선택 |
 | [운 관계 탐지](cycle_relation_detection.md) | 소속 간 쌍별·다자 후보와 투간 |
 | [운 관계 감사](cycle_relation_audit.md) | 누락·중복·조회 일관성·재조립 검증 |

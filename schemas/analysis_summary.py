@@ -1,11 +1,10 @@
 from typing import Literal
 from pydantic import Field, model_validator
-from schemas.character_details import CharacterDetails, Contract
+from schemas.character_details import CharacterDetails, Contract, ACTIVATION_LABELS
 from schemas.character_relation_index import ActivationStatus
 from schemas.cycle_analysis import CycleSelection
 
-STATUS_LABELS = dict(detected='탐지', candidate_only='후보', potential='잠재', conditional='조건부',
-                     suppressed='억제', active='성립')
+STATUS_LABELS = ACTIVATION_LABELS
 
 
 class Comparison(Contract):

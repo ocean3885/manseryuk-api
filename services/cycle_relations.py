@@ -3,6 +3,8 @@ from itertools import combinations
 from services.constants import JIJANGGAN_DETAILED
 from services.five_elements import BRANCH_ELEMENT_MAP
 from services import relation_rules as rules
+from services.character_evidence import attach_participant_details
+from services.relation_presentation import attach_relation_presentations
 
 CYCLE_RELATION_RULE_VERSION = '1.0.0-draft'
 BRANCH_REPEAT_PRESENCE = 'distinct_positions_same_branch'
@@ -25,6 +27,8 @@ def detect_cycle_relations(characters):
             relation_id=rid, source_relation_id=rid, type=kind, participants=members,
             context_ids=contexts, activation_status='detected' if fact else 'candidate_only',
             status_reason='cycle_presence_only_activation_and_impact_not_evaluated',
+            status_reasons=['cycle_presence_only_activation_and_impact_not_evaluated'],
+            element_relation=None, evidence=[], presentation=None,
             direction=direction, candidate_element=element, hidden_stem=hidden_stem,
             formation_candidates=[members] if formation else [],
             rule_ids=[f'cycle:presence:{table}:{CYCLE_RELATION_RULE_VERSION}',
@@ -107,6 +111,8 @@ def attach_cycle_relations(graph):
     graph['relations'] = {rid: row for rid, row in graph['relations'].items()
                           if not rid.startswith('cycle:')}
     graph['relations'].update(detected)
+    attach_participant_details(graph)
+    attach_relation_presentations(graph)
     for key, node in graph['characters'].items():
         node['relation_ids'] = [rid for rid, row in graph['relations'].items() if key in row['participants']]
         node['transmission_relation_ids'] = [rid for rid in node['relation_ids']
