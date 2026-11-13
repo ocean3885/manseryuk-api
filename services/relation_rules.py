@@ -5,7 +5,7 @@
 """
 
 RULE_PROFILE = 'mangpa_project_provisional'
-RULE_VERSION = '2.19.0'
+RULE_VERSION = '2.22.0'
 
 # v3 방향별 잠재량은 기존 v2 계수를 재사용하는 잠정 상대 지표다.
 # 각 방향: source_capacity = 해당 쌍의 상대를 제외하고 계산한 원천 지지 세력.
@@ -59,12 +59,7 @@ STEM_RESTRAIN = {
 # 지지 관계 후보. 키의 순서는 탐지 결과에 영향을 주지 않는다.
 SIX_HAPS = {('子', '丑'): '土', ('寅', '亥'): '木', ('卯', '戌'): '火',
             ('辰', '酉'): '金', ('巳', '申'): '水', ('午', '未'): '土'}
-# 충하는 글자가 합 사이에 있으면 합 작용을 억제한다. 합 밖에서 충할 지지에
-# 인접하면 충과 합이 병존하므로 작용량을 유보하고, 충 개입이 없으면 합을 성립시킨다.
-SIX_HAP_CONDITIONS = {
-    'intervening_adjacent_clash': 'suppressed',
-    'external_adjacent_clash': 'conditional',
-}
+# 충 개입의 위치는 탐지기의 근거로 기록하며 육합의 성립·차단을 판정하지 않는다.
 CHUNGS = {('子', '午'), ('丑', '未'), ('寅', '申'),
           ('卯', '酉'), ('辰', '戌'), ('巳', '亥')}
 SQUARE_HAPS = {
@@ -79,14 +74,7 @@ THREE_HAPS = {
     ('申', '子', '辰'): '水',
     ('巳', '酉', '丑'): '金',
 }
-# 완성 삼합 후보의 구조 판정. 중신 중복은 학파별 해석 차이가 있어 보류한다.
-# 중신·생지·성지에 인접한 충은 해당 국의 점수를 억제한다.
-THREE_HAP_CONDITIONS = {
-    'duplicate_middle': 'conditional',
-    'adjacent_middle_clash': 'suppressed',
-    'adjacent_birth_clash': 'suppressed',
-    'adjacent_tomb_clash': 'suppressed',
-}
+# 삼합의 중신 중복·인접 충도 관찰 사실이며 상태를 바꾸는 조건표를 두지 않는다.
 HALF_HAPS = {
     ('寅', '午'): {'element': '火', 'type': '전반합', 'strength': 0.7},
     ('亥', '卯'): {'element': '木', 'type': '전반합', 'strength': 0.7},
@@ -307,16 +295,6 @@ PRIORITY_RANK = {
     '삼합': 1, '방합': 2, '육합': 3, '반합': 4,
     '충': 5, '형': 6, '천': 7, '파': 8,
 }
-# 집계 점수의 중복 방지 정책. 후보와 개별 점수는 남기고, 활성 다자 구조의
-# 한 성립 조합 안에 완전히 포함된 쌍의 총점 기여만 0으로 둔다.
-HARMONY_SCORE_TYPES = frozenset({
-    '천간합(天干合)', '육합(六合)', '반합(半合)',
-    '삼합(三合)', '방합(方合)',
-})
-HARMONY_GROUP_COVERS_PAIR = {
-    '삼합(三合)': frozenset({'육합(六合)', '반합(半合)'}),
-    '방합(方合)': frozenset({'육합(六合)', '반합(半合)'}),
-}
 # 완성된 다자 합의 글자별 구조적 위치. 세력이나 실제 견인 방향을 뜻하지 않는다.
 GROUP_ROLE_ORDER = {
     '삼합(三合)': ('birth', 'center', 'storage'),
@@ -392,19 +370,18 @@ THREE_HAPS_BIRTH = {'火': ['寅'], '木': ['亥'], '水': ['申'], '金': ['巳
 THREE_HAPS_KING = {'火': ['午'], '木': ['卯'], '水': ['子'], '金': ['酉']}
 THREE_HAPS_SUCCESS = {'火': ['戌'], '木': ['未'], '水': ['辰'], '金': ['丑']}
 
-# 같은 기둥의 천간과 지장간 사이 자합 후보.
+# 같은 기둥의 천간과 지장간 사이 자합 조합만 등록한다.
+# 未형·辰충 등 주변 관계는 사실로 별도 기록하며 자합 성립을 자동 판정하지 않는다.
 JAHAB_MAP = {
-    ('戊', '子'): {'hidden': '癸', 'element': '火', 'conditional': False, 'required': None},
-    ('丁', '亥'): {'hidden': '壬', 'element': '木', 'conditional': False, 'required': None},
-    ('己', '亥'): {'hidden': '甲', 'element': '土', 'conditional': False, 'required': None},
-    ('辛', '巳'): {'hidden': '丙', 'element': '水', 'conditional': False, 'required': None},
-    ('癸', '巳'): {'hidden': '戊', 'element': '火', 'conditional': False, 'required': None},
-    ('壬', '午'): {'hidden': '丁', 'element': '木', 'conditional': False, 'required': None},
-    ('甲', '午'): {'hidden': '己', 'element': '土', 'conditional': False, 'required': None},
-    ('丙', '戌'): {'hidden': '辛', 'element': '水', 'conditional': True,
-                'required': ('지세형', '未'), 'blocked_by_chung': '辰'},
-    ('壬', '戌'): {'hidden': '丁', 'element': '木', 'conditional': True,
-                'required': ('지세형', '未'), 'blocked_by_chung': '辰'},
+    ('戊', '子'): {'hidden': '癸', 'element': '火'},
+    ('丁', '亥'): {'hidden': '壬', 'element': '木'},
+    ('己', '亥'): {'hidden': '甲', 'element': '土'},
+    ('辛', '巳'): {'hidden': '丙', 'element': '水'},
+    ('癸', '巳'): {'hidden': '戊', 'element': '火'},
+    ('壬', '午'): {'hidden': '丁', 'element': '木'},
+    ('甲', '午'): {'hidden': '己', 'element': '土'},
+    ('丙', '戌'): {'hidden': '辛', 'element': '水'},
+    ('壬', '戌'): {'hidden': '丁', 'element': '木'},
 }
 
 # v2의 미보정 상대 점수 가정. 관계의 성립 규칙과 구별한다.

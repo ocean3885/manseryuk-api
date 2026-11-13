@@ -2,7 +2,7 @@ from itertools import combinations
 from services.relation_rules import (SIX_HAPS, CHUNGS, CHEONS, BREAKS, THREE_HAPS,
     HALF_HAPS, GONG_HAPS, HIDDEN_STEM_HAPS, SQUARE_HAPS, PUNISHMENTS,
     THREE_PUNISHMENTS, STEM_COMBINATIONS, THREE_HAPS_KING,
-    THREE_HAP_CONDITIONS, SIX_HAP_CONDITIONS, PAIR_PRESENCE_ACTIVE_RULE_ID,
+    PAIR_PRESENCE_ACTIVE_RULE_ID,
     ADJACENT_SELF_PUNISHMENT_RULE_ID, TRIPLE_PUNISHMENT_PRESENCE_RULE_ID)
 from services.calculator import get_ten_star_branch
 
@@ -63,7 +63,7 @@ def check_six_haps(target_branch, target_index, all_branches, day_stem):
                 reason = 'external_adjacent_clash'
             else:
                 reason = None
-            status = SIX_HAP_CONDITIONS[reason] if reason else 'active'
+            status = 'detected'
             results.append({
                 'my': target_branch,
                 'my_index': target_index,
@@ -78,13 +78,13 @@ def check_six_haps(target_branch, target_index, all_branches, day_stem):
                 'proximity_coefficient': 1.0 if is_adjacent else 0.5,
                 'is_adjacent': is_adjacent,
                 'activation_status': status,
-                'activation_rule_id': PAIR_PRESENCE_ACTIVE_RULE_ID if not reason else None,
+                'activation_rule_id': None,
                 'status_reasons': [reason] if reason else [],
                 'impact_status': 'not_evaluated',
                 'condition_evidence': {
                     'summary': ' '.join(
                         [clash['description'] for clash in adjacent_clashes] or
-                        ['육합 성립을 제한하는 인접 충이 확인되지 않았습니다.']),
+                        ['육합 조합에 인접한 충 관계가 확인되지 않았습니다.']),
                     'adjacent_clashes': adjacent_clashes,
                 },
             })
@@ -273,12 +273,7 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
             for role in ('birth', 'tomb'):
                 if any(clash['wing_role'] == role for clash in adjacent_wing_clashes):
                     status_reasons.append(f'adjacent_{role}_clash')
-            status = 'potential'
-            for reason in status_reasons:
-                if THREE_HAP_CONDITIONS[reason] == 'suppressed':
-                    status = 'suppressed'
-                    break
-                status = THREE_HAP_CONDITIONS[reason]
+            status = 'detected'
             middle_members = [_condition_branch(i, all_branches, day_stem)
                               for i in middle_indices]
             observations = []
@@ -306,6 +301,7 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
                         ['삼합 중신의 중복과 구성 지지의 인접 충이 확인되지 않았습니다.']),
                     'middle_indices': middle_indices,
                     'middle_members': middle_members,
+                    'middle_count': len(middle_members),
                     'adjacent_clashes': adjacent_clashes,
                     'adjacent_wing_clashes': adjacent_wing_clashes,
                 },
@@ -313,9 +309,8 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
                 'is_adjacent': is_adjacent
             })
 
-            # 생지 또는 성지가 충으로 빠진 경우 중신과 남은 날개만 반합 후보로 남긴다.
-            if (status == 'suppressed' and not adjacent_clashes and
-                    len(adjacent_wing_clashes) == 1):
+            # 한 날개의 인접 충이 있을 때 다른 날개·중신의 반합 후보도 함께 기록한다.
+            if not adjacent_clashes and len(adjacent_wing_clashes) == 1:
                 clash = adjacent_wing_clashes[0]
                 surviving_wing = b3 if clash['wing_role'] == 'birth' else b1
                 if target_branch in (middle, surviving_wing):
@@ -332,7 +327,7 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
                             'affected': clash['affected'],
                             'cause': clash['cause'],
                             'description': (clash['description'] +
-                                            ' 완전한 삼합은 억제되고, 남은 중신과 날개의 반합 후보를 기록합니다.'),
+                                            ' 충이 없는 다른 날개와 중신의 반합 후보를 함께 기록합니다.'),
                         },
                     ))
             

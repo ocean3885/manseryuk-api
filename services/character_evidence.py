@@ -73,19 +73,12 @@ def _decision_details(source):
     return result
 
 
-def _self_combine_links(graph, row, source, response):
+def _self_combine_links(graph, row, source):
     branch = next(p for p in row['participants'] if p.endswith('.branch'))
-    position = graph['characters'][branch]['position']
-    indices = []
-    if source.get('blocking_chung'):
-        indices.append(('clash', source['blocking_chung']['with_index']))
-    required = source.get('required_condition')
-    if required and source['condition_met']:
-        punishments = response['analysis']['details'][position]['branch']['relations']['punishments']
-        indices.extend(('punishment', p['with_index']) for p in punishments
-                       if p['type'] == required['type'] and p['with'] == required['with_branch'])
-    return [rid for kind, index in indices for rid, r in graph['relations'].items()
-            if r['type'] == kind and set(r['participants']) == {branch, f'natal.chart.{PILLARS[index]}.branch'}]
+    return sorted({rid for context in source['related_branch_relations']
+                   for rid, relation in graph['relations'].items()
+                   if relation['type'] == context['type'] and set(relation['participants']) ==
+                   {branch, f"natal.chart.{PILLARS[context['with_index']]}.branch"}})
 
 
 def attach_natal_evidence(graph, response):
@@ -137,7 +130,7 @@ def attach_natal_evidence(graph, response):
             else:
                 details = {'records': deepcopy(source)}
                 if row['type'] == 'self_combine':
-                    related = _self_combine_links(graph, row, source, response)
+                    related = _self_combine_links(graph, row, source)
             if row.get('status_reason') == PAIR_ELEMENT_OVERRIDE_REASON:
                 related = [rid for rid, r in graph['relations'].items()
                            if r['type'] in V3_ELEMENT_OVERRIDE_PAIR_TYPES and r['activation_status'] == 'active'
@@ -148,7 +141,7 @@ def attach_natal_evidence(graph, response):
         row['status_reasons'] = list(dict.fromkeys(reasons))
         if row['type'] == 'half_combine' and row['activation_status'] == 'candidate_only':
             groups = [rid for rid, r in graph['relations'].items() if r['type'] == 'trine'
-                      and r['activation_status'] in ('potential', 'conditional')
+                      and r['activation_status'] in ('potential', 'conditional', 'detected')
                       and any(set(row['participants']) <= set(f) for f in r['formation_candidates'])]
             if groups:
                 row['evidence'].append(_evidence(

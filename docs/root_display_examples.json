@@ -1,0 +1,226 @@
+{
+  "description": "합성 원국, 년·월·일·시 순서. 실제 달력 날짜가 아님.",
+  "examples": [
+    {
+      "stems": "甲丙戊庚",
+      "branches": "申卯寅酉",
+      "focus_star": "도화살",
+      "special_stars": [
+        {
+          "rule_id": "special_star:dohwa:year_day_branch_v2",
+          "basis": [
+            {
+              "pillar": "day",
+              "kind": "branch",
+              "char": "寅",
+              "display_name": "일지 寅"
+            }
+          ],
+          "interpretation_scope": "traditional_symbolism",
+          "name": "도화살",
+          "pillar": "month",
+          "position": "월지",
+          "char": "卯",
+          "type": "신살(神殺)",
+          "description": "전통적 상징: 교류와 주목의 상징."
+        },
+        {
+          "rule_id": "special_star:dohwa:year_day_branch_v2",
+          "basis": [
+            {
+              "pillar": "year",
+              "kind": "branch",
+              "char": "申",
+              "display_name": "년지 申"
+            }
+          ],
+          "interpretation_scope": "traditional_symbolism",
+          "name": "도화살",
+          "pillar": "hour",
+          "position": "시지",
+          "char": "酉",
+          "type": "신살(神殺)",
+          "description": "전통적 상징: 교류와 주목의 상징."
+        }
+      ]
+    },
+    {
+      "stems": "甲丙戊庚",
+      "branches": "申寅亥巳",
+      "focus_star": "역마살",
+      "special_stars": [
+        {
+          "rule_id": "special_star:yeokma:year_day_branch_v2",
+          "basis": [
+            {
+              "pillar": "year",
+              "kind": "branch",
+              "char": "申",
+              "display_name": "년지 申"
+            }
+          ],
+          "interpretation_scope": "traditional_symbolism",
+          "name": "역마살",
+          "pillar": "month",
+          "position": "월지",
+          "char": "寅",
+          "type": "신살(神殺)",
+          "description": "전통적 상징: 이동과 활동의 상징."
+        },
+        {
+          "rule_id": "special_star:yeokma:year_day_branch_v2",
+          "basis": [
+            {
+              "pillar": "day",
+              "kind": "branch",
+              "char": "亥",
+              "display_name": "일지 亥"
+            }
+          ],
+          "interpretation_scope": "traditional_symbolism",
+          "name": "역마살",
+          "pillar": "hour",
+          "position": "시지",
+          "char": "巳",
+          "type": "신살(神殺)",
+          "description": "전통적 상징: 이동과 활동의 상징."
+        }
+      ]
+    },
+    {
+      "stems": "甲丙戊庚",
+      "branches": "申辰亥未",
+      "focus_star": "화개살",
+      "special_stars": [
+        {
+          "rule_id": "special_star:hwagae:year_day_branch_v2",
+          "basis": [
+            {
+              "pillar": "year",
+              "kind": "branch",
+              "char": "申",
+              "display_name": "년지 申"
+            }
+          ],
+          "interpretation_scope": "traditional_symbolism",
+          "name": "화개살",
+          "pillar": "month",
+          "position": "월지",
+          "char": "辰",
+          "type": "신살(神殺)",
+          "description": "전통적 상징: 예술과 사색의 상징."
+        },
+        {
+          "rule_id": "special_star:hwagae:year_day_branch_v2",
+          "basis": [
+            {
+              "pillar": "day",
+              "kind": "branch",
+              "char": "亥",
+              "display_name": "일지 亥"
+            }
+          ],
+          "interpretation_scope": "traditional_symbolism",
+          "name": "화개살",
+          "pillar": "hour",
+          "position": "시지",
+          "char": "未",
+          "type": "신살(神殺)",
+          "description": "전통적 상징: 예술과 사색의 상징."
+        }
+      ]
+    },
+    {
+      "stems": "甲丙戊庚",
+      "branches": "申酉子酉",
+      "focus_star": "도화살",
+      "special_stars": [
+        {
+          "rule_id": "special_star:dohwa:year_day_branch_v2",
+          "basis": [
+            {
+              "pillar": "day",
+              "kind": "branch",
+              "char": "子",
+              "display_name": "일지 子"
+            },
+            {
+              "pillar": "year",
+              "kind": "branch",
+              "char": "申",
+              "display_name": "년지 申"
+            }
+          ],
+          "interpretation_scope": "traditional_symbolism",
+          "name": "도화살",
+          "pillar": "month",
+          "position": "월지",
+          "char": "酉",
+          "type": "신살(神殺)",
+          "description": "전통적 상징: 교류와 주목의 상징."
+        },
+        {
+          "rule_id": "special_star:dohwa:year_day_branch_v2",
+          "basis": [
+            {
+              "pillar": "day",
+              "kind": "branch",
+              "char": "子",
+              "display_name": "일지 子"
+            },
+            {
+              "pillar": "year",
+              "kind": "branch",
+              "char": "申",
+              "display_name": "년지 申"
+            }
+          ],
+          "interpretation_scope": "traditional_symbolism",
+          "name": "도화살",
+          "pillar": "hour",
+          "position": "시지",
+          "char": "酉",
+          "type": "신살(神殺)",
+          "description": "전통적 상징: 교류와 주목의 상징."
+        }
+      ]
+    }
+  ],
+  "five_elements_example": {
+    "stems": "甲丙戊庚",
+    "branches": "申卯寅酉",
+    "five_elements": {
+      "distribution_basis": "eight_visible_characters",
+      "score_meaning": "provisional_weighted_index",
+      "counts": {
+        "목": 3,
+        "화": 1,
+        "토": 1,
+        "금": 3,
+        "수": 0
+      },
+      "percentages": {
+        "목": 37.5,
+        "화": 12.5,
+        "토": 12.5,
+        "금": 37.5,
+        "수": 0.0
+      },
+      "scores": {
+        "목": 4.5,
+        "화": 1.0,
+        "토": 1.0,
+        "금": 3.7,
+        "수": 0.0
+      },
+      "frequent_elements": [
+        "목",
+        "금"
+      ],
+      "absent_elements": [
+        "수"
+      ],
+      "summary": "원국 8글자의 대표 오행 분포는 목 3개, 화 1개, 토 1개, 금 3개, 수 0개입니다. 비율은 글자 수 기준이며 실제 세력의 비율이 아닙니다."
+    }
+  }
+}

@@ -152,7 +152,7 @@ class BranchInfluencePathTests(unittest.TestCase):
             chart('庚己丙乙', '申丑申未',
                   interpretation_candidates=candidates)
 
-    def test_repeated_groups_and_suppressed_group_keep_stable_paths(self):
+    def test_repeated_and_clashed_trines_keep_unquantified_paths(self):
         repeated = chart('己丁辛己', '亥卯未亥')
         trine = [item for item in repeated.values()
                  if item['mechanism'] == 'trine_participation_candidate']
@@ -161,8 +161,10 @@ class BranchInfluencePathTests(unittest.TestCase):
         self.assertTrue(all(item['quantity'] is None for item in trine))
 
         suppressed = chart('甲甲甲甲', '巳亥卯未')
-        self.assertFalse(any(item['mechanism'] == 'trine_participation_candidate'
-                             for item in suppressed.values()))
+        trine = [item for item in suppressed.values()
+                 if item['mechanism'] == 'trine_participation_candidate']
+        self.assertTrue(trine)
+        self.assertTrue(all(item['quantity'] is None for item in trine))
 
         punished = chart('甲甲甲甲', '寅巳申未')
         triple = [item for item in punished.values()

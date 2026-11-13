@@ -3,11 +3,25 @@
 갱신일: 2026-11-13. 현행 API 계약을 먼저 읽고, 과거 설계의 다음 작업을 현재 개발 지시로 사용하지 않는다.
 
 최근 작업과 재개 지점은 [2026-11-13 작업 재개 기록](current_work_handoff.md)을 참조한다.
+재개 후 확인한 조건부 판정의 세 가지 의미와 후속 정리안은
+[`conditional` 의미 검토](conditional_state_review.md)에 정리했다.
+이후 사용자 결정으로 자합은 조합·주변 관계의 사실 조회로 정리했다.
+자합에 대해서는 [자료 대조와 현행 계약](self_combination_source_review.md)을 우선한다.
+이후 육합·삼합도 전체 존재 정보로 통일했다.
+[변경 계약과 수치 영향](hap_presence_migration.md)을 함께 참조한다.
+이후 관계 총계·개별 점수와 빈주의 점수·취용 판정을 제거했다.
+[현행 관계 점수 제거 계약](relation_score_retirement.md)을 우선한다.
+[기존 점수 총계 검토](relation_score_audit.md)는 제거 결정의 근거 기록이다.
+
+최근에는 신살의 년지 기준 누락을 수정하고 탐지 기준을 명시했다.
+오행 개수 목록의 이름과 설명을 정리했으며 원국 상세·관찰 근거의 응답 타입을 구체화했다.
+[루트 표시·신살·타입 계약](root_display_contract.md)을 함께 읽는다.
 
 ## 현행 API 계약
 
 | 문서 | 기준 |
 | --- | --- |
+| [루트 표시·신살·타입](root_display_contract.md) | 신살 기준·상징 설명·오행 목록·상세 응답 타입 |
 | [출생 입력·달력 조회](birth_input_validation.md) | 날짜·시간 검증, 음력 평달·윤달 선택 |
 | [대운 선택](daewoon_selection_contract.md) | 현재 대운·선택 세운의 공통 연도 경계 |
 | [오류 응답](api_errors.md) | HTTP 상태·오류 코드·필드·허용 범위 |
@@ -15,6 +29,7 @@
 | [원국 관계 조회](character_relation_index_contract.md) | `/relation-index`, 현행 `1.7-draft` |
 | [글자별 통합 조회](character_details_contract.md) | `/character-details`, 소속·글자·중앙 관계 |
 | [글자별 원자료 관계](raw_character_relations_contract.md) | `stem.relations`·`branch.relations` 배열·상태·후보·수치 의미 |
+| [관계 점수 제거](relation_score_retirement.md) | 매트릭스 `2.0.0`, 빈주 `4.0.0`, 관계·십성 보존 |
 | [상태·사유·근거 감사](relation_activation_audit.md) | 판정 범위·근거 연결·미평가 항목 |
 | [관계별 자연어 표시](relation_presentation_contract.md) | 근거·십성이 연결된 제목·본문·사유·평가 범위 |
 | [운 선택 조회](cycle_analysis_contract.md) | `/cycle-analysis`, 대운 또는 세운 선택 |
@@ -33,7 +48,7 @@
 - 미평가는 `null`·명시적 상태로 제공한다. 기존 잠정 세력 지표를 완성된 최종 세력이나 검증된 손상량으로 해석하지 않는다.
 - 수치 모델·피해량·계수 추정·작공/LLM 출력 확장은 현재 개발 계획에 포함하지 않는다. 재개하려면 명시적 작업 범위와 근거 검토가 먼저다.
 
-다음 API 보강 후보는 응답 타입 구체화와 성능 측정이다. 이는 자동 실행 지시가 아니며 새 사용자 요청에 따라 범위를 정한다.
+원국 상세·매트릭스 관찰 근거·빈주 영역의 타입 보강은 적용했다. 보존된 실험 모델의 유연한 근거 구조는 이번 범위 밖이다. 다음 API 보강 후보는 실제 화면 연동 확인과 성능 측정이다. 이는 자동 실행 지시가 아니며 새 사용자 요청에 따라 범위를 정한다.
 
 ## 현행 코드 이해를 위한 참고 자료
 

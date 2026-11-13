@@ -115,7 +115,7 @@ class RawRelationTests(unittest.TestCase):
         self.assertEqual(item['impact_status'], 'not_evaluated')
         raw = analyze_palja_integrated(list('甲甲甲甲'), list('午子丑寅'))
         item = raw['pillars']['month']['branch']['relations']['six_haps'][0]
-        self.assertEqual(item['activation_status'], 'conditional')
+        self.assertEqual(item['activation_status'], 'detected')
         self.assertEqual(item['candidate_element'], '土')
         self.assertEqual(item['distance_weight'], 1.0)
         self.assertEqual(item['impact_status'], 'not_evaluated')

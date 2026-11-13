@@ -115,7 +115,7 @@ class CharacterRelationIndexTests(unittest.TestCase):
     def test_repeated_group_requires_each_position_formation(self):
         row = relation('group:trine:hai_mao_wei', 'trine',
                        ['year.branch', 'month.branch', 'day.branch', 'hour.branch'],
-                       status='potential', formations=[
+                       status='detected', formations=[
                            ['year.branch', 'month.branch', 'day.branch'],
                            ['month.branch', 'day.branch', 'hour.branch'],
                        ])
@@ -163,7 +163,7 @@ class CharacterRelationIndexTests(unittest.TestCase):
 
     def test_pair_ids_and_same_pillar_endpoints_follow_position(self):
         same_pillar = relation('same_pillar:self_combine:year', 'self_combine',
-                               ['year.stem', 'year.branch'], status='active',
+                               ['year.stem', 'year.branch'], status='detected',
                                sources=[{'system': 'analysis_details',
                                          'location': 'analysis.details.year.jahab'}])
         CharacterRelationIndex.model_validate(

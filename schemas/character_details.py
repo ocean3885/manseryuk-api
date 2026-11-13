@@ -190,6 +190,15 @@ class CharacterDetails(Contract):
             if node.transmission_relation_ids != [rid for rid in node.relation_ids if self.relations[rid].type == 'transmission']:
                 raise ValueError('투간 참조가 맞지 않습니다.')
         for key, row in self.relations.items():
+            if (row.context_ids == ['natal.chart'] and
+                    (row.type == 'trine' or (row.type == 'combine' and
+                     all(p.endswith('.branch') for p in row.participants))) and
+                    row.activation_status != 'detected'):
+                raise ValueError('육합·삼합은 구성의 존재만 탐지하며 성립·차단을 판정하지 않습니다.')
+            if row.type == 'self_combine' and (
+                    row.activation_status != 'detected' or row.status_reason is not None
+                    or row.status_reasons):
+                raise ValueError('자합은 조합 존재만 탐지하며 성립·불성립을 판정하지 않습니다.')
             if row.participant_details:
                 check_details(row.participant_details, row.participants)
             check_evidence(row.evidence)

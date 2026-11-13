@@ -136,9 +136,9 @@ def _check_metrics(relation):
             _check(len(directions) == 2,
                    f'{relation_id}: 양방향 관계에는 두 방향의 수치가 필요합니다.')
     activation = relation.get('activation_status')
-    if activation == 'conditional':
+    if activation in ('conditional', 'detected'):
         _check(status not in ('resolved', 'provisional_calculated'),
-               f'{relation_id}: 조건부 유보에 실제 적용량을 확정할 수 없습니다.')
+               f'{relation_id}: 탐지·유보 상태에서 실제 적용량을 확정할 수 없습니다.')
     if activation == 'suppressed':
         _check(status == 'resolved' and metrics is not None and
                all(effect['applied_power_delta'] == 0

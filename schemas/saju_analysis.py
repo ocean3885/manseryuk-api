@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List, Any, Dict, Literal
+from schemas.natal_analysis import NatalAnalysisDetails, InteractionCondition, BinZhuDomainStructure
 
 # ──────────────────────────────────────────
 # 사주 분석 응답용 중첩 스키마 (프론트엔드 최적화)
@@ -187,7 +188,7 @@ class AnalysisSummary(BaseModel):
 class AnalysisInfo(BaseModel):
     """최종 분석 결과 그룹"""
     summary: AnalysisSummary
-    details: dict  # 개발 단계에서는 유연함을 위해 dict 사용
+    details: NatalAnalysisDetails
 
 
 # ──────────────────────────────────────────
@@ -206,9 +207,6 @@ class InteractionItem(BaseModel):
     to_pillar: str
     is_adjacent: bool
     weight: float
-    score: float
-    score_contribution: Optional[float] = None
-    score_covered_by: Optional[str] = None
     transformed_element: Optional[str] = None
     candidate_element: Optional[str] = None
     missing_branch: Optional[str] = None
@@ -217,7 +215,7 @@ class InteractionItem(BaseModel):
     activation_status: Optional[str] = None
     activation_rule_id: Optional[str] = None
     status_reasons: List[str] = Field(default_factory=list)
-    condition_evidence: Dict[str, Any] = Field(default_factory=dict)
+    condition_evidence: InteractionCondition = Field(default_factory=dict)
     description: str
 
 
@@ -225,9 +223,6 @@ class InteractionsInfo(BaseModel):
     rule_version: str
     summary_list: List[str]
     matrix: List[InteractionItem]
-    tension_score: float
-    harmony_score: float
-    climate: str
 
 
 class XuShiInteraction(BaseModel):
@@ -312,17 +307,6 @@ class XuShiDynamics(BaseModel):
     overall_status: str
 
 
-class ControlFlow(BaseModel):
-    direction: str
-    dominant_interaction: Optional[str] = None
-    summary_meaning: str
-    career_advice: str
-    interpretation_notes: Optional[str] = None
-    vector: Optional[str] = None
-    vector_code: Optional[str] = None
-    acquisition_summary: Optional[str] = None
-
-
 class BinZhuExcludedInteraction(BaseModel):
     relation_id: Optional[str] = None
     participants: List[str]
@@ -331,65 +315,72 @@ class BinZhuExcludedInteraction(BaseModel):
     name: str
     from_pillar: Optional[str] = None
     to_pillar: Optional[str] = None
-    reason_code: Literal['group_relation_unsupported', 'invalid_endpoint',
-                         'unsupported_relation_type', 'candidate_only_relation']
+    reason_code: Literal['missing_group_participants', 'invalid_endpoint', 'invalid_category']
 
 
 class BinZhuGroupConnection(BaseModel):
     relation_id: Optional[str] = None
     type: str
     participants: List[str]
+    formations: List[List[str]]
     guest_participants: List[str]
     host_participants: List[str]
-    included_in_score: bool = False
-    cohesion_score: Optional[float] = None
     activation_status: Optional[str] = None
     description: str
 
 
+class BinZhuParticipant(BaseModel):
+    pillar: str
+    char: str
+    ten_god: str
+    display_name: str
+
+
 class BinZhuLink(BaseModel):
     relation_id: Optional[str] = None
+    category: str
     type: str
+    participants: List[str]
     detail: str
-    target_guest: str
-    source_host: str
-    mechanism: Optional[str] = None
-    flow_direction: Optional[str] = None
-    weight: Optional[float] = None
-
-
-class BinZhuScores(BaseModel):
-    combination: float
-    conflict: float
-    unweighted_combination: Optional[float] = None
-    unweighted_conflict: Optional[float] = None
+    guest: BinZhuParticipant
+    host: BinZhuParticipant
+    activation_status: Optional[str] = None
+    distance: int
+    is_adjacent: bool
 
 
 class BinZhuDynamics(BaseModel):
     rule_version: str
-    pairwise_scores: BinZhuScores
-    group_cohesion_score: Optional[float] = 0.0
     group_connections: List[BinZhuGroupConnection]
     guest_host_links: List[BinZhuLink]
-    interaction_scope: Literal['pairwise']
+    interaction_scope: Literal['cross_domain_relations']
     excluded_interactions: List[BinZhuExcludedInteraction]
-    guest_structure: dict
-    host_structure: dict
-    control_flow: ControlFlow
+    guest_structure: BinZhuDomainStructure
+    host_structure: BinZhuDomainStructure
 
 
 class FiveElementsInfo(BaseModel):
     distribution_basis: Literal['eight_visible_characters']
     score_meaning: Literal['provisional_weighted_index']
-    counts: Dict[str, int]
-    percentages: Dict[str, float]
-    scores: Dict[str, float]
-    dominant: List[str]
-    deficient: List[str]
+    counts: Dict[str, int] = Field(description='원국 여덟 글자의 대표 오행별 개수')
+    percentages: Dict[str, float] = Field(description='대표 오행 글자 수 / 8 × 100')
+    scores: Dict[str, float] = Field(description='기존 통근·위치 가중치의 잠정 지표. 실제 세력 비율이 아님')
+    frequent_elements: List[str] = Field(description='대표 오행이 3글자 이상인 오행 목록')
+    absent_elements: List[str] = Field(description='대표 오행이 0글자인 오행 목록. 지장간 부재나 보완 필요성이 아님')
     summary: str
 
 
+class SpecialStarBasis(BaseModel):
+    pillar: Literal['year', 'month', 'day', 'hour']
+    kind: Literal['stem', 'branch', 'pillar']
+    char: str
+    display_name: str
+
+
 class SpecialStarItem(BaseModel):
+    rule_id: str
+    basis: List[SpecialStarBasis] = Field(min_length=1)
+    interpretation_scope: Literal['traditional_symbolism']
     name: str
     pillar: str
     position: str
@@ -437,7 +428,7 @@ class BranchRelationEffect(BaseModel):
     candidate_hidden_stem_effects: List[Dict[str, str]] = Field(default_factory=list)
     rule_id: Optional[str] = None
     activation_rule_id: Optional[str] = None
-    activation_status: Literal['potential', 'conditional', 'suppressed', 'candidate_only', 'active'] = 'potential'
+    activation_status: Literal['detected', 'potential', 'conditional', 'suppressed', 'candidate_only', 'active'] = 'potential'
     status_reason: Optional[str] = None
     distance_weight: float
     element_relation: str
@@ -463,7 +454,7 @@ class BranchPairDynamics(BaseModel):
 
 class BranchGroupPairOverlap(BaseModel):
     relation_id: str
-    covered_in_harmony_score: bool
+    participants: List[str]
 
 
 class BranchGroupDirectionCandidate(BaseModel):

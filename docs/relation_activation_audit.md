@@ -1,6 +1,6 @@
 # 상태·사유·근거 연결 감사
 
-기준: 2026-11-13, 실행 규칙 2.19.0, 내부 v3 3.9.0-draft, 동주 허실 4.0.0,
+기준: 2026-11-13, 실행 규칙 2.21.0, 내부 v3 3.9.0-draft, 동주 허실 4.0.0,
 운 탐지 1.0.0-draft. 이전 작업의 근거·십성 확장을 복구하고 자연어 표현의 입력을 재검증했다.
 이 문서는 현행 실행 범위를 설명하며 보류 규칙의 재개 지시가 아니다.
 
@@ -9,24 +9,24 @@
 | 대상 | 현재 구현 | 미정·미평가 |
 | --- | --- | --- |
 | 원국 충·파·천·쌍별 지세형 | 등록된 쌍 존재 시 거리 무관 active | 일반 차단 규칙·실제 영향 |
-| 육합 | 충 없음 active, 합 사이 인접 충 suppressed, 바깥 인접 충 conditional | 실제 합화·상세 발현 |
+| 육합 | 조합 detected, 내부·외부 인접 충은 위치별 관찰 사실 | 성립·차단·경합·실제 합화·영향 |
 | 자형 | 인접 辰辰·午午·酉酉·亥亥 active, 격위 candidate_only | 독립 작용량 |
 | 삼형 | 세 종류 지지가 있으면 active, 구성 쌍 상태 유지 | 복합 작용·독립 영향 |
-| 삼합 | 기본 potential, 중신 중복 conditional, 중신/생지/성지 인접 충 suppressed | 합화·주도·경합 |
+| 삼합 | 구성 detected, 중신 개수·위치·중복 조합·인접 충은 사실로 보존 | 성립·차단·합화·주도·경합 |
 | 방합 | 구조 potential | 상세 성립·훼손·방향 |
-| 반합 | 결손 구조·날개 충 후 잔여 반합 탐지, 완성 그룹 내부는 구조 전용 후보 | 독립 성립·실제 영향 |
+| 반합 | 결손 구조·삼합 날개 충과 함께 있는 반합 탐지, 내부 구성 쌍은 구조 전용 후보 | 독립 성립·실제 영향 |
 | 공합·암합 | 지정 조합 candidate_only | 활성 조건·세부 영향 |
 | 지지 생·극 | 오행 방향 potential, 같은 쌍 active 구조로 독립 적용 억제 | 실제 발현·적용량 |
 | 천간 합·충·극 | 중앙 조회에서 detected | 종합 성립·억제 |
 | 동주 오행·투간 | 오행 사실·지장간 정확 일치 detected | 실제 영향 |
-| 자합 | 등록 조합, 丙戌·壬戌의 未형 필요·辰충 차단 | 기타 관계의 일반 개입 |
+| 자합 | 등록된 동주 조합 detected, 주변 未형·辰충 등 충·형 사실 보존 | 자합 성립·불성립, 주변 관계의 실제 영향 |
 | 통근 | 동주 점수 양수면 실, 0이면 허투, 타주 지원 분리 | 관계에 의한 손상·소멸 |
 | 운 관계 | 후보 또는 구조 사실 탐지 | 성립·경합·억제·통근 영향 |
 
 active는 현행 프로젝트의 성립 조건 충족이며 실제 세력·길흉·손상을 확정하지 않는다.
 detected와 candidate_only, potential도 각각 사실 탐지·후보·잠재 상태로 구분한다.
 
-## 사유 13개와 필수 근거
+## 사유 11개와 필수 근거
 
 | 코드 | 필수 근거 및 설명 범위 |
 | --- | --- |
@@ -38,8 +38,6 @@ detected와 candidate_only, potential도 각각 사실 탐지·후보·잠재 �
 | adjacent_tomb_clash | 성지·충 글자·충 ID |
 | active_pair_structure_overrides_element | 같은 쌍의 active 구조 전체를 overriding_relation_ids로 연결 |
 | combination_candidate_not_transformation | 실제 합화 미확정 안내. active 육합에도 나오는 주의 정보 |
-| required_punishment_missing | required_condition, condition_met=false. 없는 관계 ID를 만들지 않음 |
-| blocked_by_chen_chung | blocking_chung의 위치·충 ID, 충족한 未형도 별도 보존 |
 | adjacent_self_punishment | 인접한 두 위치와 성립 규칙 |
 | nonadjacent_self_punishment_candidate | 격위 위치와 후보 유지 이유 |
 | cycle_presence_only_activation_and_impact_not_evaluated | 참여자·등록 표·탐지 버전, 운 성립·영향 미평가 |
@@ -66,8 +64,8 @@ root_impact_status=not_evaluated는 손상이 없다는 판정이 아니다.
 
 ## 검증과 후속 경계
 
-`test_relation_presentation.py`는 13개 사유의 생산 경로, 위치 순열, 인접/격위,
-복수 충, 자합의 필요 형/차단 충, 구조 전용/잔여 반합을 점검한다.
+`test_relation_presentation.py`는 11개 사유의 생산 경로, 위치 순열, 인접/격위,
+복수 충, 자합과 주변 충·형의 사실 분리, 구조 전용/잔여 반합을 점검한다.
 모든 지지 쌍을 인접·격위로 배치한 288개 및 천간 쌍 100개의 고정 간지 사례에서
 표시 근거 누락 여부를 검사한다. 고정 간지는 규칙 자료이며 실제 출생일을 주장하지 않는다.
 기존 관계 조회와 비교해 ID·수·상태·대표 사유·규칙이 유지되는지 확인한다.

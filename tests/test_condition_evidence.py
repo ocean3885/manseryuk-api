@@ -20,8 +20,8 @@ class ConditionEvidenceTests(unittest.TestCase):
 
     def test_six_hap_explains_clash_location_and_status(self):
         for branches, index, state, location, label in (
-            ('午子丑寅', 1, 'conditional', 'outside', '육합 조합 바깥'),
-            ('子午丑寅', 0, 'suppressed', 'between', '육합 두 글자 사이'),
+            ('午子丑寅', 1, 'detected', 'outside', '육합 조합 바깥'),
+            ('子午丑寅', 0, 'detected', 'between', '육합 두 글자 사이'),
         ):
             with self.subTest(branches=branches):
                 item = check_six_haps(branches[index], index, list(branches), '甲')[0]
@@ -42,9 +42,9 @@ class ConditionEvidenceTests(unittest.TestCase):
         item = check_six_haps('子', 0, list('子丑寅卯'), '甲')[0]
         condition = item['condition_evidence']
         self.assertEqual(condition['adjacent_clashes'], [])
-        self.assertEqual(item['activation_status'], 'active')
+        self.assertEqual(item['activation_status'], 'detected')
         self.assertEqual(item['impact_status'], 'not_evaluated')
-        self.assertIn('인접 충이 확인되지 않았습니다', condition['summary'])
+        self.assertIn('충 관계가 확인되지 않았습니다', condition['summary'])
         self.assertNotIn('판정', condition['summary'])
         self.assertNotIn('합화', condition['summary'])
 
@@ -58,7 +58,7 @@ class ConditionEvidenceTests(unittest.TestCase):
         for member in members:
             self.assertIn(member['display_name'], condition['summary'])
         self.assertIn('중신이 중복', condition['summary'])
-        self.assertEqual(item['activation_status'], 'conditional')
+        self.assertEqual(item['activation_status'], 'detected')
         self.assertNotIn('판정', condition['summary'])
 
     def test_middle_birth_and_tomb_clashes_are_not_confused(self):
@@ -72,7 +72,7 @@ class ConditionEvidenceTests(unittest.TestCase):
                 item = check_three_hap('亥', index, list(branches), '甲')[0][0]
                 condition = item['condition_evidence']
                 self.assertIn(f'삼합 {role}의 인접 충', condition['summary'])
-                self.assertEqual(item['activation_status'], 'suppressed')
+                self.assertEqual(item['activation_status'], 'detected')
                 self.assertNotIn('판정', condition['summary'])
                 for clash in condition[bucket]:
                     for key in ('affected', 'cause'):
@@ -98,7 +98,7 @@ class ConditionEvidenceTests(unittest.TestCase):
                     self.assertEqual(row['presentation']['explanation_status'], 'complete')
                     if item['type'] == '반합(半合)':
                         fallback = condition['fallback_from']
-                        self.assertIn('남은 중신과 날개의 반합 후보', condition['summary'])
+                        self.assertIn('다른 날개와 중신의 반합 후보', condition['summary'])
                         self.assertEqual(fallback['affected']['pillar'], fallback['clashed_pillar'])
                         self.assertEqual(fallback['cause']['pillar'], fallback['clashing_pillar'])
 

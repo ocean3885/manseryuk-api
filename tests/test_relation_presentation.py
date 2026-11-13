@@ -79,27 +79,29 @@ class RelationPresentationTests(unittest.TestCase):
         self.assertEqual(line['relation_ids'], ['natal.chart:branch:break:year:month'])
         self.assertEqual(links(row), set(line['relation_ids']))
 
-    def test_self_combine_absence_satisfaction_and_blocking(self):
-        for branches, state, cause_types in [('戌子卯酉', 'conditional', set()),
-                                            ('戌未卯酉', 'active', {'punishment'}),
-                                            ('戌未辰酉', 'suppressed', {'punishment', 'clash'}),
-                                            ('戌辰卯酉', 'suppressed', {'clash'})]:
+    def test_self_combine_and_surrounding_relations_are_independent_facts(self):
+        for branches, cause_types in [('戌子卯酉', set()),
+                                      ('戌未卯酉', {'punishment'}),
+                                      ('戌未辰酉', {'punishment', 'clash'}),
+                                      ('戌辰卯酉', {'clash'})]:
             graph = assemble_character_details(response_for(branches, '丙甲甲甲'))
             row = next(r for r in graph['relations'].values() if r['source_relation_id'] == 'same_pillar:self_combine:year')
-            self.assertEqual(row['activation_status'], state)
+            self.assertEqual(row['activation_status'], 'detected')
+            self.assertEqual(row['status_reasons'], [])
             self.assertEqual({graph['relations'][rid]['type'] for rid in links(row)}, cause_types)
             self.assertEqual(row['presentation']['explanation_status'], 'complete')
-            if state == 'conditional':
-                self.assertFalse(row['presentation']['reasons'][0]['relation_ids'])
-                self.assertIn('확인되지 않아', row['presentation']['reasons'][0]['text'])
+            lines = row['presentation']['reasons']
+            self.assertTrue(any('성립 여부와 실제 영향은 평가하지 않았습니다' in r['text'] for r in lines))
+            self.assertEqual(len([r for r in lines if r['code'] == 'self_combine_context']), len(links(row)))
+            self.assertFalse(any(r['category'] == 'decision' for r in lines))
 
-    def test_active_combination_carries_transformation_notice_separately(self):
+    def test_detected_combination_carries_transformation_notice_separately(self):
         graph = assemble_character_details(response_for('子丑寅辰'))
         row = row_for(graph, 'combine', 'year', 'month')
-        self.assertEqual(row['presentation']['status_label'], '성립')
+        self.assertEqual(row['presentation']['status_label'], '탐지')
         notice = next(r for r in row['presentation']['reasons'] if r['code'] == 'combination_candidate_not_transformation')
         self.assertEqual(notice['category'], 'notice')
-        self.assertTrue(any(r['category'] == 'decision' for r in row['presentation']['reasons']))
+        self.assertTrue(any(r['category'] == 'scope' for r in row['presentation']['reasons']))
 
     def test_missing_or_unknown_evidence_is_explicit_and_does_not_invent_cause(self):
         graph = assemble_character_details(response_for('巳亥卯未'))
@@ -108,12 +110,12 @@ class RelationPresentationTests(unittest.TestCase):
         result = build_relation_presentation(graph, row)
         self.assertEqual(result['explanation_status'], 'partial')
         self.assertIn('adjacent_birth_clash', result['missing_evidence_codes'])
-        self.assertFalse(result['reasons'])
+        self.assertTrue(all(r['category'] == 'scope' for r in result['reasons']))
         row['status_reasons'] = ['future_rule']
         row['status_reason'] = 'future_rule'
         result = build_relation_presentation(graph, row)
         self.assertEqual(result['missing_evidence_codes'], ['future_rule'])
-        self.assertFalse(result['reasons'])
+        self.assertTrue(all(r['category'] == 'scope' for r in result['reasons']))
 
     def test_transmission_and_element_descriptions_keep_direction(self):
         graph = assemble_character_details(response_for('亥卯未亥', '己丁辛己'))

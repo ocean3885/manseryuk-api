@@ -107,7 +107,7 @@
 - `dominance`는 두 `power_before`의 차이가 합계의 10%를 넘을 때만 강한 위치로 표시한다. 이 값은 세력 우세이며 생·극의 오행 방향과 별개다.
 - `force_dominance`는 해당 관계의 양방향 `force`를 같은 10% 허용치로 비교한다. 두 방향 모두 0이면 `undetermined`이고 비슷하면 `tie`다. 예를 들어 `子寅午辰`의 子→寅 생에서는 월지 寅의 관계 전 세력이 더 커 `dominance=month`이지만, 생 작용 방향은 년지 子에서 월지 寅으로만 향하므로 `force_dominance=year`다. 이 값은 관계별 작용의 방향 우세이며 지지 자체의 우열이나 실제 사건의 승패가 아니다.
 - `roles`는 **관계별 잠재 작용량을 읽기 위한 분류**다. 합은 작용량이 큰 쪽을 `leads_attraction`, 상대를 `drawn_more`로, 충·형·파·천는 `delivers_more_pressure`와 `receives_more_pressure`로 표시한다. 생·극은 오행상 정해진 방향을 따라 `supports`/`receives_support`, `controls`/`receives_control`로 구분한다. 양방향 힘이 비슷하면 합은 `mutual_attraction`, 압박 관계는 `mutual_pressure`이며, 작용량이 모두 0이면 양쪽 모두 `inactive`다. 강도 비교와 역할 분류는 이 프로젝트의 잠정 규칙이며 실제 피해·합화·길흉을 확정하지 않는다.
-- 삼합·방합의 `formation_evidence[]`는 **실제 성립 조합별** 참여 위치(`pillars`), 글자의 구조적 자리(`structural_roles`), `power_before`, 조합 내부 상대를 제외한 `context_evidence`, 조합 안에서의 상대 세력 비중(`capacity_share`), 포함된 육합·반합(`overlapping_pairs`)을 반환한다. `power_before`는 지장간·월령·동주 천간과 조합 **밖** 지지의 배경 보정을 반영한다. `capacity_share`는 이 세력값을 한 조합 안에서 나눈 비율이며 그룹의 실제 견인력이나 지지별 세력 증가분이 아니다. 같은 글자가 다른 위치에 반복되어 성립 조합이 여럿이면 비중도 조합별로 각각 계산한다. `overlapping_pairs[].covered_in_harmony_score`는 기존 조화 점수의 중복 집계 여부를 설명할 뿐 지지별 작용량 차감 규칙은 아니다. 그룹 `status`는 아직 `not_scored`이며, 조합별 비중을 쌍별 `force`나 `effective_power`에 더하지 않는다. 억제된 삼합의 잔존 반합은 별도 쌍 관계로 유지한다.
+- 삼합·방합의 `formation_evidence[]`는 **실제 성립 조합별** 참여 위치(`pillars`), 글자의 구조적 자리(`structural_roles`), `power_before`, 조합 내부 상대를 제외한 `context_evidence`, 조합 안에서의 상대 세력 비중(`capacity_share`), 포함된 모든 실제 지지 쌍 관계(`overlapping_pairs`)을 반환한다. `power_before`는 지장간·월령·동주 천간과 조합 **밖** 지지의 배경 보정을 반영한다. `capacity_share`는 이 세력값을 한 조합 안에서 나눈 비율이며 그룹의 실제 견인력이나 지지별 세력 증가분이 아니다. 같은 글자가 다른 위치에 반복되어 성립 조합이 여럿이면 비중도 조합별로 각각 계산한다. `overlapping_pairs[]`는 `relation_id`와 `participants`로 조합 안의 실제 쌍 관계를 연결한다. 관계 점수 제거에 따라 점수 포함 여부 필드는 없다. 이는 구조 참조이며 지지별 작용량 차감 규칙은 아니다. 그룹 `status`는 아직 `not_scored`이며, 조합별 비중을 쌍별 `force`나 `effective_power`에 더하지 않는다. 억제된 삼합의 잔존 반합은 별도 쌍 관계로 유지한다.
 - 그룹의 `action_rule_id`는 조합별 방향 후보 규칙을 가리킨다. 삼합의 `directional_candidates`는 생지·묘고에서 중신으로 모이는 **구조상 경로**이고, 寅午戌 묘고의 `center_generates_storage_candidate`와 다른 삼합 묘고의 `transformation_candidate`는 별도 효과 후보다. `candidate_only`는 방향별 힘을 계산했다는 뜻이 아니다. 방합은 `direction_status: undetermined`와 빈 방향 후보 목록을 낸다. 그룹이 억제·유보되면 그 상태가 후보에도 붙는다. `pair_overlap_policy: preserve_pair_do_not_sum_group_force`는 탐지된 육합·반합의 쌍별 힘을 유지하고 그룹 힘을 합산하지 않는 정책이다. 완성 삼합의 내부 반합은 별도 사건·힘으로 출력하지 않고 구성 근거로만 취급하며, 삼합이 깨져 남은 반합은 독립 쌍 관계로 출력한다. 방합에도 독립 힘을 부여하지 않는다. 따라서 그룹 `status`는 `not_scored`이고 실제 견인·합화는 확정하지 않는다.
 
 이 계수는 해석 모델의 첫 가정이며 경험적 피해량이나 길흉 확률로 검증된 값이 아니다. 관계 유형별 피해·견인 계수, 다자 관계의 작용량, 천간의 사주 전체 세력에 따른 동주 작용 보정은 다음 단계의 검증 대상이다.
@@ -145,7 +145,10 @@
 
 최신 목표 JSON 트리는 [사용자 v3 설계 샘플](archive/strength-research/branch_dynamics_v3.json), 단계별 구현 순서는 [v3 개발 계획](archive/strength-research/branch_dynamics_v3_plan.md)에 기록한다. [이전 출력 계약 초안](archive/strength-research/branch_dynamics_target_contract.md)은 비교 자료로 남긴다.
 
-빈주(년·월=빈, 일·시=주)는 지지 작용의 **해석 맥락**으로 각 결과에 연결한다. 지지 관계의 존재·성립·방향·힘을 빈주 구분이나 기존 빈주 총점으로 결정하지 않는다. 현재 `pairwise[].domain_pair`는 빈–빈·주–주·빈–주 분류를 제공한다. 목표 계약에서는 `branch_strengths.<pillar>`에 해당 지지의 빈·주 영역을, `pairwise[].relations[]`에 이미 계산된 작용 방향을 영역 관점에서 읽는 근거를, `groups[].formation_evidence[]`에 참여 위치별 영역과 영역 사이 연결 여부를 배치한다. 정확한 필드명과 자료형은 출력 트리 설계 단계에서 확정한다.
+빈주(년·월=빈, 일·시=주)는 지지 작용의 **해석 맥락**으로 각 결과에 연결한다. 지지 관계의 존재·성립·방향·힘을 빈주 구분이나 기존 빈주 총점으로 결정하지 않는다. 현재 `pairwise[].domain_pair`는 빈–빈·주–주·빈–주 분류를 제공한다. 2026-11-13 현행 빈주 API는 [사실 조회 계약](relation_score_retirement.md)으로 정리했다.
+아래 표는 과거 통합 목표의 참고 기록이며 추가 구현 지시가 아니다. 점수·전체 벡터는 이미 제거됐다.
+
+목표 계약에서는 `branch_strengths.<pillar>`에 해당 지지의 빈·주 영역을, `pairwise[].relations[]`에 이미 계산된 작용 방향을 영역 관점에서 읽는 근거를, `groups[].formation_evidence[]`에 참여 위치별 영역과 영역 사이 연결 여부를 배치한다. 정확한 필드명과 자료형은 출력 트리 설계 단계에서 확정한다.
 
 | 기존 `bin_zhu_dynamics` 내용 | 목표 위치·처리 |
 | --- | --- |

@@ -104,6 +104,86 @@ class RootResponseContractTests(unittest.TestCase):
         self.assertEqual(result.status_code, 200, result.text)
         return result.json()
 
+    def test_relation_scores_and_derived_judgments_are_absent_from_http(self):
+        advanced = self.get()['advanced_analysis']
+        interactions = advanced['interactions']
+        self.assertEqual(set(interactions), {'rule_version', 'matrix', 'summary_list'})
+        removed = {'score', 'score_contribution', 'score_covered_by'}
+        self.assertTrue(interactions['matrix'])
+        for row in interactions['matrix']:
+            self.assertTrue(removed.isdisjoint(row))
+        for state in advanced['xu_shi_dynamics']['pillars'].values():
+            # 통근 점수는 유지하고, 원본 관계를 전달하는 곳에서도 관계 점수는 제거한다.
+            self.assertIn('score', state)
+            self.assertIn('effective_score', state)
+            for row in state['related_interactions']:
+                self.assertTrue(removed.isdisjoint(row))
+        bin_zhu = advanced['bin_zhu_dynamics']
+        self.assertTrue({'pairwise_scores', 'group_cohesion_score', 'control_flow',
+                         'ai_prompt_bullets'}.isdisjoint(bin_zhu))
+        by_id = {r['relation_id']: r for r in interactions['matrix']}
+        for row in bin_zhu['guest_host_links']:
+            self.assertEqual(row['activation_status'], by_id[row['relation_id']]['activation_status'])
+            self.assertEqual(row['type'], by_id[row['relation_id']]['type'])
+            for member in ('guest', 'host'):
+                self.assertTrue({'pillar', 'char', 'ten_god', 'display_name'} <= row[member].keys())
+        self.assertTrue(advanced['five_elements']['scores'])
+        for prompt in advanced['ai_consultation_prompts']:
+            self.assertFalse(prompt.startswith(('【사주 기후】', '【빈주', '【주-빈 통로】')))
+
+    def test_openapi_matches_retired_relation_score_contract(self):
+        schemas = self.client.get('/openapi.json').json()['components']['schemas']
+        for model, removed in {
+            'InteractionsInfo': {'tension_score', 'harmony_score', 'climate'},
+            'InteractionItem': {'score', 'score_contribution', 'score_covered_by'},
+            'BinZhuDynamics': {'pairwise_scores', 'group_cohesion_score', 'control_flow'},
+            'BinZhuLink': {'mechanism', 'flow_direction', 'weight', 'target_guest', 'source_host'},
+            'BinZhuGroupConnection': {'cohesion_score', 'included_in_score'},
+            'BranchGroupPairOverlap': {'covered_in_harmony_score'},
+        }.items():
+            with self.subTest(model=model):
+                self.assertTrue(removed.isdisjoint(schemas[model]['properties']))
+        self.assertNotIn('ControlFlow', schemas)
+        self.assertNotIn('BinZhuScores', schemas)
+
+    def test_special_star_basis_and_count_labels_survive_http(self):
+        body = self.get()
+        advanced = body['advanced_analysis']
+        stars = advanced['special_stars']
+        self.assertTrue(stars)
+        for item in stars:
+            self.assertTrue(item['basis'])
+            self.assertTrue(item['rule_id'].startswith('special_star:'))
+            self.assertEqual(item['interpretation_scope'], 'traditional_symbolism')
+            for basis in item['basis']:
+                pillar = body['four_pillars'][basis['pillar']]
+                expected = (pillar['gan']['ch'] if basis['kind'] == 'stem' else
+                            pillar['ji']['ch'] if basis['kind'] == 'branch' else
+                            pillar['gan']['ch'] + pillar['ji']['ch'])
+                self.assertEqual(basis['char'], expected)
+        self.assertEqual(len({(r['name'], r['pillar']) for r in stars}), len(stars))
+        for pillar in ('year', 'month', 'day', 'hour'):
+            expected = [r['name'] for r in stars if r['pillar'] == pillar]
+            self.assertEqual(body['four_pillars'][pillar]['special_stars'], expected)
+            self.assertEqual(advanced['special_stars_by_pillar'][pillar], expected)
+        elements = advanced['five_elements']
+        self.assertNotIn('dominant', elements)
+        self.assertNotIn('deficient', elements)
+        self.assertEqual(elements['frequent_elements'], [e for e, n in elements['counts'].items() if n >= 3])
+        self.assertEqual(elements['absent_elements'], [e for e, n in elements['counts'].items() if n == 0])
+
+    def test_openapi_describes_nested_analysis_and_symbolic_scope(self):
+        schemas = self.client.get('/openapi.json').json()['components']['schemas']
+        self.assertTrue(schemas['AnalysisInfo']['properties']['details']['$ref'].endswith('/NatalAnalysisDetails'))
+        details = schemas['NatalAnalysisDetails']
+        self.assertEqual(set(details['required']), {'year', 'month', 'day', 'hour'})
+        self.assertFalse(details['additionalProperties'])
+        for value in schemas['RawBranchRelations']['properties'].values():
+            self.assertEqual(value['type'], 'array')
+            self.assertIn('$ref', value['items'])
+        self.assertTrue({'rule_id', 'basis', 'interpretation_scope'} <=
+                        set(schemas['SpecialStarItem']['required']))
+
     def test_raw_relations_survive_http_and_unified_character_adapters(self):
         base = self.get()
         for path, selector in [('/character-details', {}),
@@ -139,6 +219,47 @@ class RootResponseContractTests(unittest.TestCase):
         solar = self.get(year=2023, month='3', day='22')
         self.assertEqual(solar['calendar']['lunar'], leap['calendar']['lunar'])
         self.assertEqual(solar['four_pillars'], leap['four_pillars'])
+
+    def test_self_combination_facts_survive_all_http_paths(self):
+        base = self.get()
+        registered = {p: details['jahab'] for p, details in base['analysis']['details'].items()
+                      if details['jahab'] is not None}
+        self.assertTrue(registered)
+        for path, selector in [('/character-details', {}),
+                               ('/cycle-analysis', {'daewoon_index': 1})]:
+            response = self.client.get(path, params={**QUERY, **selector})
+            self.assertEqual(response.status_code, 200, response.text)
+            graph = response.json()
+            for pillar, raw in registered.items():
+                self.assertEqual(raw['activation_status'], 'detected')
+                self.assertEqual(raw['impact_status'], 'not_evaluated')
+                self.assertNotIn('active', raw)
+                self.assertNotIn('condition_met', raw)
+                row = graph['relations'][f'natal.chart:same_pillar:self_combine:{pillar}']
+                self.assertEqual(row['activation_status'], 'detected')
+                self.assertEqual(row['status_reasons'], [])
+                self.assertTrue(any(entry['details'].get('records') == raw for entry in row['evidence']))
+
+    def test_duplicate_middle_trine_facts_survive_http_paths(self):
+        query = {**QUERY, 'year': 1990, 'month': '1', 'day': '8', 'hour': 18, 'min': 0}
+        response = self.client.get('/', params=query)
+        self.assertEqual(response.status_code, 200, response.text)
+        base = response.json()
+        raw = base['analysis']['details']['year']['branch']['relations']['three_haps'][0]
+        self.assertEqual(raw['activation_status'], 'detected')
+        self.assertEqual(raw['condition_evidence']['middle_count'], 2)
+        self.assertEqual(len(raw['formation_indices']), 2)
+        for path, selector in [('/character-details', {}),
+                               ('/cycle-analysis', {'daewoon_index': 1})]:
+            result = self.client.get(path, params={**query, **selector})
+            self.assertEqual(result.status_code, 200, result.text)
+            graph = result.json()
+            row = next(r for r in graph['relations'].values()
+                       if r['type'] == 'trine' and r['context_ids'] == ['natal.chart'])
+            self.assertEqual(row['activation_status'], 'detected')
+            self.assertEqual(row['presentation']['status_label'], '탐지')
+            self.assertFalse(any(r['category'] == 'decision' for r in row['presentation']['reasons']))
+            self.assertEqual(graph['characters']['natal.chart.year.branch']['analysis']['relations']['three_haps'][0], raw)
 
     def test_age_reference_and_counting_age_are_consistent_before_birthday(self):
         body = self.get(month='12', day='31')

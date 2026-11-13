@@ -1,0 +1,875 @@
+{
+  "description": "현행 규칙의 합성 원국. 년·월·일·시 순서, 실제 달력 날짜가 아님.",
+  "examples": {
+    "亥卯未亥": {
+      "stems": "癸丙戊庚",
+      "branches": "亥卯未亥",
+      "interactions": {
+        "rule_version": "2.0.0",
+        "summary_list": [
+          "년지(亥)-시지(亥) 형(자형): 격위 자형 후보",
+          "년간(癸)-일간(戊) 천간합 조합(火 후보)",
+          "지지 삼합(木국 후보): 구성·중신 위치·주변 충을 기록함"
+        ],
+        "matrix": [
+          {
+            "relation_id": "지지:형(刑):자형:year,hour",
+            "relation_scope": "pairwise",
+            "participants": [
+              "year",
+              "hour"
+            ],
+            "formations": [],
+            "category": "지지",
+            "type": "형(刑)",
+            "name": "자형",
+            "from_pillar": "year",
+            "to_pillar": "hour",
+            "is_adjacent": false,
+            "weight": 0.5,
+            "transformed_element": null,
+            "candidate_element": null,
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "candidate_only",
+            "activation_rule_id": null,
+            "status_reasons": [
+              "nonadjacent_self_punishment_candidate"
+            ],
+            "condition_evidence": {},
+            "description": "년지(亥)-시지(亥) 형(자형): 격위 자형 후보"
+          },
+          {
+            "relation_id": "천간:천간합(天干合):癸戊합:year,day",
+            "relation_scope": "pairwise",
+            "participants": [
+              "year",
+              "day"
+            ],
+            "formations": [],
+            "category": "천간",
+            "type": "천간합(天干合)",
+            "name": "癸戊합",
+            "from_pillar": "year",
+            "to_pillar": "day",
+            "is_adjacent": false,
+            "weight": 0.7,
+            "transformed_element": null,
+            "candidate_element": "火",
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "detected",
+            "activation_rule_id": null,
+            "status_reasons": [],
+            "condition_evidence": {},
+            "description": "년간(癸)-일간(戊) 천간합 조합(火 후보)"
+          },
+          {
+            "relation_id": "지지:삼합(三合):삼합 木국:year,month,day,hour",
+            "relation_scope": "group",
+            "participants": [
+              "year",
+              "month",
+              "day",
+              "hour"
+            ],
+            "formations": [
+              [
+                "year",
+                "month",
+                "day"
+              ],
+              [
+                "month",
+                "day",
+                "hour"
+              ]
+            ],
+            "category": "지지",
+            "type": "삼합(三合)",
+            "name": "삼합 木국",
+            "from_pillar": "all",
+            "to_pillar": "all",
+            "is_adjacent": true,
+            "weight": 1.0,
+            "transformed_element": null,
+            "candidate_element": "木",
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "detected",
+            "activation_rule_id": null,
+            "status_reasons": [],
+            "condition_evidence": {
+              "summary": "삼합 중신의 중복과 구성 지지의 인접 충이 확인되지 않았습니다.",
+              "middle_members": [
+                {
+                  "index": 1,
+                  "pillar": "month",
+                  "char": "卯",
+                  "ten_god": "정관",
+                  "display_name": "월지 卯(정관)"
+                }
+              ],
+              "middle_count": 1,
+              "middle_pillars": [
+                "month"
+              ],
+              "adjacent_clashes": [],
+              "adjacent_wing_clashes": []
+            },
+            "description": "지지 삼합(木국 후보): 구성·중신 위치·주변 충을 기록함"
+          }
+        ]
+      },
+      "bin_zhu_dynamics": {
+        "rule_version": "4.0.0",
+        "group_connections": [
+          {
+            "relation_id": "지지:삼합(三合):삼합 木국:year,month,day,hour",
+            "type": "삼합(三合)",
+            "participants": [
+              "year",
+              "month",
+              "day",
+              "hour"
+            ],
+            "formations": [
+              [
+                "year",
+                "month",
+                "day"
+              ],
+              [
+                "month",
+                "day",
+                "hour"
+              ]
+            ],
+            "guest_participants": [
+              "year",
+              "month"
+            ],
+            "host_participants": [
+              "day",
+              "hour"
+            ],
+            "activation_status": "detected",
+            "description": "빈과 주가 함께 참여하는 삼합(三合)의 구성 정보입니다."
+          }
+        ],
+        "guest_host_links": [
+          {
+            "relation_id": "지지:형(刑):자형:year,hour",
+            "category": "지지",
+            "type": "형(刑)",
+            "participants": [
+              "year",
+              "hour"
+            ],
+            "detail": "빈 년지 亥(편재) ↔ 주 시지 亥(편재): 형(刑) 관계가 있습니다.",
+            "guest": {
+              "pillar": "year",
+              "char": "亥",
+              "ten_god": "편재",
+              "display_name": "년지 亥(편재)"
+            },
+            "host": {
+              "pillar": "hour",
+              "char": "亥",
+              "ten_god": "편재",
+              "display_name": "시지 亥(편재)"
+            },
+            "activation_status": "candidate_only",
+            "distance": 3,
+            "is_adjacent": false
+          },
+          {
+            "relation_id": "천간:천간합(天干合):癸戊합:year,day",
+            "category": "천간",
+            "type": "천간합(天干合)",
+            "participants": [
+              "year",
+              "day"
+            ],
+            "detail": "빈 년간 癸(정재) ↔ 주 일간 戊(일간): 천간합(天干合) 관계가 있습니다.",
+            "guest": {
+              "pillar": "year",
+              "char": "癸",
+              "ten_god": "정재",
+              "display_name": "년간 癸(정재)"
+            },
+            "host": {
+              "pillar": "day",
+              "char": "戊",
+              "ten_god": "일간",
+              "display_name": "일간 戊(일간)"
+            },
+            "activation_status": "detected",
+            "distance": 2,
+            "is_adjacent": false
+          }
+        ],
+        "interaction_scope": "cross_domain_relations",
+        "excluded_interactions": [],
+        "guest_structure": {
+          "scope": "년주·월주",
+          "elements": {
+            "year": {
+              "stem": "년간 癸(정재)",
+              "branch": "년지 亥(편재)"
+            },
+            "month": {
+              "stem": "월간 丙(편인)",
+              "branch": "월지 卯(정관)"
+            }
+          }
+        },
+        "host_structure": {
+          "scope": "일주·시주",
+          "elements": {
+            "day": {
+              "stem": "일간 戊(일간)",
+              "branch": "일지 未(겁재)"
+            },
+            "hour": {
+              "stem": "시간 庚(식신)",
+              "branch": "시지 亥(편재)"
+            }
+          }
+        }
+      }
+    },
+    "巳午未寅": {
+      "stems": "癸丙戊庚",
+      "branches": "巳午未寅",
+      "interactions": {
+        "rule_version": "2.0.0",
+        "summary_list": [
+          "년지(巳)-시지(寅) 천(穿) 관계가 있습니다.",
+          "월지(午)-일지(未) 육합 조합(土 후보): 조합과 주변 충의 존재를 기록함",
+          "월지(午)-시지(寅) 전반합 (생+왕)(火): 두 지지의 반합 후보",
+          "년간(癸)-일간(戊) 천간합 조합(火 후보)",
+          "지지 방합(여름 火방): 방합 구성 후보"
+        ],
+        "matrix": [
+          {
+            "relation_id": "지지:천(穿):巳寅천:year,hour",
+            "relation_scope": "pairwise",
+            "participants": [
+              "year",
+              "hour"
+            ],
+            "formations": [],
+            "category": "지지",
+            "type": "천(穿)",
+            "name": "巳寅천",
+            "from_pillar": "year",
+            "to_pillar": "hour",
+            "is_adjacent": false,
+            "weight": 0.5,
+            "transformed_element": null,
+            "candidate_element": null,
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "active",
+            "activation_rule_id": "branch:pair_presence_active_v1",
+            "status_reasons": [],
+            "condition_evidence": {},
+            "description": "년지(巳)-시지(寅) 천(穿) 관계가 있습니다."
+          },
+          {
+            "relation_id": "지지:육합(六合):午未합:month,day",
+            "relation_scope": "pairwise",
+            "participants": [
+              "month",
+              "day"
+            ],
+            "formations": [],
+            "category": "지지",
+            "type": "육합(六合)",
+            "name": "午未합",
+            "from_pillar": "month",
+            "to_pillar": "day",
+            "is_adjacent": true,
+            "weight": 1.0,
+            "transformed_element": null,
+            "candidate_element": "土",
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [
+              {
+                "pillar": "day",
+                "branch": "未",
+                "stem": "乙",
+                "effect": "closure",
+                "activation_status": "candidate_only"
+              }
+            ],
+            "activation_status": "detected",
+            "activation_rule_id": null,
+            "status_reasons": [],
+            "condition_evidence": {
+              "summary": "육합 조합에 인접한 충 관계가 확인되지 않았습니다.",
+              "adjacent_clashes": []
+            },
+            "description": "월지(午)-일지(未) 육합 조합(土 후보): 조합과 주변 충의 존재를 기록함"
+          },
+          {
+            "relation_id": "지지:반합(半合):午寅반합:month,hour",
+            "relation_scope": "pairwise",
+            "participants": [
+              "month",
+              "hour"
+            ],
+            "formations": [],
+            "category": "지지",
+            "type": "반합(半合)",
+            "name": "午寅반합",
+            "from_pillar": "month",
+            "to_pillar": "hour",
+            "is_adjacent": false,
+            "weight": 0.7,
+            "transformed_element": null,
+            "candidate_element": "火",
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "potential",
+            "activation_rule_id": null,
+            "status_reasons": [],
+            "condition_evidence": {},
+            "description": "월지(午)-시지(寅) 전반합 (생+왕)(火): 두 지지의 반합 후보"
+          },
+          {
+            "relation_id": "천간:천간합(天干合):癸戊합:year,day",
+            "relation_scope": "pairwise",
+            "participants": [
+              "year",
+              "day"
+            ],
+            "formations": [],
+            "category": "천간",
+            "type": "천간합(天干合)",
+            "name": "癸戊합",
+            "from_pillar": "year",
+            "to_pillar": "day",
+            "is_adjacent": false,
+            "weight": 0.7,
+            "transformed_element": null,
+            "candidate_element": "火",
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "detected",
+            "activation_rule_id": null,
+            "status_reasons": [],
+            "condition_evidence": {},
+            "description": "년간(癸)-일간(戊) 천간합 조합(火 후보)"
+          },
+          {
+            "relation_id": "지지:방합(方合):방합 여름火:year,month,day",
+            "relation_scope": "group",
+            "participants": [
+              "year",
+              "month",
+              "day"
+            ],
+            "formations": [
+              [
+                "year",
+                "month",
+                "day"
+              ]
+            ],
+            "category": "지지",
+            "type": "방합(方合)",
+            "name": "방합 여름火",
+            "from_pillar": "all",
+            "to_pillar": "all",
+            "is_adjacent": true,
+            "weight": 1.0,
+            "transformed_element": null,
+            "candidate_element": "火",
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "potential",
+            "activation_rule_id": null,
+            "status_reasons": [],
+            "condition_evidence": {},
+            "description": "지지 방합(여름 火방): 방합 구성 후보"
+          }
+        ]
+      },
+      "bin_zhu_dynamics": {
+        "rule_version": "4.0.0",
+        "group_connections": [
+          {
+            "relation_id": "지지:방합(方合):방합 여름火:year,month,day",
+            "type": "방합(方合)",
+            "participants": [
+              "year",
+              "month",
+              "day"
+            ],
+            "formations": [
+              [
+                "year",
+                "month",
+                "day"
+              ]
+            ],
+            "guest_participants": [
+              "year",
+              "month"
+            ],
+            "host_participants": [
+              "day"
+            ],
+            "activation_status": "potential",
+            "description": "빈과 주가 함께 참여하는 방합(方合)의 구성 정보입니다."
+          }
+        ],
+        "guest_host_links": [
+          {
+            "relation_id": "지지:천(穿):巳寅천:year,hour",
+            "category": "지지",
+            "type": "천(穿)",
+            "participants": [
+              "year",
+              "hour"
+            ],
+            "detail": "빈 년지 巳(편인) ↔ 주 시지 寅(편관): 천(穿) 관계가 있습니다.",
+            "guest": {
+              "pillar": "year",
+              "char": "巳",
+              "ten_god": "편인",
+              "display_name": "년지 巳(편인)"
+            },
+            "host": {
+              "pillar": "hour",
+              "char": "寅",
+              "ten_god": "편관",
+              "display_name": "시지 寅(편관)"
+            },
+            "activation_status": "active",
+            "distance": 3,
+            "is_adjacent": false
+          },
+          {
+            "relation_id": "지지:육합(六合):午未합:month,day",
+            "category": "지지",
+            "type": "육합(六合)",
+            "participants": [
+              "month",
+              "day"
+            ],
+            "detail": "빈 월지 午(정인) ↔ 주 일지 未(겁재): 육합(六合) 관계가 있습니다.",
+            "guest": {
+              "pillar": "month",
+              "char": "午",
+              "ten_god": "정인",
+              "display_name": "월지 午(정인)"
+            },
+            "host": {
+              "pillar": "day",
+              "char": "未",
+              "ten_god": "겁재",
+              "display_name": "일지 未(겁재)"
+            },
+            "activation_status": "detected",
+            "distance": 1,
+            "is_adjacent": true
+          },
+          {
+            "relation_id": "지지:반합(半合):午寅반합:month,hour",
+            "category": "지지",
+            "type": "반합(半合)",
+            "participants": [
+              "month",
+              "hour"
+            ],
+            "detail": "빈 월지 午(정인) ↔ 주 시지 寅(편관): 반합(半合) 관계가 있습니다.",
+            "guest": {
+              "pillar": "month",
+              "char": "午",
+              "ten_god": "정인",
+              "display_name": "월지 午(정인)"
+            },
+            "host": {
+              "pillar": "hour",
+              "char": "寅",
+              "ten_god": "편관",
+              "display_name": "시지 寅(편관)"
+            },
+            "activation_status": "potential",
+            "distance": 2,
+            "is_adjacent": false
+          },
+          {
+            "relation_id": "천간:천간합(天干合):癸戊합:year,day",
+            "category": "천간",
+            "type": "천간합(天干合)",
+            "participants": [
+              "year",
+              "day"
+            ],
+            "detail": "빈 년간 癸(정재) ↔ 주 일간 戊(일간): 천간합(天干合) 관계가 있습니다.",
+            "guest": {
+              "pillar": "year",
+              "char": "癸",
+              "ten_god": "정재",
+              "display_name": "년간 癸(정재)"
+            },
+            "host": {
+              "pillar": "day",
+              "char": "戊",
+              "ten_god": "일간",
+              "display_name": "일간 戊(일간)"
+            },
+            "activation_status": "detected",
+            "distance": 2,
+            "is_adjacent": false
+          }
+        ],
+        "interaction_scope": "cross_domain_relations",
+        "excluded_interactions": [],
+        "guest_structure": {
+          "scope": "년주·월주",
+          "elements": {
+            "year": {
+              "stem": "년간 癸(정재)",
+              "branch": "년지 巳(편인)"
+            },
+            "month": {
+              "stem": "월간 丙(편인)",
+              "branch": "월지 午(정인)"
+            }
+          }
+        },
+        "host_structure": {
+          "scope": "일주·시주",
+          "elements": {
+            "day": {
+              "stem": "일간 戊(일간)",
+              "branch": "일지 未(겁재)"
+            },
+            "hour": {
+              "stem": "시간 庚(식신)",
+              "branch": "시지 寅(편관)"
+            }
+          }
+        }
+      }
+    },
+    "子子卯卯": {
+      "stems": "癸丙戊庚",
+      "branches": "子子卯卯",
+      "interactions": {
+        "rule_version": "2.0.0",
+        "summary_list": [
+          "년지(子)-일지(卯) 파 관계가 있습니다.",
+          "년지(子)-시지(卯) 파 관계가 있습니다.",
+          "월지(子)-일지(卯) 파 관계가 있습니다.",
+          "월지(子)-시지(卯) 파 관계가 있습니다.",
+          "년간(癸)-일간(戊) 천간합 조합(火 후보)"
+        ],
+        "matrix": [
+          {
+            "relation_id": "지지:파(破):子卯파:year,day",
+            "relation_scope": "pairwise",
+            "participants": [
+              "year",
+              "day"
+            ],
+            "formations": [],
+            "category": "지지",
+            "type": "파(破)",
+            "name": "子卯파",
+            "from_pillar": "year",
+            "to_pillar": "day",
+            "is_adjacent": false,
+            "weight": 0.7,
+            "transformed_element": null,
+            "candidate_element": null,
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "active",
+            "activation_rule_id": "branch:pair_presence_active_v1",
+            "status_reasons": [],
+            "condition_evidence": {},
+            "description": "년지(子)-일지(卯) 파 관계가 있습니다."
+          },
+          {
+            "relation_id": "지지:파(破):子卯파:year,hour",
+            "relation_scope": "pairwise",
+            "participants": [
+              "year",
+              "hour"
+            ],
+            "formations": [],
+            "category": "지지",
+            "type": "파(破)",
+            "name": "子卯파",
+            "from_pillar": "year",
+            "to_pillar": "hour",
+            "is_adjacent": false,
+            "weight": 0.5,
+            "transformed_element": null,
+            "candidate_element": null,
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "active",
+            "activation_rule_id": "branch:pair_presence_active_v1",
+            "status_reasons": [],
+            "condition_evidence": {},
+            "description": "년지(子)-시지(卯) 파 관계가 있습니다."
+          },
+          {
+            "relation_id": "지지:파(破):子卯파:month,day",
+            "relation_scope": "pairwise",
+            "participants": [
+              "month",
+              "day"
+            ],
+            "formations": [],
+            "category": "지지",
+            "type": "파(破)",
+            "name": "子卯파",
+            "from_pillar": "month",
+            "to_pillar": "day",
+            "is_adjacent": true,
+            "weight": 1.0,
+            "transformed_element": null,
+            "candidate_element": null,
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "active",
+            "activation_rule_id": "branch:pair_presence_active_v1",
+            "status_reasons": [],
+            "condition_evidence": {},
+            "description": "월지(子)-일지(卯) 파 관계가 있습니다."
+          },
+          {
+            "relation_id": "지지:파(破):子卯파:month,hour",
+            "relation_scope": "pairwise",
+            "participants": [
+              "month",
+              "hour"
+            ],
+            "formations": [],
+            "category": "지지",
+            "type": "파(破)",
+            "name": "子卯파",
+            "from_pillar": "month",
+            "to_pillar": "hour",
+            "is_adjacent": false,
+            "weight": 0.7,
+            "transformed_element": null,
+            "candidate_element": null,
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "active",
+            "activation_rule_id": "branch:pair_presence_active_v1",
+            "status_reasons": [],
+            "condition_evidence": {},
+            "description": "월지(子)-시지(卯) 파 관계가 있습니다."
+          },
+          {
+            "relation_id": "천간:천간합(天干合):癸戊합:year,day",
+            "relation_scope": "pairwise",
+            "participants": [
+              "year",
+              "day"
+            ],
+            "formations": [],
+            "category": "천간",
+            "type": "천간합(天干合)",
+            "name": "癸戊합",
+            "from_pillar": "year",
+            "to_pillar": "day",
+            "is_adjacent": false,
+            "weight": 0.7,
+            "transformed_element": null,
+            "candidate_element": "火",
+            "missing_branch": null,
+            "hidden_stem_pairs": null,
+            "candidate_hidden_stem_effects": [],
+            "activation_status": "detected",
+            "activation_rule_id": null,
+            "status_reasons": [],
+            "condition_evidence": {},
+            "description": "년간(癸)-일간(戊) 천간합 조합(火 후보)"
+          }
+        ]
+      },
+      "bin_zhu_dynamics": {
+        "rule_version": "4.0.0",
+        "group_connections": [],
+        "guest_host_links": [
+          {
+            "relation_id": "지지:파(破):子卯파:year,day",
+            "category": "지지",
+            "type": "파(破)",
+            "participants": [
+              "year",
+              "day"
+            ],
+            "detail": "빈 년지 子(정재) ↔ 주 일지 卯(정관): 파(破) 관계가 있습니다.",
+            "guest": {
+              "pillar": "year",
+              "char": "子",
+              "ten_god": "정재",
+              "display_name": "년지 子(정재)"
+            },
+            "host": {
+              "pillar": "day",
+              "char": "卯",
+              "ten_god": "정관",
+              "display_name": "일지 卯(정관)"
+            },
+            "activation_status": "active",
+            "distance": 2,
+            "is_adjacent": false
+          },
+          {
+            "relation_id": "지지:파(破):子卯파:year,hour",
+            "category": "지지",
+            "type": "파(破)",
+            "participants": [
+              "year",
+              "hour"
+            ],
+            "detail": "빈 년지 子(정재) ↔ 주 시지 卯(정관): 파(破) 관계가 있습니다.",
+            "guest": {
+              "pillar": "year",
+              "char": "子",
+              "ten_god": "정재",
+              "display_name": "년지 子(정재)"
+            },
+            "host": {
+              "pillar": "hour",
+              "char": "卯",
+              "ten_god": "정관",
+              "display_name": "시지 卯(정관)"
+            },
+            "activation_status": "active",
+            "distance": 3,
+            "is_adjacent": false
+          },
+          {
+            "relation_id": "지지:파(破):子卯파:month,day",
+            "category": "지지",
+            "type": "파(破)",
+            "participants": [
+              "month",
+              "day"
+            ],
+            "detail": "빈 월지 子(정재) ↔ 주 일지 卯(정관): 파(破) 관계가 있습니다.",
+            "guest": {
+              "pillar": "month",
+              "char": "子",
+              "ten_god": "정재",
+              "display_name": "월지 子(정재)"
+            },
+            "host": {
+              "pillar": "day",
+              "char": "卯",
+              "ten_god": "정관",
+              "display_name": "일지 卯(정관)"
+            },
+            "activation_status": "active",
+            "distance": 1,
+            "is_adjacent": true
+          },
+          {
+            "relation_id": "지지:파(破):子卯파:month,hour",
+            "category": "지지",
+            "type": "파(破)",
+            "participants": [
+              "month",
+              "hour"
+            ],
+            "detail": "빈 월지 子(정재) ↔ 주 시지 卯(정관): 파(破) 관계가 있습니다.",
+            "guest": {
+              "pillar": "month",
+              "char": "子",
+              "ten_god": "정재",
+              "display_name": "월지 子(정재)"
+            },
+            "host": {
+              "pillar": "hour",
+              "char": "卯",
+              "ten_god": "정관",
+              "display_name": "시지 卯(정관)"
+            },
+            "activation_status": "active",
+            "distance": 2,
+            "is_adjacent": false
+          },
+          {
+            "relation_id": "천간:천간합(天干合):癸戊합:year,day",
+            "category": "천간",
+            "type": "천간합(天干合)",
+            "participants": [
+              "year",
+              "day"
+            ],
+            "detail": "빈 년간 癸(정재) ↔ 주 일간 戊(일간): 천간합(天干合) 관계가 있습니다.",
+            "guest": {
+              "pillar": "year",
+              "char": "癸",
+              "ten_god": "정재",
+              "display_name": "년간 癸(정재)"
+            },
+            "host": {
+              "pillar": "day",
+              "char": "戊",
+              "ten_god": "일간",
+              "display_name": "일간 戊(일간)"
+            },
+            "activation_status": "detected",
+            "distance": 2,
+            "is_adjacent": false
+          }
+        ],
+        "interaction_scope": "cross_domain_relations",
+        "excluded_interactions": [],
+        "guest_structure": {
+          "scope": "년주·월주",
+          "elements": {
+            "year": {
+              "stem": "년간 癸(정재)",
+              "branch": "년지 子(정재)"
+            },
+            "month": {
+              "stem": "월간 丙(편인)",
+              "branch": "월지 子(정재)"
+            }
+          }
+        },
+        "host_structure": {
+          "scope": "일주·시주",
+          "elements": {
+            "day": {
+              "stem": "일간 戊(일간)",
+              "branch": "일지 卯(정관)"
+            },
+            "hour": {
+              "stem": "시간 庚(식신)",
+              "branch": "시지 卯(정관)"
+            }
+          }
+        }
+      }
+    }
+  }
+}

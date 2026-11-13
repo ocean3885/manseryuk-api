@@ -2,6 +2,10 @@
 
 2026-11-13. 기존 프론트엔드 호환 제약 없이 탐지 함수의 반환 계약을 정리했다.
 새 API나 호환용 변환 계층은 추가하지 않는다.
+원국 상세 원자료의 네 기둥·관계별 타입과 매트릭스 관찰 근거는
+[`schemas/natal_analysis.py`](../schemas/natal_analysis.py)에 정의했다.
+타입 검증은 기존 키와 빈 배열·`null`을 보존한다.
+[루트 표시·타입 정리](root_display_contract.md)를 함께 참조한다.
 
 ## 적용 경로와 자료형
 
@@ -26,8 +30,8 @@
 | 천간 합·충·극 | `detected`: 해당 글자 관계 탐지 |
 | 지지 충·천·파·지세형 | `active`: 존재 규칙으로 성립 |
 | 자형 | 인접하면 `active`, 비인접이면 `candidate_only` |
-| 육합 | 충 조건에 따라 `active`, `conditional`, `suppressed` |
-| 삼합 | 중신 중복·인접 충 조건에 따라 `potential`, `conditional`, `suppressed` |
+| 육합 | 충의 유무·위치와 무관하게 조합 존재 `detected` |
+| 삼합 | 중신 중복·인접 충과 무관하게 구성 존재 `detected` |
 | 반합·방합 | `potential` |
 | 공합·지장간 암합 | `candidate_only` |
 | 삼형 | 세 글자 존재 시 `active` |
@@ -36,8 +40,8 @@
 합화 확정은 평가하지 않는다. 비인접 자형에도 잠정 수치가 남을 수 있으므로
 0이 아닌 숫자로 성립·영향을 역산하지 않는다.
 
-존재·인접 규칙이 있는 관계는 `activation_rule_id`도 제공한다. 육합의 조건부·억제,
-비인접 자형에서는 해당 활성 규칙 ID가 `null`이다. 사유가 없는 관계의
+존재·인접 규칙이 있는 관계는 `activation_rule_id`도 제공한다. 육합은 성립을
+판정하지 않으므로 해당 ID가 항상 `null`이다. 비인접 자형도 `null`이다. 사유가 없는 관계의
 `status_reasons`는 빈 배열이다. 육합·삼합의 `condition_evidence`는 아래의
 읽기 쉬운 근거 표현을 함께 제공한다.
 매트릭스는 탐지 함수가 산출한 상태·사유를 사용하며, 원국 관계 조립 시
@@ -71,7 +75,7 @@
 
 삼합 날개 충으로 남은 반합의 원자료 `fallback_from`에도 `affected`, `cause`,
 `description`을 제공한다. 매트릭스에서는 이를 `condition_evidence.fallback_from`과
-`condition_evidence.summary`로 전달한다. 원래 삼합 억제와 남은 반합 후보를 구분한다.
+`condition_evidence.summary`로 전달한다. 삼합의 존재·날개의 충·반합 후보를 함께 보존한다.
 기존 인덱스·위치 코드는 내부 규칙 연결과 검증에 사용하므로 유지한다.
 
 화면에서는 우선 `summary`를 표시하고, 상세 펼침이나 글자 강조에는
@@ -79,6 +83,33 @@
 기존 중앙 `presentation`을 사용하며 같은 근거 설명을 중복 표시할 필요는 없다.
 
 ## 후보 오행과 수치
+
+육합·삼합 전체는 성립을 판단하지 않는 사실 조회다. `status_reasons`의 중신 중복·충
+코드는 구성 관찰 정보이며 조건부·억제 판정이 아니다. 삼합은 `middle_count`도 제공한다.
+자동 육합 성립에 따른 생·극 억제는 제거했다.
+[존재 정보 계약과 당시 계산 영향](hap_presence_migration.md)을 따른다.
+이후 매트릭스의 개별 관계 점수·총계와 빈주 점수는 [별도 제거](relation_score_retirement.md)했다.
+원자료의 거리 가중치·기본/구조 계수·`potential_index`와 실제 적용량 `null`은 유지한다.
+통근·오행 등 다른 분석의 수치를 일괄 폐기한 것은 아니다.
+
+### 자합은 조합과 주변 관계의 사실만 제공
+
+2026-11-13 사용자 결정에 따라 `analysis.details[기둥].jahab`과 중앙
+`self_combine`은 자합 성립을 자동 판단하지 않는다. 등록된 9개 조합을 유지하고
+모두 `detected`로 제공한다. 未형·辰충 등 해당 지지의 충·형은
+`related_branch_relations` 배열로 따로 기록한다.
+각 항목에는 `type`, `with`, `with_index`, `with_ten_star`, `distance`,
+`is_adjacent`가 있다. 반복 글자도 위치별로 보존하고 주변 관계가 없으면 `[]`다.
+
+`active`, `is_conditional`, `condition_met`, `required_condition`, `inactive_reason`,
+`blocking_chung`, `chung_impact`는 제거했다. 자합의 실제 영향은
+`impact_status=not_evaluated`이며 성립·불성립 판단은 별도다.
+원자료의 `chars`, `my_index`, `exists`, `hidden_stem`, `candidate_element`는
+조합 식별에 사용한다. 중앙 관계 ID와 지장간 후보는 유지한다.
+주변 충·형 자체의 기존 상태·수치는 바꾸지 않는다.
+이론 자료와의 대조는 [자합 자료 검토](self_combination_source_review.md)를 따른다.
+
+### 합의 오행과 잠정 수치
 
 천간합의 `combined_element`, 육합·삼합·반합·공합·방합의 `element`는
 `candidate_element`로 바꿨다. 동주 `jahab.combined_element`도
@@ -100,8 +131,8 @@
 천간 극의 `distance_strength`, `restrain_base_strength`도 각각
 `distance_weight`, `base_coefficient`로 바꿨다. 삼합의 `candidate_strength`는
 `structure_coefficient`로 통일했다. 공합·암합의 `strength: null`은 제거했다.
-자합의 `chung_impact.strength`는 `distance_weight`다. 이는 근접 충 정보이며
-실제 영향량이 아니다. `potential_index`는 소수 넷째 자리로 반올림한다.
+자합의 기존 `chung_impact`는 제거하고 위 주변 관계 사실 배열로 대체했다.
+`potential_index`는 소수 넷째 자리로 반올림한다.
 
 이 값들은 검증된 강도·확률·손상률이나 서로 다른 관계 간 순위 점수가 아니다.
 기존 계수의 의미를 구분한 것이며 계수 추정이나 세력 모델 확장은 하지 않았다.

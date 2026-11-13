@@ -15,7 +15,7 @@ REASON_CODES = frozenset((
     'intervening_adjacent_clash', 'external_adjacent_clash', 'duplicate_middle',
     'adjacent_middle_clash', 'adjacent_birth_clash', 'adjacent_tomb_clash',
     'active_pair_structure_overrides_element', 'combination_candidate_not_transformation',
-    'required_punishment_missing', 'blocked_by_chen_chung', 'adjacent_self_punishment',
+    'adjacent_self_punishment',
     'nonadjacent_self_punishment_candidate',
     'cycle_presence_only_activation_and_impact_not_evaluated'))
 
@@ -77,12 +77,12 @@ def _clash_reason(graph, row, code):
         return None
     causes = ' / '.join(f'{_label(graph, a)} ↔ {_label(graph, b)}의 인접 충' for a, b in sorted(matches))
     endings = dict(
-        intervening_adjacent_clash='이 합을 이루는 두 글자 사이에 있어 육합 성립을 억제합니다.',
-        external_adjacent_clash='이 합의 바깥에서 개입하여 육합 성립을 조건부로 둡니다.',
-        adjacent_middle_clash='으로 삼합 중신이 충을 받아 완전한 삼합 성립을 억제합니다.',
-        adjacent_birth_clash='으로 삼합 생지가 충을 받아 완전한 삼합 성립을 억제합니다.',
-        adjacent_tomb_clash='으로 삼합 성지가 충을 받아 완전한 삼합 성립을 억제합니다.')
-    return _line(code, 'decision', causes + endings[code],
+        intervening_adjacent_clash='이 육합 조합의 두 글자 사이에 있습니다.',
+        external_adjacent_clash='이 육합 조합의 바깥에 함께 있습니다.',
+        adjacent_middle_clash='이 삼합 중신에 함께 있습니다.',
+        adjacent_birth_clash='이 삼합 생지에 함께 있습니다.',
+        adjacent_tomb_clash='이 삼합 성지에 함께 있습니다.')
+    return _line(code, 'structure', causes + endings[code],
                  [p for pair in matches for p in pair],
                  [rid for refs, _ in matches.values() for rid in refs],
                  [i for _, indices in matches.values() for i in indices])
@@ -101,7 +101,7 @@ def _explain_reason(graph, row, code):
                 keys.update(f'natal.chart.{p}.branch' for p in positions)
                 indices.append(i)
         if keys:
-            return _line(code, 'decision', f'{_join(graph, sorted(keys))}에 중신이 중복되어 삼합 성립을 조건부로 둡니다.', keys, evidence=indices)
+            return _line(code, 'structure', f'{_join(graph, sorted(keys))}에 삼합 중신이 중복되어 있습니다.', keys, evidence=indices)
     elif code == 'active_pair_structure_overrides_element':
         ids, indices = set(), []
         for i, entry in enumerate(row['evidence']):
@@ -117,19 +117,6 @@ def _explain_reason(graph, row, code):
         return _line(code, 'notice', '후보 오행은 합의 오행 표기이며, 실제 합화가 성립했다는 판정은 아닙니다.', members,
                      evidence=[i for i, e in enumerate(row['evidence'])
                                if code == e['details'].get('status_reason') or code in e['details'].get('status_reasons', [])])
-    elif code in ('required_punishment_missing', 'blocked_by_chen_chung'):
-        for i, entry in enumerate(row['evidence']):
-            source = entry['details'].get('records')
-            if not isinstance(source, dict):
-                continue
-            if code == 'required_punishment_missing' and source.get('condition_met') is False and source.get('required_condition'):
-                required = source['required_condition']['with_branch']
-                return _line(code, 'decision', f'자합에 필요한 {required}와의 형 조건이 확인되지 않아 성립을 유보합니다.', members, evidence=[i])
-            if code == 'blocked_by_chen_chung' and source.get('blocking_chung'):
-                ids = [rid for rid in entry['related_relation_ids'] if graph['relations'][rid]['type'] == 'clash']
-                if ids:
-                    keys = sorted({p for rid in ids for p in graph['relations'][rid]['participants']})
-                    return _line(code, 'decision', f'{_join(graph, keys)}의 충이 확인되어 이 자합의 성립을 차단합니다.', keys, ids, [i])
     elif code in ('adjacent_self_punishment', 'nonadjacent_self_punishment_candidate'):
         indices = [i for i, e in enumerate(row['evidence']) if code in e['details'].get('status_reasons', [])
                    or e['details'].get('status_reason') == code]
@@ -144,25 +131,13 @@ def _explain_reason(graph, row, code):
 
 
 def _active_basis(graph, row):
-    if row['type'] == 'self_combine':
-        for i, entry in enumerate(row['evidence']):
-            source = entry['details'].get('records')
-            if isinstance(source, dict) and source.get('active'):
-                refs = entry['related_relation_ids']
-                text = ('필수 형 조건이 확인되어 현재 원국 규칙에서 자합이 성립합니다.'
-                        if source.get('required_condition') and source.get('condition_met') else
-                        '등록된 동주 천간·지장간 조합이 확인되어 현재 원국 규칙에서 자합이 성립합니다.')
-                if source.get('required_condition') and not refs:
-                    return None
-                return _line('self_combine_condition_met', 'decision', text, row['participants'], refs, [i])
-    else:
-        indices = [i for i, e in enumerate(row['evidence']) if e['details'].get('activation_rule_id') in (
-            'branch:pair_presence_active_v1', 'branch:triple_punishment_presence_active_v1')]
-        if indices:
-            text = ('삼형을 구성하는 세 종류 지지가 원국에 함께 있어 현행 성립 규칙을 충족합니다.'
-                    if row['type'] == 'triple_punishment' else
-                    '등록된 관계의 두 지지가 원국에 함께 있고 현행 성립 조건을 충족합니다.')
-            return _line('registered_presence', 'decision', text, row['participants'], evidence=indices)
+    indices = [i for i, e in enumerate(row['evidence']) if e['details'].get('activation_rule_id') in (
+        'branch:pair_presence_active_v1', 'branch:triple_punishment_presence_active_v1')]
+    if indices:
+        text = ('삼형을 구성하는 세 종류 지지가 원국에 함께 있어 현행 성립 규칙을 충족합니다.'
+                if row['type'] == 'triple_punishment' else
+                '등록된 관계의 두 지지가 원국에 함께 있고 현행 성립 조건을 충족합니다.')
+        return _line('registered_presence', 'decision', text, row['participants'], evidence=indices)
     return None
 
 
@@ -183,7 +158,7 @@ def build_relation_presentation(graph, row):
             stem = next(p for p in members if graph['characters'][p]['kind'] == 'stem')
             branch = next(p for p in members if graph['characters'][p]['kind'] == 'branch')
             description = (f"{_label(graph, stem)} ↔ {_label(graph, branch)}의 지장간 {source['hidden_stem']}: "
-                           '같은 기둥의 자합 관계입니다.')
+                           '같은 기둥의 자합 조합이 있습니다.')
     elif kind == 'element':
         subtype = row.get('element_relation')
         if subtype == 'same_element':
@@ -234,21 +209,31 @@ def build_relation_presentation(graph, row):
     if row['activation_status'] == 'potential' and not codes:
         lines.append(_line('potential_structure', 'scope',
                            '등록된 구성 또는 오행 경로가 확인된 잠재 관계입니다. 실제 성립과 적용은 확정하지 않았습니다.', members))
-    if row['activation_status'] == 'detected' and not codes:
+    if row['activation_status'] == 'detected':
         lines.append(_line('detected_fact', 'scope',
-                           '글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.', members))
+                           ('자합 조합의 존재를 확인했으며, 성립 여부와 실제 영향은 평가하지 않았습니다.'
+                            if kind == 'self_combine' else
+                            '조합의 존재와 제공된 구성 근거를 확인했으며, 실제 성립과 작용은 확정하지 않았습니다.'
+                            if kind in ('combine', 'trine') else
+                            '글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.'), members))
 
     for i, entry in enumerate(row.get('evidence', [])):
         details = entry['details']
+        if kind == 'self_combine':
+            for rid in entry['related_relation_ids']:
+                context = graph['relations'][rid]
+                lines.append(_line('self_combine_context', 'structure',
+                                   f"{_join(graph, context['participants'])}의 {_name(context, graph)} 관계가 함께 있습니다.",
+                                   context['participants'], [rid], [i]))
         if details.get('formation_status') == 'included_in_complete_group':
             lines.append(_line('included_in_complete_group', 'structure',
-                               '완성 삼합의 구성 근거로 제공하는 반합 후보입니다. 독립 작용으로 확정하지 않습니다.',
+                               '삼합 구성 안의 두 지지를 연결한 반합 후보입니다. 독립 작용으로 확정하지 않습니다.',
                                members, entry['related_relation_ids'], [i]))
         if any(isinstance(record.get('fallback_from'), dict) for record in walk_records(details)):
             group_ids = [rid for rid in entry['related_relation_ids'] if graph['relations'][rid]['type'] == 'trine']
             if group_ids:
                 lines.append(_line('remaining_half_combine', 'structure',
-                                   '삼합의 날개 글자가 인접 충을 받은 뒤 남은 두 글자를 반합 후보로 기록합니다.',
+                                   '삼합 날개의 인접 충과 함께, 다른 날개와 중신의 반합 후보를 기록합니다.',
                                    members, entry['related_relation_ids'], [i]))
             else:
                 missing.append('missing_fallback_group')

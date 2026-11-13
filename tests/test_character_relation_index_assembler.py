@@ -54,7 +54,7 @@ class CharacterRelationAssemblerTests(unittest.TestCase):
         self.assertTrue(any(ref['relation_id'] == '지지:충(沖):丑未충:month,day'
                             for ref in clash['source_refs']))
         self.assertEqual(relations['branch:combine:day:hour']['activation_status'],
-                         'conditional')
+                         'detected')
         self.assertEqual(relations['branch:combine:day:hour']['status_reason'],
                          'external_adjacent_clash')
         self.assertEqual(relations['group:square:si_wu_wei']['formation_candidates'],
@@ -108,7 +108,7 @@ class CharacterRelationAssemblerTests(unittest.TestCase):
                     self.assertEqual(len(trine['participants']), 4)
                 if branches == '巳亥卯未':
                     self.assertTrue(any(row['type'] == 'trine'
-                                        and row['activation_status'] == 'suppressed'
+                                        and row['activation_status'] == 'detected'
                                         for row in result['relations']))
                 if branches == '子午辰寅':
                     clash = next(row for row in result['relations']
@@ -118,21 +118,16 @@ class CharacterRelationAssemblerTests(unittest.TestCase):
                         'to_character': 'month.branch', 'basis': 'rule_fixed',
                     })
 
-    def test_same_pillar_self_combination_carries_actual_condition(self):
-        for branches, expected in (
-            ('戌未寅子', 'active'),
-            ('戌子寅卯', 'conditional'),
-            ('戌未辰子', 'suppressed'),
-        ):
+    def test_same_pillar_self_combination_records_presence_without_activation(self):
+        for branches in ('戌未寅子', '戌子寅卯', '戌未辰子'):
             with self.subTest(branches=branches):
                 result = assemble('丙甲甲甲', branches)
                 self_combine = next(row for row in result['relations']
                                     if row['relation_id'] ==
                                     'same_pillar:self_combine:year')
-                self.assertEqual(self_combine['activation_status'], expected)
+                self.assertEqual(self_combine['activation_status'], 'detected')
                 self.assertEqual(self_combine['candidate_element'], '水')
-                self.assertEqual(self_combine['status_reason'] is None,
-                                 expected == 'active')
+                self.assertIsNone(self_combine['status_reason'])
 
     def test_unrooted_stems_keep_hollow_status_separate_from_transmission(self):
         result = assemble('甲甲甲甲', '申酉戌丑')

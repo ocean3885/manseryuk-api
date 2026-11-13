@@ -123,6 +123,11 @@ class CharacterRelation(_ContractModel):
 
     @model_validator(mode='after')
     def check_relation(self):
+        if (self.type == 'trine' or self.relation_id.startswith('branch:combine:')) and self.activation_status != 'detected':
+            raise ValueError('육합·삼합은 구성의 존재만 탐지하며 성립·차단을 판정하지 않습니다.')
+        if self.type == 'self_combine' and (
+                self.activation_status != 'detected' or self.status_reason is not None):
+            raise ValueError('자합은 조합 존재만 탐지하며 성립·불성립을 판정하지 않습니다.')
         members = self.participants
         if (len(members) != len(set(members))
                 or members != sorted(members, key=CHARACTER_IDS.index)):

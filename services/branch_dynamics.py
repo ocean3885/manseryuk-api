@@ -10,7 +10,7 @@ from services.relation_rules import (
     POSITION_WEIGHTS, GENERATES, DOMINANCE_MARGIN, SEASON_FACTORS,
     STEM_ADJUSTMENTS, AMBIENT_RATES, ATTRACTION_TYPES, PRESSURE_TYPES,
     RELATION_COEFFICIENTS, RULE_PROFILE, RULE_VERSION, PAIR_ACTION_RULES,
-    THREE_HAPS, SQUARE_HAPS, GROUP_ROLE_ORDER, HARMONY_GROUP_COVERS_PAIR,
+    THREE_HAPS, SQUARE_HAPS, GROUP_ROLE_ORDER,
     ACTIVE_PAIR_RELATION_TYPES, PAIR_ELEMENT_OVERRIDE_REASON,
     get_pair_action_rule, get_group_action_rule,
 )
@@ -246,7 +246,7 @@ def _group_formations(group, branches, strengths, matrix_by_pair):
         role_to_pillar = {role_by_branch[branches[index]]: pillar
                           for pillar, index in zip(formation, indices)}
         action_rule = get_group_action_rule(group['type'], canonical)
-        candidate_status = ('candidate_only' if group['activation_status'] == 'potential'
+        candidate_status = ('candidate_only' if group['activation_status'] in ('potential', 'detected')
                             else group['activation_status'])
         power = {}
         context = {}
@@ -256,10 +256,9 @@ def _group_formations(group, branches, strengths, matrix_by_pair):
         total = sum(power.values())
         overlapping = [
             {'relation_id': item['relation_id'],
-             'covered_in_harmony_score': item.get('score_covered_by') == group['relation_id']}
+             'participants': list(item['participants'])}
             for pair_items in matrix_by_pair.values() for item in pair_items
-            if item['type'] in HARMONY_GROUP_COVERS_PAIR[group['type']]
-            and set(item['participants']) <= set(formation)
+            if set(item['participants']) <= set(formation)
         ]
         result.append({
             'pillars': formation,
@@ -299,7 +298,10 @@ def _event(item, first_pillar, second_pillar, first_branch, second_branch,
     first_to_second = round(first_power * distance_weight * first_coefficient, 4)
     second_to_first = round(second_power * distance_weight * second_coefficient, 4)
     status = item.get('activation_status', effect.get('status', 'potential'))
-    if status in ('suppressed', 'conditional'):
+    if (status in ('suppressed', 'conditional') or
+            (item['type'] == '육합(六合)' and
+             item.get('condition_evidence', {}).get('adjacent_clashes'))):
+        # 충이 개입한 합의 기존 잠정량 표시 정책이며 실제 적용량 판정이 아니다.
         first_to_second = second_to_first = 0.0
     if item['type'] in ('생', '극'):
         # 오행의 생·극 방향은 정해져 있다. 반대 방향의 저항/반격을 생·극으로 위장하지 않는다.
@@ -397,7 +399,8 @@ def analyze_branch_dynamics(stems, branches, interaction_matrix):
                 group['type'], [branches[PILLARS.index(pillar)]
                                 for pillar in first_formation])
             group['action_rule_id'] = action_rule['rule_id']
-            group['direction_status'] = (group['activation_status']
+            group['direction_status'] = ('undetermined' if group['activation_status'] == 'detected' else
+                                        group['activation_status']
                                          if group['activation_status'] in ('conditional', 'suppressed')
                                          else action_rule['direction_status'])
             group['pair_overlap_policy'] = action_rule['pair_overlap_policy']

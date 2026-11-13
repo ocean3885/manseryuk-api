@@ -56,125 +56,67 @@ HONG_YEOM_MAP = {
 BAEKHO_SET = {('甲', '辰'), ('乙', '未'), ('丙', '戌'), ('丁', '丑'), ('戊', '辰'), ('壬', '戌'), ('癸', '丑')}
 GOEGANG_SET = {('戊', '戌'), ('庚', '辰'), ('庚', '戌'), ('壬', '辰')}
 
+# 기존 조합표의 출처 기준을 명시한다. 새 학파 규칙을 합성하지 않는다.
+BRANCH_STAR_RULES = (
+    ('천을귀인', CHEON_EUL_MAP, ((2, 'stem'), (0, 'stem')), '길신(吉神)',
+     '조력과 보호의 상징', 'special_star:cheon_eul:year_day_stem_v1'),
+    ('문창귀인', MOON_CHANG_MAP, ((2, 'stem'),), '길신(吉神)',
+     '학문과 문예의 상징', 'special_star:moon_chang:day_stem_v1'),
+    ('도화살', DOHWA_MAP, ((2, 'branch'), (0, 'branch')), '신살(神殺)',
+     '교류와 주목의 상징', 'special_star:dohwa:year_day_branch_v2'),
+    ('역마살', YEOKMA_MAP, ((2, 'branch'), (0, 'branch')), '신살(神殺)',
+     '이동과 활동의 상징', 'special_star:yeokma:year_day_branch_v2'),
+    ('화개살', HWAGAE_MAP, ((2, 'branch'), (0, 'branch')), '신살(神殺)',
+     '예술과 사색의 상징', 'special_star:hwagae:year_day_branch_v2'),
+    ('양인살', YANG_IN_MAP, ((2, 'stem'),), '신살(神殺)',
+     '강한 기세와 결단의 상징', 'special_star:yang_in:day_stem_v1'),
+    ('홍염살', HONG_YEOM_MAP, ((2, 'stem'),), '신살(神殺)',
+     '친화와 매력의 상징', 'special_star:hong_yeom:day_stem_v1'),
+)
+PILLAR_STAR_RULES = (
+    ('백호살', BAEKHO_SET, '강한 기세의 상징', 'special_star:baekho:own_pillar_v1'),
+    ('괴강살', GOEGANG_SET, '강한 기세와 독립성의 상징', 'special_star:goegang:own_pillar_v1'),
+)
+
+
 def analyze_special_stars(stems: List[str], branches: List[str]) -> List[Dict[str, Any]]:
+    """등록 조합을 탐지하고 기준 글자를 제공한다. 설명은 전통적 상징이다.
+
+    천을은 일간·년간, 도화·역마·화개는 일지·년지를 각각 검사한다.
+    문창·양인·홍염은 일간, 백호·괴강은 각 기둥의 간지 조합 기준을 유지한다.
+    같은 신살·같은 대상 위치는 한 항목으로 묶고 일치하는 기준은 모두 보존한다.
     """
-    일간/년간 및 일지/년지 기준으로 주요 길신(천을귀인, 문창귀인) 및
-    핵심 신살(도화, 역마, 화개, 백호, 양인, 괴강, 홍염)을 추출합니다.
-    """
-    detected_stars: List[Dict[str, Any]] = []
-    day_stem = stems[2]
-    day_branch = branches[2]
-    year_stem = stems[0]
-    year_branch = branches[0]
+    def basis(index, kind):
+        char = (stems[index] if kind == 'stem' else branches[index]
+                if kind == 'branch' else stems[index] + branches[index])
+        suffix = {'stem': '간', 'branch': '지', 'pillar': '주'}[kind]
+        return {'pillar': PILLAR_KEYS[index], 'kind': kind, 'char': char,
+                'display_name': f'{POSITION_NAMES[index]}{suffix} {char}'}
 
-    for i in range(4):
-        p_key = PILLAR_KEYS[i]
-        pos_name = f"{POSITION_NAMES[i]}지"
-        stem_pos_name = f"{POSITION_NAMES[i]}주"
-        b = branches[i]
-        s = stems[i]
-
-        # 1. 천을귀인 (天乙貴人)
-        ce_targets = CHEON_EUL_MAP.get(day_stem, []) + CHEON_EUL_MAP.get(year_stem, [])
-        if b in ce_targets:
-            detected_stars.append({
-                "name": "천을귀인",
-                "pillar": p_key,
-                "position": pos_name,
-                "char": b,
-                "type": "길신(吉神)",
-                "description": "최고의 길신으로 위기 극복, 귀인의 조력, 명예와 신뢰를 상징"
-            })
-
-        # 2. 문창귀인 (文昌貴人)
-        if b == MOON_CHANG_MAP.get(day_stem):
-            detected_stars.append({
-                "name": "문창귀인",
-                "pillar": p_key,
-                "position": pos_name,
-                "char": b,
-                "type": "길신(吉神)",
-                "description": "총명함, 학문적 성취, 글재주 및 지적 창작 능력 우수"
-            })
-
-        # 3. 도화살 (桃花殺)
-        dohwa_target = DOHWA_MAP.get(day_branch) or DOHWA_MAP.get(year_branch)
-        if b == dohwa_target:
-            detected_stars.append({
-                "name": "도화살",
-                "pillar": p_key,
-                "position": pos_name,
-                "char": b,
-                "type": "신살(神殺)",
-                "description": "사람을 끄는 대중적 매력, 예술적 끼, 인기와 화제성"
-            })
-
-        # 4. 역마살 (驛馬殺)
-        yeokma_target = YEOKMA_MAP.get(day_branch) or YEOKMA_MAP.get(year_branch)
-        if b == yeokma_target:
-            detected_stars.append({
-                "name": "역마살",
-                "pillar": p_key,
-                "position": pos_name,
-                "char": b,
-                "type": "신살(神殺)",
-                "description": "활동 반경의 확장, 이동/이직운, 해외 교류 및 적극적 추진력"
-            })
-
-        # 5. 화개살 (華蓋殺)
-        hwagae_target = HWAGAE_MAP.get(day_branch) or HWAGAE_MAP.get(year_branch)
-        if b == hwagae_target:
-            detected_stars.append({
-                "name": "화개살",
-                "pillar": p_key,
-                "position": pos_name,
-                "char": b,
-                "type": "신살(神殺)",
-                "description": "예술적 감수성, 철학·인문학적 통찰, 전문 기술 및 재생/복구 능력"
-            })
-
-        # 6. 양인살 (羊刃殺)
-        if b == YANG_IN_MAP.get(day_stem):
-            detected_stars.append({
-                "name": "양인살",
-                "pillar": p_key,
-                "position": pos_name,
-                "char": b,
-                "type": "신살(神殺)",
-                "description": "강력한 결단력과 카리스마, 전문 분야의 독보적 칼자루를 쥠"
-            })
-
-        # 7. 홍염살 (紅艶殺)
-        if b in HONG_YEOM_MAP.get(day_stem, []):
-            detected_stars.append({
-                "name": "홍염살",
-                "pillar": p_key,
-                "position": pos_name,
-                "char": b,
-                "type": "신살(神殺)",
-                "description": "자연스러운 친화력과 다정한 이성 매력, 호감형 인상"
-            })
-
-        # 8. 백호살 (白虎殺)
-        if (s, b) in BAEKHO_SET:
-            detected_stars.append({
-                "name": "백호살",
-                "pillar": p_key,
-                "position": stem_pos_name,
-                "char": f"{s}{b}",
-                "type": "특수신살",
-                "description": "강한 집중력과 프로페셔널한 돌파력, 위기를 기회로 바꾸는 힘"
-            })
-
-        # 9. 괴강살 (魁罡殺)
-        if (s, b) in GOEGANG_SET:
-            detected_stars.append({
-                "name": "괴강살",
-                "pillar": p_key,
-                "position": stem_pos_name,
-                "char": f"{s}{b}",
-                "type": "특수신살",
-                "description": "엄청난 총명함과 리더십, 대담한 배포와 독립적 추진력"
-            })
-
-    return detected_stars
+    detected = []
+    for i, branch in enumerate(branches):
+        for name, mapping, sources, star_type, symbolism, rule_id in BRANCH_STAR_RULES:
+            matches = []
+            for index, kind in sources:
+                source = basis(index, kind)
+                targets = mapping.get(source['char'], ())
+                if branch in targets:
+                    matches.append(source)
+            if matches:
+                detected.append({
+                    'name': name, 'pillar': PILLAR_KEYS[i],
+                    'position': f'{POSITION_NAMES[i]}지', 'char': branch,
+                    'type': star_type, 'rule_id': rule_id, 'basis': matches,
+                    'interpretation_scope': 'traditional_symbolism',
+                    'description': f'전통적 상징: {symbolism}.',
+                })
+        for name, combinations, symbolism, rule_id in PILLAR_STAR_RULES:
+            if (stems[i], branch) in combinations:
+                detected.append({
+                    'name': name, 'pillar': PILLAR_KEYS[i],
+                    'position': f'{POSITION_NAMES[i]}주', 'char': stems[i] + branch,
+                    'type': '특수신살', 'rule_id': rule_id, 'basis': [basis(i, 'pillar')],
+                    'interpretation_scope': 'traditional_symbolism',
+                    'description': f'전통적 상징: {symbolism}.',
+                })
+    return detected

@@ -198,7 +198,7 @@ class BranchDynamicsV3ContractTests(unittest.TestCase):
                 'target_exposure': 0.4, 'applied_power_delta': 0,
             }],
         }
-        with self.assertRaisesRegex(ValueError, '조건부 유보'):
+        with self.assertRaisesRegex(ValueError, '탐지·유보'):
             validate_branch_dynamics_v3(data)
 
     def test_elemental_direction_cannot_be_reversed_by_power(self):

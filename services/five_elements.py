@@ -47,9 +47,9 @@ def analyze_five_elements(stems: List[str], branches: List[str], tonggeun_result
     # 4. 점수 정규화 및 반올림
     scores = {elem: round(score, 1) for elem, score in scores.items()}
 
-    # 5. 과다(Dominant) 및 결핍(Deficient) 판정
-    dominant_list = [elem for elem, count in counts.items() if count >= 3 or percentages[elem] >= 35.0]
-    deficient_list = [elem for elem, count in counts.items() if count == 0]
+    # 5. 대표 오행의 다빈도(3글자 이상)·부재. 실제 세력과 보완 필요성이 아니다.
+    frequent_list = [elem for elem, count in counts.items() if count >= 3]
+    absent_list = [elem for elem, count in counts.items() if count == 0]
 
     # Report counts only: neither weighted power dominance nor advice is evaluated here.
     distribution = ', '.join(f'{element} {count}개' for element, count in counts.items())
@@ -59,8 +59,8 @@ def analyze_five_elements(stems: List[str], branches: List[str], tonggeun_result
         "counts": counts,
         "percentages": percentages,
         "scores": scores,
-        "dominant": dominant_list,
-        "deficient": deficient_list,
+        "frequent_elements": frequent_list,
+        "absent_elements": absent_list,
         "summary": summary_text,
         "distribution_basis": "eight_visible_characters",
         "score_meaning": "provisional_weighted_index",

@@ -59,7 +59,7 @@ class BranchDynamicsTests(unittest.TestCase):
 
     def test_strength_and_relation_force_leads_are_distinct(self):
         result = analyze(list('甲甲甲甲'), list('子寅午辰'))
-        self.assertEqual(result['rule_version'], '2.19.0')
+        self.assertEqual(result['rule_version'], '2.22.0')
         generation = next(r for r in pair(result, 'year', 'month')['relations']
                           if r['type'] == '생')
         self.assertEqual(generation['dominance'], 'month')
@@ -240,13 +240,13 @@ class BranchDynamicsTests(unittest.TestCase):
         self.assertNotEqual(result['branch_strengths']['year']['effective_power'],
                             hypothetical['branch_strengths']['year']['effective_power'])
 
-    def test_conditional_combination_does_not_suppress_separate_generation(self):
+    def test_detected_combination_with_external_clash_does_not_suppress_generation(self):
         result = analyze(list('甲甲甲甲'), list('申寅亥子'))
         pair_result = pair(result, 'month', 'day')
         combination = next(r for r in pair_result['relations']
                            if r['type'] == '육합(六合)')
         generation = next(r for r in pair_result['relations'] if r['type'] == '생')
-        self.assertEqual(combination['activation_status'], 'conditional')
+        self.assertEqual(combination['activation_status'], 'detected')
         self.assertEqual(set(combination['force'].values()), {0.0})
         self.assertEqual(generation['activation_status'], 'potential')
         evidence = next(e for e in result['branch_strengths']['month']['ambient_evidence']
@@ -254,7 +254,7 @@ class BranchDynamicsTests(unittest.TestCase):
         self.assertGreater(evidence['adjustment_ratio'], 0)
         self.assertEqual(evidence['element_relation_id'], generation['relation_id'])
         self.assertIn({'relation_id': combination['relation_id'],
-                       'type': '육합(六合)', 'activation_status': 'conditional'},
+                       'type': '육합(六合)', 'activation_status': 'detected'},
                       evidence['related_relations'])
         self.assertEqual(evidence['activation_status'], 'potential')
 
@@ -283,7 +283,7 @@ class BranchDynamicsTests(unittest.TestCase):
         self.assertEqual(pair_result['primary_relation'], '육합(六合)')
         combination = next(r for r in pair_result['relations']
                            if r['type'] == '육합(六合)')
-        self.assertEqual(combination['activation_status'], 'active')
+        self.assertEqual(combination['activation_status'], 'detected')
         self.assertEqual(combination['status_reason'],
                          'combination_candidate_not_transformation')
         self.assertEqual(combination['directional_mechanisms']['year'],
@@ -328,10 +328,10 @@ class BranchDynamicsTests(unittest.TestCase):
                        if r['type'] == '육합(六合)')
         self.assertGreater(six_hap['force']['month_to_day'], 0)
         self.assertGreater(six_hap['force']['day_to_month'], 0)
-        self.assertEqual(formation['overlapping_pairs'], [{
-            'relation_id': six_hap['relation_id'],
-            'covered_in_harmony_score': True,
-        }])
+        self.assertIn({'relation_id': six_hap['relation_id'],
+                       'participants': ['month', 'day']}, formation['overlapping_pairs'])
+        self.assertTrue(all(set(p['participants']).issubset(formation['pillars'])
+                            for p in formation['overlapping_pairs']))
         self.assertEqual(formation['directional_candidates'], [])
         self.assertEqual(group['pair_overlap_policy'],
                          'preserve_pair_do_not_sum_group_force')
@@ -348,10 +348,10 @@ class BranchDynamicsTests(unittest.TestCase):
         self.assertNotEqual(formations[0]['overlapping_pairs'][0]['relation_id'],
                             formations[1]['overlapping_pairs'][0]['relation_id'])
 
-    def test_suppressed_group_preserves_uncovered_fallback_half_hap(self):
+    def test_trine_with_wing_clash_preserves_other_half_candidate(self):
         result = analyze(list('甲甲甲甲'), list('巳亥卯未'))
         group = next(g for g in result['groups'] if g['type'] == '삼합(三合)')
-        self.assertEqual(group['activation_status'], 'suppressed')
+        self.assertEqual(group['activation_status'], 'detected')
         self.assertEqual(group['status'], 'not_scored')
         self.assertNotIn('force', group)
         formation = group['formation_evidence'][0]
@@ -363,10 +363,10 @@ class BranchDynamicsTests(unittest.TestCase):
         self.assertGreater(half['force']['day_to_hour'], 0)
         self.assertEqual(formation['overlapping_pairs'], [{
             'relation_id': half['relation_id'],
-            'covered_in_harmony_score': False,
+            'participants': ['day', 'hour'],
         }])
-        self.assertEqual(group['direction_status'], 'suppressed')
-        self.assertTrue(all(candidate['activation_status'] == 'suppressed'
+        self.assertEqual(group['direction_status'], 'undetermined')
+        self.assertTrue(all(candidate['activation_status'] == 'candidate_only'
                             for candidate in formation['directional_candidates']))
 
     def test_three_hap_direction_candidates_follow_center_position(self):
@@ -374,8 +374,8 @@ class BranchDynamicsTests(unittest.TestCase):
             analyze(list('甲甲甲甲'), list('亥卯未亥'))).model_dump()
         group = next(g for g in result['groups'] if g['type'] == '삼합(三合)')
         self.assertEqual(group['action_rule_id'], 'group:삼합:亥卯未')
-        self.assertEqual(group['direction_status'], 'candidate_only')
-        self.assertEqual(group['activation_status'], 'potential')
+        self.assertEqual(group['direction_status'], 'undetermined')
+        self.assertEqual(group['activation_status'], 'detected')
         self.assertEqual(group['status'], 'not_scored')
         self.assertNotIn('force', group)
         first, second = group['formation_evidence']

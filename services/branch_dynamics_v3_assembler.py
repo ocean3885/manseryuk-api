@@ -223,8 +223,10 @@ def _covered_half_combinations(branches, dynamics_v2):
     """완성 삼합 후보의 내부 반합 위치 쌍을 구조 근거로 찾는다."""
     covered = set()
     for group in dynamics_v2['groups']:
+        condition = group.get('condition_evidence', {})
         if (group['type'] != '삼합(三合)' or
-                group['activation_status'] not in ('potential', 'conditional')):
+                condition.get('adjacent_clashes') or condition.get('adjacent_wing_clashes') or
+                group['activation_status'] not in ('potential', 'conditional', 'detected')):
             continue
         for formation in group['formations']:
             for left, right in combinations(formation, 2):
@@ -426,10 +428,10 @@ def assemble_branch_pairs_v3(branches, dynamics_v2):
                 'direction': None if structural_half else direction,
                 'metrics': metrics,
                 'power_before': None if structural_half else event['power_before'],
-                'force_dominance': None if ziwu or not quantifiable or status in ('conditional', 'suppressed')
+                'force_dominance': None if ziwu or not quantifiable or status in ('conditional', 'suppressed', 'detected')
                                    else event['force_dominance'],
                 'roles': ({zi_pillar: 'attacker', wu_pillar: 'resistor'} if ziwu else
-                          None if not quantifiable or status in ('conditional', 'suppressed')
+                          None if not quantifiable or status in ('conditional', 'suppressed', 'detected')
                           else event['roles']),
                 'evidence': evidence,
             }
@@ -556,7 +558,9 @@ def assemble_branch_groups_v3(branches, dynamics_v2, pairs_v3):
                 raise ValueError(f'{group_id}: 성립 조합의 지지가 다릅니다.')
             evidence = source_formations.get(tuple(formation), {})
             components = []
-            if group_type == 'trine' and source['activation_status'] in ('potential', 'conditional'):
+            if (group_type == 'trine' and not condition.get('adjacent_clashes')
+                    and not condition.get('adjacent_wing_clashes')
+                    and source['activation_status'] in ('potential', 'conditional', 'detected')):
                 for left, right in combinations(formation, 2):
                     pair = [left, right]
                     pair_members = frozenset(branches[PILLARS.index(pillar)] for pillar in pair)

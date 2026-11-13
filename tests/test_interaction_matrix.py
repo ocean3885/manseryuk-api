@@ -20,6 +20,11 @@ def pairs(result, kind):
 
 
 class InteractionMatrixTests(unittest.TestCase):
+    def test_empty_matrix_does_not_invent_a_climate(self):
+        result = matrix('子子子子')
+        self.assertEqual(result, {'rule_version': '2.0.0', 'summary_list': [], 'matrix': []})
+        self.assertEqual(InteractionsInfo.model_validate(result).model_dump(), result)
+
     def test_break_and_clash_are_active_at_adjacent_and_distant_positions(self):
         cases = [
             ('子午辰寅', 'year', 'month', '충(沖)', 1.0),
@@ -53,14 +58,14 @@ class InteractionMatrixTests(unittest.TestCase):
                                 if item['type'] == kind
                                 and item['from_pillar'] == left
                                 and item['to_pillar'] == right)
-                self.assertEqual(relation['activation_status'], 'active')
+                self.assertEqual(relation['activation_status'], 'detected' if kind == '육합(六合)' else 'active')
                 self.assertEqual(relation['activation_rule_id'],
-                                 'branch:pair_presence_active_v1')
+                                 None if kind == '육합(六合)' else 'branch:pair_presence_active_v1')
                 self.assertEqual(relation['weight'], weight)
 
     def test_clash_condition_and_adjacent_self_punishment_remain_separate(self):
-        for branches, status in [('子午丑寅', 'suppressed'),
-                                 ('午子丑寅', 'conditional')]:
+        for branches, status in [('子午丑寅', 'detected'),
+                                 ('午子丑寅', 'detected')]:
             with self.subTest(branches=branches):
                 combination = next(item for item in matrix(branches)['matrix']
                                    if item['type'] == '육합(六合)')
@@ -85,7 +90,7 @@ class InteractionMatrixTests(unittest.TestCase):
                     ('year', 'month'), ('year', 'day'), ('month', 'day')})
                 for pair in (('year', 'month'), ('month', 'day')):
                     self.assertEqual(punishments[pair]['activation_status'], 'active')
-                    self.assertEqual(punishments[pair]['score'], 0)
+                    self.assertNotIn('score', punishments[pair])
                 self.assertEqual(punishments[('year', 'day')]['activation_status'],
                                  'candidate_only')
                 self.assertIsNone(punishments[('year', 'day')]['activation_rule_id'])
@@ -109,7 +114,7 @@ class InteractionMatrixTests(unittest.TestCase):
         relations = get_relations_for_branch('子', 0, branches, list('甲甲甲甲'))
         self.assertEqual(relations['six_haps'], all_haps)
         self.assertNotIn('six_haps_all', relations)
-        self.assertEqual(matrix(branches)['harmony_score'], 5.1)
+        self.assertEqual(len(pairs(matrix(branches), '육합(六合)')), 4)
 
     def test_six_hap_hidden_stem_candidates_survive_schema(self):
         result = matrix('午未子丑')
@@ -134,7 +139,7 @@ class InteractionMatrixTests(unittest.TestCase):
         for kind, stems, branches, expected_elements in cases:
             with self.subTest(kind=kind):
                 result = matrix(branches, stems)
-                self.assertEqual(result['rule_version'], '1.3.0')
+                self.assertEqual(result['rule_version'], '2.0.0')
                 encoded = InteractionsInfo.model_validate(result).model_dump()
                 items = [r for r in encoded['matrix'] if r['type'] == kind]
                 self.assertEqual({r['candidate_element'] for r in items},
@@ -143,7 +148,7 @@ class InteractionMatrixTests(unittest.TestCase):
 
         suppressed = matrix('亥酉卯未')
         group = next(r for r in suppressed['matrix'] if r['type'] == '삼합(三合)')
-        self.assertEqual(group['activation_status'], 'suppressed')
+        self.assertEqual(group['activation_status'], 'detected')
         self.assertEqual(group['candidate_element'], '木')
         self.assertIsNone(group['transformed_element'])
         dynamics = analyze_branch_dynamics(
@@ -162,45 +167,27 @@ class InteractionMatrixTests(unittest.TestCase):
                             if (branches[i], branches[j]) in SIX_HAPS or (branches[j], branches[i]) in SIX_HAPS}
                 self.assertEqual(pairs(matrix(branches), '육합(六合)'), expected)
 
-    def test_group_coverage_keeps_pair_candidate_without_double_counting(self):
-        result = matrix('巳午未寅')
-        encoded = InteractionsInfo.model_validate(result).model_dump()
-        group = next(r for r in encoded['matrix'] if r['type'] == '방합(方合)')
-        included = next(r for r in encoded['matrix']
-                        if r['type'] == '육합(六合)' and
-                        r['participants'] == ['month', 'day'])
-        outside = next(r for r in encoded['matrix']
-                       if r['type'] == '반합(半合)' and
-                       r['participants'] == ['month', 'hour'])
-        self.assertEqual((group['score'], group['score_contribution']), (3.5, 3.5))
-        self.assertEqual((included['score'], included['score_contribution']),
-                         (1.5, 0.0))
-        self.assertEqual(included['score_covered_by'], group['relation_id'])
-        self.assertEqual((outside['score'], outside['score_contribution']),
-                         (0.91, 0.91))
-        self.assertIsNone(outside['score_covered_by'])
-        self.assertEqual(result['harmony_score'], 4.4)
-
-        repeated = matrix('亥子丑子')
-        group = next(r for r in repeated['matrix'] if r['type'] == '방합(方合)')
-        covered = [r for r in repeated['matrix'] if r['type'] == '육합(六合)']
-        self.assertEqual(len(covered), 2)
-        self.assertTrue(all(r['score_contribution'] == 0.0 and
-                            r['score_covered_by'] == group['relation_id']
-                            for r in covered))
-        self.assertEqual(repeated['harmony_score'], 3.5)
-
-        # 깨진 삼합의 점수 0은 남아 있는 반합 후보를 덮지 않는다.
-        fallback = matrix('巳亥卯未')
-        half = next(r for r in fallback['matrix'] if r['type'] == '반합(半合)')
-        self.assertEqual(half['score_contribution'], half['score'])
-        self.assertIsNone(half['score_covered_by'])
-        self.assertEqual(fallback['harmony_score'], 1.1)
+    def test_groups_keep_pair_facts_without_score_coverage(self):
+        for branches, kind, included_pairs in (
+            ('巳午未寅', '방합(方合)', {('month', 'day')}),
+            ('亥子丑子', '방합(方合)', {('month', 'day'), ('day', 'hour')}),
+            ('巳亥卯未', '삼합(三合)', set()),
+        ):
+            with self.subTest(branches=branches):
+                result = matrix(branches)
+                encoded = InteractionsInfo.model_validate(result).model_dump()
+                self.assertTrue(any(r['type'] == kind for r in encoded['matrix']))
+                self.assertTrue(included_pairs.issubset(pairs(encoded, '육합(六合)')))
+                for row in encoded['matrix']:
+                    for field in ('score', 'score_contribution', 'score_covered_by'):
+                        self.assertNotIn(field, row)
+                for field in ('tension_score', 'harmony_score', 'climate'):
+                    self.assertNotIn(field, encoded)
+        self.assertEqual(pairs(matrix('巳亥卯未'), '반합(半合)'), {('day', 'hour')})
 
     def test_half_hap_includes_each_repeated_partner(self):
         result = matrix('寅午午酉')
         self.assertEqual(pairs(result, '반합(半合)'), {('year', 'month'), ('year', 'day')})
-        self.assertEqual(result['harmony_score'], 2.2)
         for branches in sorted(set(permutations('寅午午酉'))):
             expected = {(PILLARS[i], PILLARS[j]) for i, j in combinations(range(4), 2)
                         if {branches[i], branches[j]} == {'寅', '午'}}
@@ -225,7 +212,7 @@ class InteractionMatrixTests(unittest.TestCase):
                 self.assertEqual(group['formations'], [['year', 'month', 'day'], ['month', 'day', 'hour']])
                 self.assertEqual(group['relation_scope'], 'group')
                 self.assertEqual(group['from_pillar'], 'all')
-                self.assertEqual(group['score'], 3.0 if kind == '삼합(三合)' else 3.5)
+                self.assertNotIn('score', group)
                 for index in range(4):
                     details = checker(branches[index], index, list(branches), '甲')
                     if checker == check_three_hap:

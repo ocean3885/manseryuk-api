@@ -14,11 +14,8 @@ from services.branch_relations import (
 from services.stem_relations import (
     check_stem_combination,
     check_stem_conflict,
-    check_stem_restrain
 )
-from services.relation_rules import (
-    get_pair_action_rule, HARMONY_SCORE_TYPES, HARMONY_GROUP_COVERS_PAIR,
-)
+from services.relation_rules import get_pair_action_rule
 
 POSITION_NAMES = ['년', '월', '일', '시']
 PILLAR_KEYS = ['year', 'month', 'day', 'hour']
@@ -26,13 +23,10 @@ PILLAR_KEYS = ['year', 'month', 'day', 'hour']
 def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: str) -> Dict[str, Any]:
     """
     4개 기둥 간의 모든 천간/지지 상호작용(합, 충, 형, 천, 파, 극)을 분석하고
-    상세 매트릭스, 요약 목록, 긴장도(Tension) 및 조화도(Harmony) 점수를 산출합니다.
+    위치별 관계 매트릭스와 요약을 반환합니다. 점수·총계·기후 유형은 산출하지 않습니다.
     """
     matrix: List[Dict[str, Any]] = []
     summary_list: List[str] = []
-    
-    tension_score = 0.0
-
     # 거리별 가중치 (차이 1: 1.0, 차이 2: 0.7, 차이 3: 0.5)
     def get_dist_weight(dist: int) -> float:
         if dist == 1:
@@ -58,9 +52,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
             if chungs:
                 for c in chungs:
                     if c.get('with_index') == j:
-                        score = 2.0 * weight
-                        tension_score += score
-                        desc = f"{name_from}지({b1})-{name_to}지({b2}) 육충: 기반 변동 및 마찰"
+                        desc = f"{name_from}지({b1})-{name_to}지({b2}) 육충 관계가 있습니다."
                         summary_list.append(desc)
                         matrix.append({
                             "category": "지지",
@@ -70,7 +62,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "to_pillar": pos_to,
                             "is_adjacent": (dist == 1),
                             "weight": weight,
-                            "score": score,
                             "activation_status": c['activation_status'],
                             "activation_rule_id": c['activation_rule_id'],
                             "status_reasons": c['status_reasons'],
@@ -82,7 +73,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             if hap['with_index'] == j), None)
             if six_hap and six_hap.get('with_index') == j:
                 status = six_hap['activation_status']
-                score = 1.5 * weight if status == 'active' else 0.0
                 pair_rule = get_pair_action_rule(b1, b2, '육합(六合)')
                 effect = pair_rule[1] if pair_rule else {}
                 hidden_candidates = [
@@ -91,8 +81,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     for candidate in effect.get('hidden_stem_candidates', [])
                 ]
                 desc = (f"{name_from}지({b1})-{name_to}지({b2}) "
-                        f"육합({six_hap['candidate_element']} 후보): " +
-                        ('결합 성립' if status == 'active' else '인접 충으로 작용 유보'))
+                        f"육합 조합({six_hap['candidate_element']} 후보): "
+                        '조합과 주변 충의 존재를 기록함')
                 summary_list.append(desc)
                 matrix.append({
                     "category": "지지",
@@ -102,7 +92,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     "to_pillar": pos_to,
                     "is_adjacent": (dist == 1),
                     "weight": weight,
-                    "score": score,
                     "candidate_element": six_hap['candidate_element'],
                     "transformed_element": None,
                     "activation_status": status,
@@ -127,9 +116,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
             if cheons:
                 for c in cheons:
                     if c.get('with_index') == j:
-                        score = 1.5 * weight
-                        tension_score += score
-                        desc = f"{name_from}지({b1})-{name_to}지({b2}) 천(穿): 암묵적 갈등 및 손상"
+                        desc = f"{name_from}지({b1})-{name_to}지({b2}) 천(穿) 관계가 있습니다."
                         summary_list.append(desc)
                         matrix.append({
                             "category": "지지",
@@ -139,7 +126,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "to_pillar": pos_to,
                             "is_adjacent": (dist == 1),
                             "weight": weight,
-                            "score": score,
                             "activation_status": c['activation_status'],
                             "activation_rule_id": c['activation_rule_id'],
                             "status_reasons": c['status_reasons'],
@@ -153,13 +139,10 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     if p.get('with_index') == j:
                         is_self_punishment = p.get('type') == '자형'
                         candidate_only = p['activation_status'] == 'candidate_only'
-                        # 자형의 독립 강도는 미정이다. 기존 긴장 총점에 합산하지 않는다.
-                        score = 0.0 if is_self_punishment else 1.5 * weight
-                        tension_score += score
                         desc = (f"{name_from}지({b1})-{name_to}지({b2}) "
                                 f"형({p.get('type', '')}): " +
                                 ("격위 자형 후보" if candidate_only else
-                                 "인접 자형 성립" if is_self_punishment else "조정 및 압박"))
+                                 "인접 자형 성립" if is_self_punishment else "형 관계가 있습니다."))
                         summary_list.append(desc)
                         matrix.append({
                             "category": "지지",
@@ -169,7 +152,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "to_pillar": pos_to,
                             "is_adjacent": (dist == 1),
                             "weight": weight,
-                            "score": score,
                             "activation_status": p['activation_status'],
                             "activation_rule_id": p['activation_rule_id'],
                             "status_reasons": p['status_reasons'],
@@ -181,9 +163,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
             if breaks:
                 for b in breaks:
                     if b.get('with_index') == j:
-                        score = 1.0 * weight
-                        tension_score += score
-                        desc = f"{name_from}지({b1})-{name_to}지({b2}) 파: 미세한 균열 및 파괴"
+                        desc = f"{name_from}지({b1})-{name_to}지({b2}) 파 관계가 있습니다."
                         summary_list.append(desc)
                         matrix.append({
                             "category": "지지",
@@ -193,7 +173,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "to_pillar": pos_to,
                             "is_adjacent": (dist == 1),
                             "weight": weight,
-                            "score": score,
                             "activation_status": b['activation_status'],
                             "activation_rule_id": b['activation_rule_id'],
                             "status_reasons": b['status_reasons'],
@@ -208,12 +187,10 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                         h_type = hh.get('type', '반합')
                         h_elem = hh['candidate_element']
                         fallback = hh.get('fallback_from')
-                        base_score = 1.3 if '전반합' in h_type else (1.1 if '후반합' in h_type else 0.6)
-                        score = round(base_score * weight, 2)
                         desc = (f"{name_from}지({b1})-{name_to}지({b2}) "
                                 f"{h_type}({h_elem}): " +
-                                ('삼합 훼손 후 남은 반합 후보' if fallback else
-                                 '협력 및 발전적 결합'))
+                                ('삼합 날개 인접 충과 함께 있는 반합 후보' if fallback else
+                                 '두 지지의 반합 후보'))
                         summary_list.append(desc)
                         matrix.append({
                             "category": "지지",
@@ -223,7 +200,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "to_pillar": pos_to,
                             "is_adjacent": (dist == 1),
                             "weight": weight,
-                            "score": score,
                             "candidate_element": h_elem,
                             "transformed_element": None,
                             "activation_status": hh['activation_status'],
@@ -242,7 +218,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "description": desc
                         })
 
-            # (7) 공합: 중신이 없는 생지·성지 구조 후보. 점수는 아직 보정하지 않는다.
+            # (7) 공합: 중신이 없는 생지·성지 구조 후보.
             gong = next((item for item in check_gong_hap(b1, i, branches, day_stem)
                          if item['with_index'] == j), None)
             if gong:
@@ -252,7 +228,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                 matrix.append({
                     'category': '지지', 'type': '공합(拱合)', 'name': f'{b1}{b2}공합',
                     'from_pillar': pos_from, 'to_pillar': pos_to,
-                    'is_adjacent': dist == 1, 'weight': weight, 'score': 0.0,
+                    'is_adjacent': dist == 1, 'weight': weight,
                     'candidate_element': gong['candidate_element'],
                     'missing_branch': gong['missing'],
                     'activation_status': gong['activation_status'], 'status_reasons': gong['status_reasons'], 'description': desc,
@@ -267,7 +243,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                 matrix.append({
                     'category': '지지', 'type': '암합(暗合)', 'name': f'{b1}{b2}암합',
                     'from_pillar': pos_from, 'to_pillar': pos_to,
-                    'is_adjacent': dist == 1, 'weight': weight, 'score': 0.0,
+                    'is_adjacent': dist == 1, 'weight': weight,
                     'hidden_stem_pairs': hidden_hap['hidden_stem_pairs'],
                     'activation_status': hidden_hap['activation_status'], 'status_reasons': hidden_hap['status_reasons'], 'description': desc,
                 })
@@ -289,9 +265,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
             if stem_haps:
                 for h in stem_haps:
                     if h.get('with_index') == j:
-                        score = 1.8 * weight
                         desc = (f"{name_from}간({s1})-{name_to}간({s2}) "
-                                f"천간합 후보({h['candidate_element']}): 유화 및 의기투합")
+                                f"천간합 조합({h['candidate_element']} 후보)")
                         summary_list.append(desc)
                         matrix.append({
                             "category": "천간",
@@ -301,7 +276,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "to_pillar": pos_to,
                             "is_adjacent": (dist == 1),
                             "weight": weight,
-                            "score": score,
                             "candidate_element": h['candidate_element'],
                             "activation_status": h['activation_status'],
                             "status_reasons": h['status_reasons'],
@@ -314,9 +288,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
             if stem_conflicts:
                 for c in stem_conflicts:
                     if c.get('with_index') == j:
-                        score = 1.5 * weight
-                        tension_score += score
-                        desc = f"{name_from}간({s1})-{name_to}간({s2}) 천간충: 직접적인 대립 및 표출"
+                        desc = f"{name_from}간({s1})-{name_to}간({s2}) 천간충 관계가 있습니다."
                         summary_list.append(desc)
                         matrix.append({
                             "category": "천간",
@@ -326,7 +298,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "to_pillar": pos_to,
                             "is_adjacent": (dist == 1),
                             "weight": weight,
-                            "score": score,
                             "activation_status": c['activation_status'],
                             "status_reasons": c['status_reasons'],
                             "description": desc
@@ -352,8 +323,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                 'from_pillar': 'all', 'to_pillar': 'all',
                 'is_adjacent': group['is_adjacent'],
                 'weight': 1.0,
-                # 각 쌍의 천·충·육합 또는 지세형·충과 중복 가산하지 않는다.
-                'score': 0.0,
                 'activation_status': group['activation_status'],
                 'activation_rule_id': group['activation_rule_id'],
                 'status_reasons': group['status_reasons'],
@@ -368,10 +337,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
             if elem not in seen_three_haps:
                 seen_three_haps.add(elem)
                 status = th['activation_status']
-                score = 3.0 if status == 'potential' else 0.0
-                desc = (f"지지 삼합({elem}국): " +
-                        ("국(局) 형성 후보" if status == 'potential' else
-                         "구조 조건으로 국(局) 형성 유보"))
+                desc = f"지지 삼합({elem}국 후보): 구성·중신 위치·주변 충을 기록함"
                 summary_list.append(desc)
                 matrix.append({
                     "category": "지지",
@@ -383,7 +349,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     "to_pillar": "all",
                     "is_adjacent": th.get('is_adjacent', True),
                     "weight": 1.0,
-                    "score": score,
                     "candidate_element": elem,
                     "transformed_element": None,
                     "activation_status": status,
@@ -391,6 +356,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     "condition_evidence": {
                         'summary': th['condition_evidence']['summary'],
                         'middle_members': th['condition_evidence']['middle_members'],
+                        'middle_count': th['condition_evidence']['middle_count'],
                         'middle_pillars': [PILLAR_KEYS[p] for p in
                                            th['condition_evidence']['middle_indices']],
                         'adjacent_clashes': [
@@ -419,7 +385,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                 season = sq.get('season', '')
                 if elem not in seen_square_haps:
                     seen_square_haps.add(elem)
-                    desc = f"지지 방합({season} {elem}방): 강력한 방위 계절 세력 형성"
+                    desc = f"지지 방합({season} {elem}방): 방합 구성 후보"
                     summary_list.append(desc)
                     matrix.append({
                         "category": "지지",
@@ -431,7 +397,6 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                         "to_pillar": "all",
                         "is_adjacent": sq.get('is_adjacent', True),
                         "weight": 1.0,
-                        "score": 3.5,
                         "candidate_element": elem,
                         "transformed_element": None,
                         "activation_status": sq['activation_status'],
@@ -450,32 +415,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
         item['relation_id'] = ':'.join((item['category'], item['type'], item['name'],
                                         ','.join(item['participants'])))
 
-    # 서로 다른 관계 후보는 보존한다. 총점에는 활성 다자 구조 안의 같은 쌍을
-    # 한 번만 반영하고, 쌍의 개별 잠재 점수와 방향별 작용은 그대로 남긴다.
-    for item in matrix:
-        item['score_contribution'] = item['score']
-        item['score_covered_by'] = None
-    for group in matrix:
-        covered_types = HARMONY_GROUP_COVERS_PAIR.get(group['type'])
-        if not covered_types or group['score'] <= 0:
-            continue
-        formations = [set(formation) for formation in group['formations']]
-        for item in matrix:
-            if (item['type'] in covered_types and item['score_contribution'] > 0 and
-                    any(set(item['participants']) <= formation
-                        for formation in formations)):
-                item['score_contribution'] = 0.0
-                item['score_covered_by'] = group['relation_id']
-    harmony_score = sum(item['score_contribution'] for item in matrix
-                        if item['type'] in HARMONY_SCORE_TYPES)
-
     return {
-        "rule_version": "1.3.0",
+        "rule_version": "2.0.0",
         "summary_list": list(dict.fromkeys(summary_list)),
         "matrix": matrix,
-        "tension_score": round(tension_score, 1),
-        "harmony_score": round(harmony_score, 1),
-        "climate": "격렬한 변동과 도전형" if tension_score > harmony_score + 2 else (
-            "유화적이고 안정적인 조화형" if harmony_score > tension_score + 2 else "긴장과 조화가 공존하는 복합형"
-        )
     }

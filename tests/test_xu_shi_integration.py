@@ -51,7 +51,7 @@ class XuShiIntegrationTests(unittest.TestCase):
             branch_dynamics = advanced['branch_dynamics']
             self.assertEqual(branch_dynamics['scope'], 'natal')
             self.assertEqual(branch_dynamics['score_meaning'], 'uncalibrated_relative_model_index')
-            self.assertEqual(branch_dynamics['rule_version'], '2.19.0')
+            self.assertEqual(branch_dynamics['rule_version'], '2.22.0')
             self.assertEqual(set(branch_dynamics['branch_strengths']), {'year', 'month', 'day', 'hour'})
             self.assertEqual(len(branch_dynamics['pairwise']), 6)
             self.assertTrue(all('force_dominance' in relation
@@ -63,22 +63,23 @@ class XuShiIntegrationTests(unittest.TestCase):
             self.assertEqual(branch_dynamics['branch_strengths']['month']['branch'], '巳')
             self.assertEqual(branch_dynamics['branch_strengths']['month']['stem_branch_relation']['stem'], '辛')
             bin_zhu = advanced['bin_zhu_dynamics']
-            self.assertEqual(bin_zhu['interaction_scope'], 'pairwise')
-            self.assertTrue(bin_zhu['excluded_interactions'])
+            self.assertEqual(bin_zhu['interaction_scope'], 'cross_domain_relations')
+            self.assertEqual(bin_zhu['excluded_interactions'], [])
             self.assertEqual(bin_zhu['excluded_interactions'], result['advanced_analysis']['bin_zhu_dynamics']['excluded_interactions'])
             self.assertEqual(bin_zhu['group_connections'], result['advanced_analysis']['bin_zhu_dynamics']['group_connections'])
             self.assertEqual(bin_zhu['guest_host_links'], result['advanced_analysis']['bin_zhu_dynamics']['guest_host_links'])
             self.assertTrue(bin_zhu['group_connections'])
-            self.assertEqual(bin_zhu['rule_version'], '3.0.0')
+            self.assertEqual(bin_zhu['rule_version'], '4.0.0')
             interactions = advanced['interactions']
-            self.assertEqual(interactions['rule_version'], '1.3.0')
+            self.assertEqual(interactions['rule_version'], '2.0.0')
             relation_ids = {r['relation_id'] for r in interactions['matrix']}
             for group in bin_zhu['group_connections']:
                 self.assertIn(group['relation_id'], relation_ids)
-                self.assertFalse(group['included_in_score'])
+                self.assertNotIn('included_in_score', group)
             for link in bin_zhu['guest_host_links']:
                 self.assertIn(link['relation_id'], relation_ids)
-            self.assertTrue(any(p.startswith('【빈주 계산 범위】') for p in advanced['ai_consultation_prompts']))
+            self.assertFalse(any(p.startswith(('【빈주', '【사주 기후】'))
+                                 for p in advanced['ai_consultation_prompts']))
             xu_shi = advanced['xu_shi_dynamics']
             self.assertEqual(xu_shi, result['advanced_analysis']['xu_shi_dynamics'])
             self.assertEqual(xu_shi['rule_version'], '4.0.0')

@@ -1,0 +1,203 @@
+{
+  "basis_commit": "6b0cf25",
+  "fixture_scope": "fixed_pillars_not_calendar_births",
+  "cases": [
+    {
+      "case": "six_no_clash",
+      "stems": "甲甲甲甲",
+      "branches": "子丑寅辰",
+      "source_relation_id": "branch:combine:year:month",
+      "activation_status": "active",
+      "status_reason": "combination_candidate_not_transformation",
+      "status_reasons": [
+        "combination_candidate_not_transformation"
+      ],
+      "display_status": "성립",
+      "decision_explanations": [
+        "등록된 관계의 두 지지가 원국에 함께 있고 현행 성립 조건을 충족합니다."
+      ],
+      "matrix_score": 1.5,
+      "matrix_score_contribution": 1.5,
+      "condition_summary": "육합 성립을 제한하는 인접 충이 확인되지 않았습니다.",
+      "v3_calculation_status": "potential_calculated",
+      "v3_applied_power_deltas": [
+        null,
+        null
+      ]
+    },
+    {
+      "case": "six_external_clash",
+      "stems": "甲甲甲甲",
+      "branches": "午子丑寅",
+      "source_relation_id": "branch:combine:month:day",
+      "activation_status": "conditional",
+      "status_reason": "external_adjacent_clash",
+      "status_reasons": [
+        "external_adjacent_clash"
+      ],
+      "display_status": "조건부",
+      "decision_explanations": [
+        "원국 월지 子(정인) ↔ 원국 연지 午(상관)의 인접 충이 합의 바깥에서 개입하여 육합 성립을 조건부로 둡니다."
+      ],
+      "matrix_score": 0.0,
+      "matrix_score_contribution": 0.0,
+      "condition_summary": "년지 午(상관) ↔ 월지 子(정인): 육합 조합 바깥의 인접 충입니다.",
+      "v3_calculation_status": "potential_calculated",
+      "v3_applied_power_deltas": [
+        null,
+        null
+      ]
+    },
+    {
+      "case": "six_intervening_clash",
+      "stems": "甲甲甲甲",
+      "branches": "子午丑寅",
+      "source_relation_id": "branch:combine:year:day",
+      "activation_status": "suppressed",
+      "status_reason": "intervening_adjacent_clash",
+      "status_reasons": [
+        "intervening_adjacent_clash"
+      ],
+      "display_status": "억제",
+      "decision_explanations": [
+        "원국 연지 子(정인) ↔ 원국 월지 午(상관)의 인접 충이 합을 이루는 두 글자 사이에 있어 육합 성립을 억제합니다."
+      ],
+      "matrix_score": 0.0,
+      "matrix_score_contribution": 0.0,
+      "condition_summary": "월지 午(상관) ↔ 년지 子(정인): 육합 두 글자 사이의 인접 충입니다.",
+      "v3_calculation_status": "resolved",
+      "v3_applied_power_deltas": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "case": "trine_single_middle",
+      "stems": "甲甲甲甲",
+      "branches": "亥卯未亥",
+      "source_relation_id": "group:trine:hai_mao_wei",
+      "activation_status": "potential",
+      "status_reason": null,
+      "status_reasons": [],
+      "display_status": "잠재",
+      "decision_explanations": [],
+      "matrix_score": 3.0,
+      "matrix_score_contribution": 3.0,
+      "condition_summary": "삼합 중신의 중복과 구성 지지의 인접 충이 확인되지 않았습니다."
+    },
+    {
+      "case": "trine_duplicate_middle",
+      "stems": "甲甲甲甲",
+      "branches": "亥卯卯未",
+      "source_relation_id": "group:trine:hai_mao_wei",
+      "activation_status": "conditional",
+      "status_reason": "duplicate_middle",
+      "status_reasons": [
+        "duplicate_middle"
+      ],
+      "display_status": "조건부",
+      "decision_explanations": [
+        "원국 월지 卯(겁재) · 원국 일지 卯(겁재)에 중신이 중복되어 삼합 성립을 조건부로 둡니다."
+      ],
+      "matrix_score": 0.0,
+      "matrix_score_contribution": 0.0,
+      "condition_summary": "월지 卯(겁재) · 일지 卯(겁재)에 삼합 중신이 중복되어 있습니다."
+    },
+    {
+      "case": "trine_wing_clash",
+      "stems": "甲甲甲甲",
+      "branches": "巳亥卯未",
+      "source_relation_id": "group:trine:hai_mao_wei",
+      "activation_status": "suppressed",
+      "status_reason": "adjacent_birth_clash",
+      "status_reasons": [
+        "adjacent_birth_clash"
+      ],
+      "display_status": "억제",
+      "decision_explanations": [
+        "원국 월지 亥(편인) ↔ 원국 연지 巳(식신)의 인접 충으로 삼합 생지가 충을 받아 완전한 삼합 성립을 억제합니다."
+      ],
+      "matrix_score": 0.0,
+      "matrix_score_contribution": 0.0,
+      "condition_summary": "년지 巳(식신) ↔ 월지 亥(편인): 삼합 생지의 인접 충입니다."
+    },
+    {
+      "case": "self_required_missing",
+      "stems": "丙甲甲甲",
+      "branches": "戌子寅卯",
+      "source_relation_id": "same_pillar:self_combine:year",
+      "activation_status": "conditional",
+      "status_reason": "required_punishment_missing",
+      "status_reasons": [
+        "required_punishment_missing"
+      ],
+      "display_status": "조건부",
+      "decision_explanations": [
+        "자합에 필요한 未와의 형 조건이 확인되지 않아 성립을 유보합니다."
+      ],
+      "self_combination": {
+        "is_conditional": true,
+        "condition_met": false,
+        "active": false
+      }
+    },
+    {
+      "case": "self_required_present",
+      "stems": "丙甲甲甲",
+      "branches": "戌未寅卯",
+      "source_relation_id": "same_pillar:self_combine:year",
+      "activation_status": "active",
+      "status_reason": null,
+      "status_reasons": [],
+      "display_status": "성립",
+      "decision_explanations": [
+        "필수 형 조건이 확인되어 현재 원국 규칙에서 자합이 성립합니다."
+      ],
+      "self_combination": {
+        "is_conditional": true,
+        "condition_met": true,
+        "active": true
+      }
+    },
+    {
+      "case": "self_required_present_blocked",
+      "stems": "丙甲甲甲",
+      "branches": "戌未辰卯",
+      "source_relation_id": "same_pillar:self_combine:year",
+      "activation_status": "suppressed",
+      "status_reason": "blocked_by_chen_chung",
+      "status_reasons": [
+        "blocked_by_chen_chung"
+      ],
+      "display_status": "억제",
+      "decision_explanations": [
+        "원국 연지 戌(편재) · 원국 일지 辰(편재)의 충이 확인되어 이 자합의 성립을 차단합니다."
+      ],
+      "self_combination": {
+        "is_conditional": true,
+        "condition_met": true,
+        "active": false
+      }
+    },
+    {
+      "case": "self_required_missing_blocked",
+      "stems": "丙甲甲甲",
+      "branches": "戌子辰卯",
+      "source_relation_id": "same_pillar:self_combine:year",
+      "activation_status": "suppressed",
+      "status_reason": "blocked_by_chen_chung",
+      "status_reasons": [
+        "blocked_by_chen_chung"
+      ],
+      "display_status": "억제",
+      "decision_explanations": [
+        "원국 연지 戌(편재) · 원국 일지 辰(편재)의 충이 확인되어 이 자합의 성립을 차단합니다."
+      ],
+      "self_combination": {
+        "is_conditional": true,
+        "condition_met": false,
+        "active": false
+      }
+    }
+  ]
+}

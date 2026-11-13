@@ -302,20 +302,14 @@ def _same_pillar_rows(stems, branches, analysis, dynamics):
         expected = check_jahab(stems[index], branches[index], index,
                                branch_relations['chungs'], branch_relations['punishments'])
         if jahab != expected or (rule is None) != (jahab is None):
-            raise ValueError(f'{pillar}: 자합 판정과 글자별 분석이 다릅니다.')
+            raise ValueError(f'{pillar}: 자합 조합·주변 관계와 글자별 분석이 다릅니다.')
         if jahab is None:
             continue
-        reason = jahab.get('inactive_reason')
-        status = ('active' if jahab['active'] else
-                  'suppressed' if reason == 'blocked_by_chen_chung' else
-                  'conditional' if reason == 'required_punishment_missing' else None)
-        if status is None:
-            raise ValueError(f'{pillar}: 모르는 자합 판정 상태입니다.')
         rows.append(_row(
             f'same_pillar:self_combine:{pillar}', 'self_combine',
-            [f'{pillar}.stem', f'{pillar}.branch'], status,
+            [f'{pillar}.stem', f'{pillar}.branch'], jahab['activation_status'],
             [_ref('analysis_details', location=f'analysis.details.{pillar}.jahab')],
-            reason=reason, element=jahab['candidate_element'],
+            element=jahab['candidate_element'],
         ))
     return rows
 

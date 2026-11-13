@@ -13,13 +13,13 @@
     "presentation": {
       "rule_version": "1.0.0",
       "title": "원국 연지 亥(겁재) · 원국 일지 卯(식신) · 원국 시지 未(편관)의 삼합",
-      "status_label": "억제",
+      "status_label": "탐지",
       "description": "원국 연지 亥(겁재) · 원국 일지 卯(식신) · 원국 시지 未(편관) 사이의 삼합 관계를 기록했습니다.",
       "reasons": [
         {
           "code": "adjacent_birth_clash",
-          "category": "decision",
-          "text": "원국 연지 亥(겁재) ↔ 원국 월지 巳(정재)의 인접 충으로 삼합 생지가 충을 받아 완전한 삼합 성립을 억제합니다.",
+          "category": "structure",
+          "text": "원국 연지 亥(겁재) ↔ 원국 월지 巳(정재)의 인접 충이 삼합 생지에 함께 있습니다.",
           "character_ids": [
             "natal.chart.month.branch",
             "natal.chart.year.branch"
@@ -31,6 +31,18 @@
             0,
             1
           ]
+        },
+        {
+          "code": "detected_fact",
+          "category": "scope",
+          "text": "조합의 존재와 제공된 구성 근거를 확인했으며, 실제 성립과 작용은 확정하지 않았습니다.",
+          "character_ids": [
+            "natal.chart.day.branch",
+            "natal.chart.hour.branch",
+            "natal.chart.year.branch"
+          ],
+          "relation_ids": [],
+          "evidence_indices": []
         }
       ],
       "explanation_status": "complete",
@@ -121,18 +133,31 @@
     "presentation": {
       "rule_version": "1.0.0",
       "title": "원국 월간 辛(편인) · 원국 월지 巳(정재)의 자합",
-      "status_label": "성립",
-      "description": "원국 월간 辛(편인) ↔ 원국 월지 巳(정재)의 지장간 丙: 같은 기둥의 자합 관계입니다.",
+      "status_label": "탐지",
+      "description": "원국 월간 辛(편인) ↔ 원국 월지 巳(정재)의 지장간 丙: 같은 기둥의 자합 조합이 있습니다.",
       "reasons": [
         {
-          "code": "self_combine_condition_met",
-          "category": "decision",
-          "text": "등록된 동주 천간·지장간 조합이 확인되어 현재 원국 규칙에서 자합이 성립합니다.",
+          "code": "detected_fact",
+          "category": "scope",
+          "text": "자합 조합의 존재를 확인했으며, 성립 여부와 실제 영향은 평가하지 않았습니다.",
           "character_ids": [
             "natal.chart.month.branch",
             "natal.chart.month.stem"
           ],
           "relation_ids": [],
+          "evidence_indices": []
+        },
+        {
+          "code": "self_combine_context",
+          "category": "structure",
+          "text": "원국 연지 亥(겁재) · 원국 월지 巳(정재)의 충 관계가 함께 있습니다.",
+          "character_ids": [
+            "natal.chart.month.branch",
+            "natal.chart.year.branch"
+          ],
+          "relation_ids": [
+            "natal.chart:branch:clash:year:month"
+          ],
           "evidence_indices": [
             0
           ]

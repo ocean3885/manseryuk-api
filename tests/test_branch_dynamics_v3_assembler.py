@@ -208,7 +208,7 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
         conditional = self.relation(
             assemble_branch_pairs_v3(conditional_branches, conditional_source),
             'month:day', 'combine')
-        self.assertEqual(conditional['activation_status'], 'conditional')
+        self.assertEqual(conditional['activation_status'], 'detected')
         self.assertEqual(conditional['calculation_status'], 'potential_calculated')
         self.assertEqual(len(conditional['metrics']['directional_effects']), 2)
         self.assertTrue(all(item['applied_power_delta'] is None
@@ -346,7 +346,7 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
         source, _ = assemble(stems, branches)
         conditional = self.relation(assemble_branch_pairs_v3(branches, source),
                                     'month:day', 'combine')
-        self.assertEqual(conditional['activation_status'], 'conditional')
+        self.assertEqual(conditional['activation_status'], 'detected')
         self.assertTrue(any(item['interaction_intensity'] > 0
                             for item in conditional['metrics']['directional_effects']))
         self.assertTrue(all(item['applied_power_delta'] is None
@@ -403,18 +403,18 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
         response['interaction_resolution'] = assemble_interaction_resolution_v3(pairs, groups)
         BranchDynamicsV3Response.model_validate(response)
 
-    def test_group_suppression_does_not_erase_surviving_half(self):
+    def test_trine_with_wing_clash_keeps_other_half_candidate(self):
         stems, branches = list('甲甲甲甲'), list('巳亥卯未')
         source, _ = assemble(stems, branches)
         pairs = assemble_branch_pairs_v3(branches, source)
         group = assemble_branch_groups_v3(branches, source, pairs)[0]
-        self.assertEqual(group['formation_status'], 'suppressed')
+        self.assertEqual(group['formation_status'], 'detected')
         self.assertEqual(group['status_reasons'], ['adjacent_birth_clash'])
         self.assertEqual(group['formation_candidates'][0]['component_pairs'], [])
         self.assertEqual(self.relation(pairs, 'day:hour', 'half_combine')['calculation_status'],
                          'potential_calculated')
         resolution = assemble_interaction_resolution_v3(pairs, [group])
-        self.assertIn(group['group_id'], resolution['suppressed_interaction_ids'])
+        self.assertIn(group['group_id'], resolution['unresolved_interaction_ids'])
         self.assertIn('branch:half_combine:day:hour',
                       resolution['unresolved_interaction_ids'])
 
@@ -451,8 +451,9 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
                               ('year:hour', 'clash'),
                               ('month:hour', 'combine')):
             relation = self.relation(pairs, pair_id, kind)
-            self.assertEqual(relation['activation_status'], 'active')
-            self.assertIn(relation['relation_id'], resolution['active_interaction_ids'])
+            self.assertEqual(relation['activation_status'], 'detected' if kind == 'combine' else 'active')
+            self.assertIn(relation['relation_id'], resolution['unresolved_interaction_ids']
+                          if kind == 'combine' else resolution['active_interaction_ids'])
 
     def test_missing_structural_half_reference_is_rejected(self):
         stems, branches = list('己丁辛己'), list('亥卯未亥')
@@ -555,7 +556,7 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
                 self.assertIn(element['relation_id'],
                               resolution['suppressed_interaction_ids'])
 
-    def test_detected_combine_and_pierce_activate_without_manual_override(self):
+    def test_combine_is_fact_while_pierce_keeps_independent_activation(self):
         for branch_text, structure_type, element_type in (
             ('寅亥辰子', 'combine', 'generate'),
             ('寅巳申未', 'pierce', 'generate'),
@@ -566,15 +567,19 @@ class BranchDynamicsV3AssemblerTests(unittest.TestCase):
                 pairs = assemble_branch_pairs_v3(branches, source)
                 structure = self.relation(pairs, 'year:month', structure_type)
                 element = self.relation(pairs, 'year:month', element_type)
-                self.assertEqual(structure['activation_status'], 'active')
-                self.assertIn('branch:pair_presence_active_v1',
-                              [item['rule_id'] for item in structure['evidence']])
-                self.assertEqual(element['activation_status'], 'suppressed')
-                self.assertTrue(all(effect['applied_power_delta'] == 0
+                is_combine = structure_type == 'combine'
+                self.assertEqual(structure['activation_status'], 'detected' if is_combine else 'active')
+                self.assertEqual('branch:pair_presence_active_v1' in
+                                 [item['rule_id'] for item in structure['evidence']], not is_combine)
+                self.assertEqual(element['activation_status'], 'potential' if is_combine else 'suppressed')
+                self.assertTrue(all(effect['applied_power_delta'] is None if is_combine
+                                    else effect['applied_power_delta'] == 0
                                     for effect in element['metrics']['directional_effects']))
                 resolution = assemble_interaction_resolution_v3(pairs, [])
-                self.assertIn(structure['relation_id'], resolution['active_interaction_ids'])
-                self.assertIn(element['relation_id'], resolution['suppressed_interaction_ids'])
+                self.assertIn(structure['relation_id'], resolution['unresolved_interaction_ids']
+                              if is_combine else resolution['active_interaction_ids'])
+                self.assertIn(element['relation_id'], resolution['unresolved_interaction_ids']
+                              if is_combine else resolution['suppressed_interaction_ids'])
 
     def test_active_clash_suppresses_elemental_action(self):
         stems, branches = list('甲甲甲甲'), list('子午辰寅')

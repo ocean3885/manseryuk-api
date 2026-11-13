@@ -161,12 +161,12 @@ class BranchPostEffectGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '미해결 작용'):
             validate_branch_dynamics_v3(data)
 
-    def test_suppressed_group_is_not_its_own_blocker(self):
+    def test_detected_group_remains_unresolved_blocker(self):
         data = payload('甲甲甲甲', '巳亥卯未')
         group = data['branch_dynamics']['groups'][0]
-        self.assertEqual(group['formation_status'], 'suppressed')
+        self.assertEqual(group['formation_status'], 'detected')
         blockers = {item['ref_id'] for item in readiness(data, 'month')['blockers']}
-        self.assertNotIn(group['group_id'], blockers)
+        self.assertIn(group['group_id'], blockers)
 
     def test_even_without_blockers_final_number_needs_aggregation_trace(self):
         data = payload('甲甲甲甲', '丑丑丑丑')
