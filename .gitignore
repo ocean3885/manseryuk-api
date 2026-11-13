@@ -175,3 +175,9 @@ staticfiles/
 #.idea/
 
 # End of https://www.toptal.com/developers/gitignore/api/django
+
+# Generated interpretation database; rebuild from the pattern catalog.
+/interpretations.db
+/interpretations.db-journal
+/interpretations.db-wal
+/interpretations.db-shm

@@ -3,6 +3,7 @@ from services.branch_relations import get_relations_for_branch
 from services.calculator import get_ten_star_stem, get_ten_star_branch
 from services.stem_relations import get_relations_for_stem
 from services.relations import check_jahab
+from services.ko_analysis import get_storehouse_info
 
 def get_unseong(cheongan, jiji):
     return UNSEONG_DATA.get(cheongan, {}).get(jiji, "입력 오류")
@@ -130,14 +131,10 @@ def analyze_palja_integrated(stems, branches):
     day_stem = stems[2]
     tonggeun_results = analyze_advanced_tonggeun(stems, branches)
     
-    pillers = ['year', 'month', 'day', 'hour']
-    position_names = ['년', '월', '일', '시']
+    pillar_keys = ['year', 'month', 'day', 'hour']
     
     pillars_data = {}
-    collected_branch_rels = []
-    collected_stem_rels = []
-
-    for i, p in enumerate(pillers):
+    for i, p in enumerate(pillar_keys):
         branch_char = branches[i]
         stem_char = stems[i]
         transmitted_info = get_transmitted_info(branch_char, i, stems, day_stem)
@@ -146,51 +143,6 @@ def analyze_palja_integrated(stems, branches):
         chungs = branch_relations.get('chungs', [])
         punishments = branch_relations.get('punishments', [])
         
-        # 지지 주요 형충회합 요약 추출
-        branch_label_map = {
-            'six_haps': '육합',
-            'chungs': '충',
-            'cheons': '천(穿)',
-            'breaks': '파',
-            'three_haps': '삼합',
-            'half_haps': '반합',
-            'gong_haps': '공합',
-            'hidden_stem_haps': '지장간 암합',
-            'square_haps': '방합',
-            'three_punishments': '삼형',
-            'punishments': '형'
-        }
-        for rel_key, rel_val in branch_relations.items():
-            label = branch_label_map.get(rel_key, rel_key)
-            for item in rel_val:
-                target_char = item.get('with', '')
-                rel_type = item.get('type', '')
-                if not target_char and 'branches' in item:
-                    target_char = "".join(item['branches'])
-                type_str = f", {rel_type}" if rel_type else ""
-                collected_branch_rels.append(f"{position_names[i]}지 {label}({target_char}{type_str})")
-
-        # 천간 주요 관계 요약 추출
-        stem_label_map = {
-            'combinations': '천간합',
-            'conflict': '천간충',
-            'restrain': '천간극'
-        }
-        for rel_key, rel_val in stem_relations.items():
-            label = stem_label_map.get(rel_key, rel_key)
-            if rel_val and isinstance(rel_val, list):
-                for item in rel_val:
-                    if isinstance(item, dict):
-                        target_char = item.get('with', '')
-                        collected_stem_rels.append(f"{position_names[i]}간 {label}({target_char})")
-            elif rel_val and isinstance(rel_val, dict):
-                for sub_key in ['restrain_to', 'restrain_me']:
-                    for item in rel_val.get(sub_key, []):
-                        if isinstance(item, dict):
-                            target_char = item.get('with', '')
-                            direction = '극함' if sub_key == 'restrain_to' else '극당함'
-                            collected_stem_rels.append(f"{position_names[i]}간 {label}({target_char} {direction})")
-
         jahab_info = check_jahab(stem_char, branch_char, i, chungs, punishments)
         
         pillars_data[p] = {
@@ -201,14 +153,16 @@ def analyze_palja_integrated(stems, branches):
                 "root_info": tonggeun_results[i]['통근정보'],
                 "status": tonggeun_results[i]['상태'],
                 "unseong": get_unseong(stem_char, branch_char),
-            "relations": stem_relations,
-            "root_scope": tonggeun_results[i]['통근범위'],
+                "relations": stem_relations,
+                "root_scope": tonggeun_results[i]['통근범위'],
                 "same_pillar_root_exists": tonggeun_results[i]['동주통근여부'],
-            "external_support_score": tonggeun_results[i]['타주지원점수'],
-            "external_support_info": tonggeun_results[i]['타주지원정보'],
+                "external_support_score": tonggeun_results[i]['타주지원점수'],
+                "external_support_info": tonggeun_results[i]['타주지원정보'],
             },
             "branch": {
                 "char": branch_char,
+                "storehouse": get_storehouse_info(
+                    branch_char, transmitted_info['transmitted'] + transmitted_info['hidden']),
                 "jijanggan": get_jijanggan(branch_char),
                 "transmitted": transmitted_info['transmitted'],
                 "hidden": transmitted_info['hidden'],
@@ -217,18 +171,74 @@ def analyze_palja_integrated(stems, branches):
             "jahab": jahab_info
         }
 
-    # 동주 통근 개수만으로 원국 전체의 신강·신약을 단정하지 않는다.
-    rooted_count = sum(t['동주통근여부'] for t in tonggeun_results)
-    energy_balance = (
-        f'천간 동주 통근 {rooted_count}개·무근 {4 - rooted_count}개 '
-        '(원국 전체 신강·신약 미판정)'
-    )
-
     return {
-        "summary": {
-            "branch_interactions": list(dict.fromkeys(collected_branch_rels)),
-            "stem_interactions": list(dict.fromkeys(collected_stem_rels)),
-            "total_energy_balance": energy_balance
-        },
-        "pillars": pillars_data
+        "summary": _summarize_pillars(pillars_data),
+        "pillars": pillars_data,
+    }
+
+
+def _summarize_pillars(pillars):
+    """상세 원자료를 위치별 관계 하나당 한 줄로 요약한다. 판정·수치를 재계산하지 않는다."""
+    keys = ('year', 'month', 'day', 'hour')
+    names = ('년', '월', '일', '시')
+    day_stem = pillars['day']['stem']['char']
+
+    def member(index, kind):
+        char = pillars[keys[index]][kind]['char']
+        star = ('일간' if kind == 'stem' and index == 2 else
+                get_ten_star_stem(day_stem, char) if kind == 'stem' else
+                get_ten_star_branch(day_stem, char))
+        return f"{names[index]}{'간' if kind == 'stem' else '지'} {char}({star})"
+
+    def branch_label(bucket, item):
+        if bucket == 'six_haps':
+            return f"육합 조합({item['candidate_element']} 후보)"
+        if bucket == 'three_haps':
+            return f"삼합 조합({item['candidate_element']} 후보)"
+        if bucket == 'square_haps':
+            return f"방합 후보({item['season']}·{item['candidate_element']})"
+        if bucket == 'half_haps':
+            return f"반합 후보({item['candidate_element']}, {item['type'].split()[0]})"
+        if bucket == 'gong_haps':
+            return f"공합 후보({item['candidate_element']}, 중신 {item['missing']} 부재)"
+        if bucket == 'hidden_stem_haps':
+            return '지장간 암합 후보'
+        if bucket == 'three_punishments':
+            return f"삼형 구조({item['type']})"
+        if bucket == 'punishments':
+            return item['type'] + (' 후보' if item['activation_status'] == 'candidate_only' else ' 관계')
+        return {'chungs': '충 관계', 'cheons': '천(穿) 관계', 'breaks': '파 관계'}[bucket]
+
+    branch_rows, stem_rows = {}, {}
+    for pillar in pillars.values():
+        for bucket, items in pillar['branch']['relations'].items():
+            for item in items:
+                group = 'participant_indices' in item
+                indices = (tuple(sorted(item['participant_indices'])) if group else
+                           tuple(sorted((item['my_index'], item['with_index']))))
+                identity = (indices, bucket, tuple(item.get('branches', [])))
+                participants = ' · '.join(member(index, 'branch') for index in indices)
+                suffix = f", 세 자리 조합 {len(item['formation_indices'])}개" if group else ''
+                branch_rows[identity] = f'{participants}: {branch_label(bucket, item)}{suffix}'
+        relations = pillar['stem']['relations']
+        for bucket in ('combinations', 'conflict'):
+            for item in relations[bucket]:
+                indices = tuple(sorted((item['my_index'], item['with_index'])))
+                label = (f"천간합 조합({item['candidate_element']} 후보)"
+                         if bucket == 'combinations' else '천간충 관계')
+                participants = ' · '.join(member(index, 'stem') for index in indices)
+                stem_rows[(indices, bucket)] = f'{participants}: {label}'
+        for bucket, items in relations['restrain'].items():
+            for item in items:
+                source, target = (item['my_index'], item['with_index'])
+                if bucket == 'restrain_me':
+                    source, target = target, source
+                stem_rows[((source, target), 'restrain')] = (
+                    f"{member(source, 'stem')} → {member(target, 'stem')}: 천간극 관계")
+    rooted = sum(p['stem']['same_pillar_root_exists'] for p in pillars.values())
+    return {
+        'branch_interactions': [branch_rows[key] for key in sorted(branch_rows)],
+        'stem_interactions': [stem_rows[key] for key in sorted(stem_rows)],
+        'rooting_summary': (f'천간 동주 통근 {rooted}개·동주 무근 {len(keys) - rooted}개 '
+                            '(원국 전체 신강·신약 미판정)'),
     }

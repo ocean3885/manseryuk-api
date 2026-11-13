@@ -1,0 +1,75 @@
+{
+  "date": "2026-11-13",
+  "baseline_commit": "bc8208c",
+  "method": "FastAPI TestClient; warm-up then alternating unindexed baseline copy and indexed database, 30 requests each per input; no external network",
+  "calendar_rows": 73442,
+  "calendar_rows_sha256": "f3291ed7a4c659d5c2d816e4ff3b351575cdbbc9f456cb06cc564cd202050cde",
+  "database_bytes_before": 8216576,
+  "database_bytes_after": 10596352,
+  "measurements": [
+    {
+      "input": {
+        "year": 1995,
+        "month": "5",
+        "day": "12",
+        "hour": 14,
+        "min": 30,
+        "sl": "sol",
+        "gen": "남"
+      },
+      "repeat": 30,
+      "before_ms": 24.19,
+      "after_ms": 15.63,
+      "bytes": 105116,
+      "identical_response": true
+    },
+    {
+      "input": {
+        "year": 1990,
+        "month": "1",
+        "day": "8",
+        "hour": 18,
+        "min": 0,
+        "sl": "sol",
+        "gen": "남"
+      },
+      "repeat": 30,
+      "before_ms": 21.28,
+      "after_ms": 12.96,
+      "bytes": 97621,
+      "identical_response": true
+    },
+    {
+      "input": {
+        "year": 2023,
+        "month": "2",
+        "day": "1",
+        "hour": 0,
+        "min": 0,
+        "sl": "lun_y",
+        "gen": "여"
+      },
+      "repeat": 30,
+      "before_ms": 21.44,
+      "after_ms": 13.44,
+      "bytes": 89241,
+      "identical_response": true
+    },
+    {
+      "input": {
+        "year": 2000,
+        "month": "2",
+        "day": "29",
+        "hour": 23,
+        "min": 59,
+        "sl": "sol",
+        "gen": "남"
+      },
+      "repeat": 30,
+      "before_ms": 19.89,
+      "after_ms": 12.9,
+      "bytes": 88092,
+      "identical_response": true
+    }
+  ]
+}

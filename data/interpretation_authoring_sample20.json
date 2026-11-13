@@ -1,0 +1,324 @@
+{
+  "format_version": 1,
+  "purpose": "interpretation_authoring",
+  "selection": {
+    "content_status": "empty",
+    "layer": "stem",
+    "relation_type": "control",
+    "limit": 20,
+    "offset": 0
+  },
+  "total_matching": 20,
+  "exported_count": 20,
+  "next_offset": null,
+  "writing_guide": {
+    "language": "ko",
+    "editable_fields": [
+      "explanation"
+    ],
+    "instructions": [
+      "각 조합이 관찰될 때의 일반 해설을 한국어 2~3문장으로 작성하세요.",
+      "관계의 구조, 십성의 상징적 해석 관점, 추가 확인할 조건 순서로 서술하세요.",
+      "rule_id·layer·relation_type·participant_pattern·conditions_json은 그대로 유지하고 explanation만 작성하세요.",
+      "생·극의 참여 순서는 작용 주체→대상입니다. 동주는 천간→지지입니다. 나머지 순서는 작용 방향이 아닙니다.",
+      "이 자료는 실제 개인의 원국이 아닙니다. 실제 글자·위치·통근·세력·주변 관계·시기를 만들어 넣지 마세요.",
+      "비견 표기만으로 일간 본인이라고 간주하지 마세요. has_day_master=true 조건이 있는 경우에만 본인 참여가 명시됩니다.",
+      "합의 존재로 성립·합화를, 생·극의 존재로 실제 우열·손상·길흉·성과를 확정하지 마세요.",
+      "고 크기·개고·관계의 세력 영향 등 미평가 판정을 해설로 대신 만들지 마세요.",
+      "근거가 불충분해 작성할 수 없으면 explanation을 null로 유지하세요.",
+      "완성된 JSON을 반환하세요. 작성 결과는 이후 draft로 가져와 검토하며 자동 승인하지 않습니다."
+    ],
+    "relation_labels": {
+      "stem": {
+        "clash": "충",
+        "combine": "천간합",
+        "control": "극"
+      },
+      "branch": {
+        "arch_combine": "공합",
+        "break": "파",
+        "clash": "충",
+        "combine": "육합",
+        "control": "극",
+        "generate": "생",
+        "half_combine": "반합",
+        "hidden_combine": "암합",
+        "pierce": "천",
+        "punishment": "형",
+        "same_branch": "동일 지지",
+        "self_punishment": "자형"
+      },
+      "group": {
+        "square": "방합",
+        "trine": "삼합",
+        "triple_punishment": "삼형"
+      },
+      "same_pillar": {
+        "element": "동주 오행 관계",
+        "self_combine": "자합"
+      }
+    }
+  },
+  "rules": [
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "겁재",
+        "정재"
+      ],
+      "rule_id": "interpretation:254211b508fe24c2860ad7b2f857082382b56729eccbc496040b5af42fd32c73",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "겁재",
+        "편재"
+      ],
+      "rule_id": "interpretation:78e9a4ce0157472e0a81a7faf564cf7ef0cf0244a1aa81d10a09947853b81968",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "비견",
+        "정재"
+      ],
+      "rule_id": "interpretation:2b8144cfe1f29bba656410d0e5a299237879e08b802a31caedb3191d5df92a1c",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "비견",
+        "편재"
+      ],
+      "rule_id": "interpretation:e78649b791e8f18527df72f0fe553fdd9fd3696f2dc1dc62f7f97f36137803ca",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "상관",
+        "정관"
+      ],
+      "rule_id": "interpretation:97fcba2ffa5d1bd1a950166b3b7ee26b722cff943aec0f974c7a88cd52baf1a8",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "상관",
+        "편관"
+      ],
+      "rule_id": "interpretation:4eb51a67dccdefa8e48019850f46b2ba01174aa19170ba884ea8b002032bab06",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "식신",
+        "정관"
+      ],
+      "rule_id": "interpretation:a7c3c51c61c3afea7d3473ff8d016a7f3bb356820e06fd3bc0e5013fe4d81344",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "식신",
+        "편관"
+      ],
+      "rule_id": "interpretation:f533923bc9d7cb0fd778d5770f2231b99e8fc086c1207490cc6d8727116bc3a3",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "정관",
+        "겁재"
+      ],
+      "rule_id": "interpretation:092646b50a145e245f4703557c07a93c9e4f0a113c7f6eceaf6bfbd612346eb8",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "정관",
+        "비견"
+      ],
+      "rule_id": "interpretation:c01ec173b510eeb53fdc7c7f41f75357b5aafa4fcda2ff5ce1fd3f7ab20f0e1b",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "정인",
+        "상관"
+      ],
+      "rule_id": "interpretation:57841f40ce9ab1ba84e532c2ebf5bb693c9e7248dbc0ec6f7a294294e8c125bc",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "정인",
+        "식신"
+      ],
+      "rule_id": "interpretation:fd95a66c012a1c3b9faee841a9a1f8d75651857bd2c7aa0645b6fa632418dbf5",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "정재",
+        "정인"
+      ],
+      "rule_id": "interpretation:8aae235cf0cba37f812008335edef03f00354a01a3e5e834005d83a20f744f28",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "정재",
+        "편인"
+      ],
+      "rule_id": "interpretation:118143c29c9cf4c22fbcf1aa36bd059ddef8429c525c1355d3274de49af9cab9",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "편관",
+        "겁재"
+      ],
+      "rule_id": "interpretation:1b019eefc0e7e32190c199db29de131b1b167bce404273538ab567d5955c6632",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "편관",
+        "비견"
+      ],
+      "rule_id": "interpretation:50b4e6ee8a0b4c4d47b24a535eceb7cbe7ca78504c146b424b802796bb573843",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "편인",
+        "상관"
+      ],
+      "rule_id": "interpretation:7a463f71eb1cd510b292d53972ebedcb6320b19714bc9a631c830df745946138",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "편인",
+        "식신"
+      ],
+      "rule_id": "interpretation:52d154cac2081b8a810261dcf8152e2df9ac15d90e4bc2f8434d8b56789ffdb2",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "편재",
+        "정인"
+      ],
+      "rule_id": "interpretation:7692a2c09edbfd816768240c811da1ad75c23efda6561e6e2074efec4d23f331",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    },
+    {
+      "layer": "stem",
+      "relation_type": "control",
+      "participant_pattern": [
+        "편재",
+        "편인"
+      ],
+      "rule_id": "interpretation:5a6508dd458828e04fec983f5035b71fbb233bc93dd33cdbf2d15bd5f5344700",
+      "conditions_json": {
+        "scope": "natal"
+      },
+      "explanation": null
+    }
+  ]
+}

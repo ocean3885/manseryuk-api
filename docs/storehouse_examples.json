@@ -1,0 +1,221 @@
+{
+  "description": "합성 원국의 분류 예시. branch_ten_star는 기존 대표 십성과 비교하기 위한 예시 표기이며 원자료에 새로 추가한 필드는 storehouse다.",
+  "examples": [
+    {
+      "stems": "甲甲甲甲",
+      "branches": "辰戌丑未",
+      "branch_details": {
+        "year": {
+          "char": "辰",
+          "branch_ten_star": "편재",
+          "storehouse": {
+            "stored_element": "水",
+            "role": "인성고"
+          }
+        },
+        "month": {
+          "char": "戌",
+          "branch_ten_star": "편재",
+          "storehouse": {
+            "stored_element": "火",
+            "role": "식상고"
+          }
+        },
+        "day": {
+          "char": "丑",
+          "branch_ten_star": "정재",
+          "storehouse": {
+            "stored_element": "金",
+            "role": "관성고"
+          }
+        },
+        "hour": {
+          "char": "未",
+          "branch_ten_star": "정재",
+          "storehouse": {
+            "stored_element": "木",
+            "role": "비겁고"
+          }
+        }
+      }
+    },
+    {
+      "stems": "丙丙丙丙",
+      "branches": "辰戌丑未",
+      "branch_details": {
+        "year": {
+          "char": "辰",
+          "branch_ten_star": "식신",
+          "storehouse": {
+            "stored_element": "水",
+            "role": "관성고"
+          }
+        },
+        "month": {
+          "char": "戌",
+          "branch_ten_star": "식신",
+          "storehouse": {
+            "stored_element": "火",
+            "role": "비겁고"
+          }
+        },
+        "day": {
+          "char": "丑",
+          "branch_ten_star": "상관",
+          "storehouse": {
+            "stored_element": "金",
+            "role": "재고"
+          }
+        },
+        "hour": {
+          "char": "未",
+          "branch_ten_star": "상관",
+          "storehouse": {
+            "stored_element": "木",
+            "role": "인성고"
+          }
+        }
+      }
+    },
+    {
+      "stems": "戊戊戊戊",
+      "branches": "辰戌丑未",
+      "branch_details": {
+        "year": {
+          "char": "辰",
+          "branch_ten_star": "비견",
+          "storehouse": {
+            "stored_element": "水",
+            "role": "재고"
+          }
+        },
+        "month": {
+          "char": "戌",
+          "branch_ten_star": "비견",
+          "storehouse": {
+            "stored_element": "火",
+            "role": "인성고"
+          }
+        },
+        "day": {
+          "char": "丑",
+          "branch_ten_star": "겁재",
+          "storehouse": {
+            "stored_element": "金",
+            "role": "식상고"
+          }
+        },
+        "hour": {
+          "char": "未",
+          "branch_ten_star": "겁재",
+          "storehouse": {
+            "stored_element": "木",
+            "role": "관성고"
+          }
+        }
+      }
+    },
+    {
+      "stems": "庚庚庚庚",
+      "branches": "辰戌丑未",
+      "branch_details": {
+        "year": {
+          "char": "辰",
+          "branch_ten_star": "편인",
+          "storehouse": {
+            "stored_element": "水",
+            "role": "식상고"
+          }
+        },
+        "month": {
+          "char": "戌",
+          "branch_ten_star": "편인",
+          "storehouse": {
+            "stored_element": "火",
+            "role": "관성고"
+          }
+        },
+        "day": {
+          "char": "丑",
+          "branch_ten_star": "정인",
+          "storehouse": {
+            "stored_element": "金",
+            "role": "비겁고"
+          }
+        },
+        "hour": {
+          "char": "未",
+          "branch_ten_star": "정인",
+          "storehouse": {
+            "stored_element": "木",
+            "role": "재고"
+          }
+        }
+      }
+    },
+    {
+      "stems": "壬壬壬壬",
+      "branches": "辰戌丑未",
+      "branch_details": {
+        "year": {
+          "char": "辰",
+          "branch_ten_star": "편관",
+          "storehouse": {
+            "stored_element": "水",
+            "role": "비겁고"
+          }
+        },
+        "month": {
+          "char": "戌",
+          "branch_ten_star": "편관",
+          "storehouse": {
+            "stored_element": "火",
+            "role": "재고"
+          }
+        },
+        "day": {
+          "char": "丑",
+          "branch_ten_star": "정관",
+          "storehouse": {
+            "stored_element": "金",
+            "role": "인성고"
+          }
+        },
+        "hour": {
+          "char": "未",
+          "branch_ten_star": "정관",
+          "storehouse": {
+            "stored_element": "木",
+            "role": "식상고"
+          }
+        }
+      }
+    },
+    {
+      "stems": "甲甲甲甲",
+      "branches": "子寅卯巳",
+      "branch_details": {
+        "year": {
+          "char": "子",
+          "branch_ten_star": "정인",
+          "storehouse": null
+        },
+        "month": {
+          "char": "寅",
+          "branch_ten_star": "비견",
+          "storehouse": null
+        },
+        "day": {
+          "char": "卯",
+          "branch_ten_star": "겁재",
+          "storehouse": null
+        },
+        "hour": {
+          "char": "巳",
+          "branch_ten_star": "식신",
+          "storehouse": null
+        }
+      }
+    }
+  ]
+}

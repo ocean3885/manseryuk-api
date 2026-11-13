@@ -1,44 +1,29 @@
-"""
-고(庫) 분석 모듈 - 진술축미(辰戌丑未)의 개고/폐고 상태 분석
-"""
+"""辰戌丑未의 기본 고 분류. 기존 지장간 십성을 재사용한다."""
+from services.constants import STEM_INFO
 
-from services.constants import ZHI_ZANG
-from services.calculator import get_ten_star_stem
-
-# ============ 고 기본 정보 ============
-KO_INFO = {
-    '辰': {'element': '水', 'label': '수고(水庫)', 'trigger': '戌'},
-    '戌': {'element': '火', 'label': '화고(火庫)', 'trigger': '辰'},
-    '丑': {'element': '金', 'label': '금고(金庫)', 'trigger': '未'},
-    '未': {'element': '木', 'label': '목고(木庫)', 'trigger': '丑'},
+# 기존 KO_INFO의 네 저장 오행을 유지한다. 지지 본기의 오행과 구별한다.
+STORED_ELEMENTS = {'辰': '水', '戌': '火', '丑': '金', '未': '木'}
+ROLE_BY_TEN_STAR = {
+    '비견': '비겁고', '겁재': '비겁고',
+    '식신': '식상고', '상관': '식상고',
+    '편재': '재고', '정재': '재고',
+    '편관': '관성고', '정관': '관성고',
+    '편인': '인성고', '정인': '인성고',
 }
 
-# ============ 원국 분석 ============
-def analyze_ku_original(branches, day_stem):
-    """원국의 고 상태 분석"""
-    # 구현...
 
-# ============ 대운 적용 ============
-def apply_daewoon_to_ku(original_ku, daewoon_branch):
-    """대운 지지를 추가하여 고 상태 재계산"""
-    # 구현...
+def get_storehouse_info(branch: str, hidden_stem_details: list[dict]) -> dict | None:
+    """투간·미투간 목록에 이미 계산된 일간 기준 십성으로 고의 역할을 분류한다.
 
-# ============ 세운 적용 ============
-def apply_sewoon_to_ku(ku_with_daewoon, sewoon_branch):
-    """세운 지지를 추가하여 최종 고 상태 계산"""
-    # 구현...
-
-# ============ 개고 여부 판단 ============
-def is_ku_open(ku_branch, all_branches):
-    """개고 조건 충족 여부"""
-    # 구현...
-
-# ============ 강도 계산 ============
-def calculate_ku_strength(ku_branch, is_open, is_daewoon=False, is_sewoon=False):
-    """고의 강도 계산"""
-    # 구현...
-
-# ============ 해석 문구 ============
-def get_ku_interpretation(ku_branch, is_open, day_stem):
-    """해석 문구 반환"""
-    # 구현...
+    같은 지장간이 여러 천간 위치로 투출돼도 하나의 역할로 분류한다.
+    고의 크기·개고·폐고·입고 여부와 실제 지장간 작용은 판정하지 않는다.
+    """
+    element = STORED_ELEMENTS.get(branch)
+    if element is None:
+        return None
+    roles = {ROLE_BY_TEN_STAR[item['stem_ten_star']]
+             for item in hidden_stem_details
+             if STEM_INFO[item['stem']]['element_ch'] == element}
+    if len(roles) != 1:
+        raise ValueError(f'{branch}: 저장 오행의 지장간 십성 정보가 없거나 일치하지 않습니다.')
+    return {'stored_element': element, 'role': roles.pop()}

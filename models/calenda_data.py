@@ -1,8 +1,12 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Index, Integer, String
 from core.database import Base
 
 class CalendaData(Base):
     __tablename__ = "calenda_data"
+    __table_args__ = (
+        Index('ix_calenda_data_solar_date', 'cd_sy', 'cd_sm', 'cd_sd'),
+        Index('ix_calenda_data_lunar_date', 'cd_ly', 'cd_lm', 'cd_ld', 'cd_leap_month'),
+    )
     
     cd_no = Column(Integer, primary_key=True, index=True)
     cd_sy = Column(Integer, primary_key=True, index=True)

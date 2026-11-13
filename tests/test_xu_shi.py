@@ -132,7 +132,7 @@ class XuShiTests(unittest.TestCase):
 
     def test_root_count_summary_does_not_claim_chart_strength(self):
         analysis = analyze_palja_integrated(list('甲甲甲甲'), list('辰辰辰辰'))
-        summary = analysis['summary']['total_energy_balance']
+        summary = analysis['summary']['rooting_summary']
         self.assertIn('동주 통근 4개', summary)
         self.assertIn('신강·신약 미판정', summary)
         self.assertNotIn('신강(身強)', summary)

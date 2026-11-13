@@ -11,11 +11,15 @@
 `six_haps` 배열 통일, `candidate_element` 이름 변경, `strength` 분리와 빈 배열
 통일은 기존 프론트엔드 호환을 유지하지 않는 변경이다. 중앙 관계 ID는 유지한다.
 
+2026-11-13 루트 보강 후 점검: 원국 분석은 루트의 천간·지지 타입을 재사용하며
+`analysis.storehouse`도 검증한다. 원국 통근 누락·불일치와 운/원국 분석 혼입을 거부한다.
+[조회 API 정합성 감사](api_projection_audit.md)를 참조한다.
+
 ## 현재 API
 
 `GET /character-details`는 기존 `/`와 동일한 `year`, `month`, `day`, `hour`, `min`, `sl`, `gen`을 받는다. 원국 계산을 한 번 실행하고 기존 관계 조회 조립기를 거쳐 통합 결과를 만든다. 기존 `/`, `/relation-index`는 유지한다. 새로운 명리 규칙이나 대운·세운 관계 계산을 추가한 것은 아니다.
 
-응답 `schema_version`은 `1.0-draft`다. 프론트엔드는 이 버전을 확인하고 다음 세 사전을 이용한다.
+응답 `schema_version`은 `1.0-draft`다. 프론트엔드는 이 버전을 확인하고 다음 네 사전을 이용한다.
 
 | 필드 | 역할 |
 | --- | --- |
@@ -31,10 +35,10 @@
 글자 ID는 `{context_id}.{position}.{kind}`, 소속 ID는 `{scope}.{instance}`다. 예:
 
 - 원국: `natal.chart.year.stem`, `natal.chart.day.branch`
-- 미래 대운 어댑터 예: `daewoon.period_0.cycle.stem`
-- 미래 세운 어댑터 예: `sewoon.year_2026.cycle.branch`
+- 선택 대운: `daewoon.period_0.cycle.stem`
+- 선택 세운: `sewoon.year_2026.cycle.branch`
 
-뒤의 두 예시는 예약된 실행 결과가 아닌 확장 규칙이다. `instance`에는 안정적인 기간 식별자를 사용한다. 글자가 같아도 소속·위치가 다르면 별개 노드다. 기간의 시작·종료, 절입 기준, 선택 연도 등은 `contexts[*].selection`에 기록하고 실제 경계 계산을 구현할 때 계약을 구체화한다. 인스턴스는 영문·숫자·밑줄을 허용한다.
+뒤의 두 ID는 `/cycle-analysis`에서 선택한 운에 사용한다. `/character-details` 단독 응답에는 원국만 포함한다. `instance`에는 안정적인 기간 식별자를 사용한다. 글자가 같아도 소속·위치가 다르면 별개 노드다. 기간의 실제 선택 범위와 연도 기준은 `/cycle-analysis`의 `contexts[*].selection`과 최상위 `selection`에 기록한다. 인스턴스는 영문·숫자·밑줄을 허용한다.
 
 현재 원국 관계 ID는 `natal.chart:{기존 관계 ID}`다. 기존 ID는 `source_relation_id`에 보존한다. `source_refs`는 기존 계산 결과에 대한 출처이므로 기존 ID와 경로를 유지한다. 관계의 `participants`, `direction`, `formation_candidates`에는 새 글자 ID를 사용한다.
 
@@ -78,7 +82,7 @@
 4. `relation_ids`로 `relations`의 본문을 조회한다. `transmission_relation_ids`는 투간 관계만 골라 놓은 참조다. 투간 방향은 출처 지지→대상 천간이다.
 5. 상대 글자의 `context_id`로 원국·대운·세운 관계를 분류한다. 다자 관계는 참여자가 둘을 넘을 수 있다.
 
-`analysis`는 기존 글자별 분석 원본의 복사본이다. 이 안의 `position`, `from_idx`, 기존 관계 설명 등은 원본 표현을 유지한다. 새 ID로 화면의 관계를 연결할 때에는 중앙 `relations`와 `relation_ids`를 사용한다. 단순 설명 필드에서 관계를 다시 탐지하거나 통근 영향을 계산하지 않는다.
+`analysis`는 원국 천간·원국 지지·운 후보 상태의 세 타입으로 검증한다. 원국에서는 기존 글자별 분석 원본을 보존한다. 이 안의 `position`, `from_idx`, 기존 관계 설명 등은 원본 표현을 유지한다. 새 ID로 화면의 관계를 연결할 때에는 중앙 `relations`와 `relation_ids`를 사용한다. 단순 설명 필드에서 관계를 다시 탐지하거나 통근 영향을 계산하지 않는다.
 
 동주 통근 영향은 `root_impact_status=not_evaluated`, `root_impact_score=null`이다. `remaining_score`는 호환용으로 원점수를 유지하며, 무손상 판정값이 아니다. 관련 합·충·형·파·천의 존재와 통근 소멸을 분리한다. 원국과 운의 관계가 생겨도 원국 계산 결과를 덮어쓰지 않는다.
 

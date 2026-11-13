@@ -179,10 +179,10 @@ class MetaInfo(BaseModel):
 
 
 class AnalysisSummary(BaseModel):
-    """분석 요약 (합충 등)"""
-    branch_interactions: List[str]
-    stem_interactions: List[str]
-    total_energy_balance: str
+    """천간 간·지지 간 관계와 동주 통근 개수. 동주 자합은 상세 자료에서 조회한다."""
+    branch_interactions: List[str] = Field(description='위치·글자·십성을 포함한 지지 간 관계별 요약. 양쪽 조회의 중복은 제거')
+    stem_interactions: List[str] = Field(description='위치·글자·십성을 포함한 천간 간 관계별 요약. 극은 방향을 보존')
+    rooting_summary: str = Field(description='네 천간의 동주 통근·동주 무근 개수. 원국 신강·신약 판정이 아님')
 
 
 class AnalysisInfo(BaseModel):
@@ -221,7 +221,6 @@ class InteractionItem(BaseModel):
 
 class InteractionsInfo(BaseModel):
     rule_version: str
-    summary_list: List[str]
     matrix: List[InteractionItem]
 
 

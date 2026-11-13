@@ -1,8 +1,14 @@
 """Context-aware graph contract shared by natal and future cycle adapters."""
 from typing import Any, Literal
-from pydantic import BaseModel, ConfigDict, Field, model_validator
-from schemas.character_relation_index import ActivationStatus, RelationSource
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, model_validator
+from typing_extensions import NotRequired, TypedDict
+from schemas.character_relation_index import ActivationStatus, RelationSource, PILLARS
 from schemas.cycle_relation_validation import validate_cycle_relation
+from schemas.natal_analysis import RawStemAnalysis, RawBranchAnalysis
+from services.ko_analysis import get_storehouse_info
+
+STEM_ANALYSIS = TypeAdapter(RawStemAnalysis)
+BRANCH_ANALYSIS = TypeAdapter(RawBranchAnalysis)
 
 ACTIVATION_LABELS = dict(detected='탐지', candidate_only='후보', potential='잠재',
                          conditional='조건부', suppressed='억제', active='성립')
@@ -85,6 +91,12 @@ class UnifiedRelation(Contract):
     presentation: RelationPresentation | None = None
 
 
+class CycleCharacterAnalysis(TypedDict):
+    __pydantic_config__ = ConfigDict(extra='forbid')
+    calculation_status: Literal['not_evaluated', 'candidates_detected']
+    root_impact_status: NotRequired[Literal['not_evaluated']]
+
+
 class CharacterDetail(Contract):
     context_id: str
     position: str = Field(pattern=r'^[A-Za-z0-9_]+$')
@@ -92,7 +104,7 @@ class CharacterDetail(Contract):
     char: str = Field(min_length=1, max_length=1)
     attributes: dict[str, Any]
     pillar_attributes: dict[str, Any]
-    analysis: dict[str, Any]
+    analysis: RawStemAnalysis | RawBranchAnalysis | CycleCharacterAnalysis
     rooting: 'Rooting | None' = None
     relation_ids: list[str]
     transmission_relation_ids: list[str]
@@ -137,6 +149,9 @@ class CharacterDetails(Contract):
 
     @model_validator(mode='after')
     def check_graph(self):
+        if 'natal.chart' not in self.contexts:
+            raise ValueError('원국 소속 natal.chart가 필요합니다.')
+
         def check_details(details, expected=None):
             ids = [d.character_id for d in details]
             if len(ids) != len(set(ids)) or (expected is not None and ids != expected):
@@ -159,11 +174,40 @@ class CharacterDetails(Contract):
         for key, context in self.contexts.items():
             if key != f'{context.scope}.{context.instance}':
                 raise ValueError('분석 소속 ID가 맞지 않습니다.')
+            if context.scope == 'natal':
+                if context.calculation_status != 'calculated':
+                    raise ValueError('원국 소속은 기존 계산 완료 상태여야 합니다.')
+                expected = {f'{key}.{pillar}.{kind}' for pillar in PILLARS
+                            for kind in ('stem', 'branch')}
+                actual = {cid for cid, node in self.characters.items() if node.context_id == key}
+                if actual != expected:
+                    raise ValueError('원국에는 네 기둥의 천간·지지 여덟 글자가 필요합니다.')
         for key, node in self.characters.items():
             if node.context_id not in self.contexts or key != f'{node.context_id}.{node.position}.{node.kind}':
                 raise ValueError('글자 ID와 소속·위치가 맞지 않습니다.')
             if node.attributes.get('ch') != node.char:
                 raise ValueError('글자 속성과 글자가 다릅니다.')
+            context = self.contexts[node.context_id]
+            if context.scope == 'natal':
+                analysis = (STEM_ANALYSIS if node.kind == 'stem' else BRANCH_ANALYSIS).validate_python(node.analysis)
+                if analysis['char'] != node.char:
+                    raise ValueError('원국 분석과 글자 속성이 다릅니다.')
+                if node.kind == 'stem':
+                    root = node.rooting
+                    if (root is None or analysis['score'] != root.root_score
+                            or analysis['status'] != root.original_status
+                            or analysis['same_pillar_root_exists'] != root.has_same_pillar_root
+                            or analysis['external_support_score'] != root.external_support_score):
+                        raise ValueError('원국 천간 분석과 통근 정보가 다릅니다.')
+                elif analysis['storehouse'] != get_storehouse_info(
+                        node.char, analysis['transmitted'] + analysis['hidden']):
+                    raise ValueError('고의 분류와 기존 지장간 십성 정보가 다릅니다.')
+            elif (node.rooting is not None
+                  or node.analysis.get('calculation_status') != context.calculation_status
+                  or set(node.analysis) - {'calculation_status', 'root_impact_status'}
+                  or (context.calculation_status == 'candidates_detected' and
+                      node.analysis.get('root_impact_status') != 'not_evaluated')):
+                raise ValueError('운 글자의 후보 탐지·통근 미평가 상태가 맞지 않습니다.')
             if node.rooting:
                 root = node.rooting
                 check_evidence(root.evidence)

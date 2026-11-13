@@ -104,8 +104,8 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
         "대운·세운에 따른 시기별 변화가 아닙니다. "
         "십성의 상징 해석은 참고로 구분하고, 능력·성과·직업 적합성으로 단정하지 마세요."
     )
-    for sm in interaction_data['summary_list'][:3]:
-        ai_consultation_prompts.append(f"【주요 상호작용】 {sm}")
+    for relation in interaction_data['matrix'][:3]:
+        ai_consultation_prompts.append(f"【주요 상호작용】 {relation['description']}")
 
     # ── 대운 계산 ──
     daewoon         = getDaewoon(gen, year_gan_kr, month_gan_kr, month_ji_kr)

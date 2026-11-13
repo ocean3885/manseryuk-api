@@ -71,7 +71,7 @@ class XuShiIntegrationTests(unittest.TestCase):
             self.assertTrue(bin_zhu['group_connections'])
             self.assertEqual(bin_zhu['rule_version'], '4.0.0')
             interactions = advanced['interactions']
-            self.assertEqual(interactions['rule_version'], '2.0.0')
+            self.assertEqual(interactions['rule_version'], '3.0.0')
             relation_ids = {r['relation_id'] for r in interactions['matrix']}
             for group in bin_zhu['group_connections']:
                 self.assertIn(group['relation_id'], relation_ids)

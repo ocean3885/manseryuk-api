@@ -107,7 +107,7 @@ class RootResponseContractTests(unittest.TestCase):
     def test_relation_scores_and_derived_judgments_are_absent_from_http(self):
         advanced = self.get()['advanced_analysis']
         interactions = advanced['interactions']
-        self.assertEqual(set(interactions), {'rule_version', 'matrix', 'summary_list'})
+        self.assertEqual(set(interactions), {'rule_version', 'matrix'})
         removed = {'score', 'score_contribution', 'score_covered_by'}
         self.assertTrue(interactions['matrix'])
         for row in interactions['matrix']:
@@ -134,7 +134,8 @@ class RootResponseContractTests(unittest.TestCase):
     def test_openapi_matches_retired_relation_score_contract(self):
         schemas = self.client.get('/openapi.json').json()['components']['schemas']
         for model, removed in {
-            'InteractionsInfo': {'tension_score', 'harmony_score', 'climate'},
+            'InteractionsInfo': {'tension_score', 'harmony_score', 'climate', 'summary_list'},
+            'AnalysisSummary': {'total_energy_balance'},
             'InteractionItem': {'score', 'score_contribution', 'score_covered_by'},
             'BinZhuDynamics': {'pairwise_scores', 'group_cohesion_score', 'control_flow'},
             'BinZhuLink': {'mechanism', 'flow_direction', 'weight', 'target_guest', 'source_host'},
@@ -145,6 +146,24 @@ class RootResponseContractTests(unittest.TestCase):
                 self.assertTrue(removed.isdisjoint(schemas[model]['properties']))
         self.assertNotIn('ControlFlow', schemas)
         self.assertNotIn('BinZhuScores', schemas)
+        self.assertIn('rooting_summary', schemas['AnalysisSummary']['required'])
+
+    def test_summary_matches_relation_and_rooting_facts_without_duplicate_copy(self):
+        body = self.get()
+        summary = body['analysis']['summary']
+        advanced = body['advanced_analysis']
+        matrix = advanced['interactions']['matrix']
+        self.assertEqual(set(summary), {'branch_interactions', 'stem_interactions', 'rooting_summary'})
+        self.assertEqual(len(summary['branch_interactions']),
+                         sum(item['category'] == '지지' for item in matrix))
+        for field in ('branch_interactions', 'stem_interactions'):
+            self.assertEqual(len(summary[field]), len(set(summary[field])))
+        rooted = advanced['xu_shi_dynamics']['real_count']
+        self.assertIn(f'동주 통근 {rooted}개', summary['rooting_summary'])
+        self.assertIn(f'동주 무근 {4 - rooted}개', summary['rooting_summary'])
+        self.assertNotIn('summary_list', advanced['interactions'])
+        prompts = [p for p in advanced['ai_consultation_prompts'] if p.startswith('【주요 상호작용】')]
+        self.assertEqual(prompts, [f"【주요 상호작용】 {r['description']}" for r in matrix[:3]])
 
     def test_special_star_basis_and_count_labels_survive_http(self):
         body = self.get()
@@ -172,6 +191,24 @@ class RootResponseContractTests(unittest.TestCase):
         self.assertEqual(elements['frequent_elements'], [e for e, n in elements['counts'].items() if n >= 3])
         self.assertEqual(elements['absent_elements'], [e for e, n in elements['counts'].items() if n == 0])
 
+    def test_basic_storehouse_classification_survives_http_and_natal_adapters(self):
+        body = self.get()
+        details = body['analysis']['details']
+        storehouses = {p: d['branch']['storehouse'] for p, d in details.items()}
+        self.assertTrue(any(value is not None for value in storehouses.values()))
+        self.assertTrue(any(value is None for value in storehouses.values()))
+        for path, selector in [('/character-details', {}),
+                               ('/cycle-analysis', {'daewoon_index': 1})]:
+            response = self.client.get(path, params={**QUERY, **selector})
+            self.assertEqual(response.status_code, 200, response.text)
+            graph = response.json()
+            for pillar, expected in storehouses.items():
+                analysis = graph['characters'][f'natal.chart.{pillar}.branch']['analysis']
+                self.assertEqual(analysis['storehouse'], expected)
+                self.assertEqual(analysis, details[pillar]['branch'])
+                if expected is not None:
+                    self.assertEqual(set(expected), {'stored_element', 'role'})
+
     def test_openapi_describes_nested_analysis_and_symbolic_scope(self):
         schemas = self.client.get('/openapi.json').json()['components']['schemas']
         self.assertTrue(schemas['AnalysisInfo']['properties']['details']['$ref'].endswith('/NatalAnalysisDetails'))
@@ -183,6 +220,9 @@ class RootResponseContractTests(unittest.TestCase):
             self.assertIn('$ref', value['items'])
         self.assertTrue({'rule_id', 'basis', 'interpretation_scope'} <=
                         set(schemas['SpecialStarItem']['required']))
+        self.assertIn('storehouse', schemas['RawBranchAnalysis']['required'])
+        self.assertEqual(set(schemas['StorehouseInfo']['properties']), {'stored_element', 'role'})
+        self.assertFalse(schemas['StorehouseInfo']['additionalProperties'])
 
     def test_raw_relations_survive_http_and_unified_character_adapters(self):
         base = self.get()

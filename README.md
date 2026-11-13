@@ -2,6 +2,11 @@
 
 문서 우선순위와 현재 개발 범위는 [docs 안내](docs/README.md)를 참고하세요.
 
+해설용 별도 SQLite의 빈 기본 패턴·검색 기능은 [해설 DB 계약](docs/interpretation_database_contract.md)을 참고하세요.
+`.venv312/bin/python scripts/interpretation_rules.py init`으로 초기화합니다.
+`.venv312/bin/python scripts/interpretation_rules.py export --output <새 JSON 경로>`로 작성용 JSON을 내보냅니다.
+기존 API 응답 연결과 LLM 해설 작성은 후속 단계입니다.
+
 > 동주 허실 v4: 통근 여부와 관련 합·충·형·파·천 기록을 분리합니다. 관계의 통근 영향은 미평가이며 자동 변허 판정은 하지 않습니다. 아래 이전 관계 반영 설명보다 [현행 계약](docs/root_relation_separation.md)을 우선합니다.
 
 전통 사주명리학 및 맹파명리(盲派命理) 이론을 기반으로, AI 사주 상담 서비스 및 운세 플랫폼에 최적화된 고도화 만세력 분석 데이터를 제공하는 FastAPI 백엔드 서비스입니다.
@@ -190,18 +195,28 @@ GET http://localhost:8000/relation-index?year=1995&month=5&day=12&hour=14&min=30
 실제 세력 우세·지장간 오행 부재·보완 필요성의 판정으로 해석하지 않습니다.
 
 ### 7. `analysis` (전통 명리 분석 요약)
-- `summary`: 천간·지지 관계 요약과 동주 통근/무근 개수.
+- `summary.branch_interactions`: 위치·글자·십성을 포함한 지지 간 관계 요약.
+- `summary.stem_interactions`: 천간 간 관계 요약. 극의 방향을 보존.
+- `summary.rooting_summary`: 동주 통근·동주 무근 개수. 전체 강약 판정이 아님.
 - `details`: 년·월·일·시의 천간 통근, 지장간·투간, 글자별 관계와 자합.
 
+요약은 상세 원자료에서 관계별 한 번씩 조립하며 반복 글자의 위치는 보존합니다.
+기존 `total_energy_balance`는 `rooting_summary`로 교체했습니다.
+[요약·상세 정합성 계약과 예시](docs/root_summary_contract.md)를 참고하세요.
+
 `details`는 `year`, `month`, `day`, `hour`를 모두 요구하는 구체적인 응답 타입입니다.
-관계 종류별 참여 글자·십성·관찰 근거까지 OpenAPI에 정의했습니다. 빈 배열·`null`과
+관계 종류별 참여 글자·십성·관찰 근거까지 OpenAPI에 정의했습니다.
+`details[기둥].branch.storehouse`는 辰戌丑未의 `stored_element`와 일간 기준
+`role`(재고·식상고·관성고·인성고·비겁고)을 제공하며, 다른 지지는 `null`입니다.
+지지 대표 십성과 별도 분류이고 기존 지장간 십성 계산을 재사용합니다.
+[고 기본 분류표와 예시](docs/storehouse_contract.md)를 참고하세요. 빈 배열·`null`과
 원자료 키는 유지하며, 잘못된 필드·상태·위치를 응답 검증에서 거부합니다.
 
 `details[기둥].branch.jijanggan/transmitted/hidden`은 지지 세력 계산과 같은 상세 지장간 표를 기준으로 합니다. 같은 지장간 글자가 천간의 두 위치에 보이면 `transmitted`에도 위치별 두 항목이 나옵니다. 기존 첫 위치만 표시하던 응답과 결과가 달라질 수 있으며, 투출 사실은 천간의 실·허 판정과 구분합니다.
 
 `details[기둥].stem.score/status/root_info`는 현재 **동주 지지 기준**입니다. `same_pillar_root_exists`는 동주 통근 유무이며, `score`는 위치 가중치를 곱하지 않은 동주 계수입니다. 양의 점수는 크기에 관계없이 실이며, `0`은 허투입니다. 다른 세 지지의 기존 가중 지원은 `external_support_score/external_support_info`로 별도 표시됩니다. 동주 뿌리가 없으면 타주 지원이 있어도 허투입니다. 통근 점수를 입력으로 사용하는 `advanced_analysis.five_elements.scores`도 이전 전주 합산 방식과 값이 달라질 수 있습니다.
 
-`analysis.summary.total_energy_balance`는 동주 통근/무근 개수만 알리고 원국 전체 신강·신약은 미판정으로 표시합니다. 동주 통근이 여러 천간에 있다는 사실만으로 전체 세력을 단정하지 않습니다.
+`analysis.summary.rooting_summary`는 동주 통근/무근 개수만 알리고 원국 전체 신강·신약은 미판정으로 표시합니다. 동주 통근이 여러 천간에 있다는 사실만으로 전체 세력을 단정하지 않습니다.
 
 현행 허실은 관계로 뿌리를 자동 제외하거나 변허로 바꾸지 않습니다. 관련 관계는 별도로 기록하고 실제 통근 영향은 미평가로 제공합니다.
 
@@ -262,12 +277,13 @@ GET http://localhost:8000/relation-index?year=1995&month=5&day=12&hour=14&min=30
 
 #### 3. `interactions` (위치별 관계 매트릭스)
 
-년·월·일·시의 여섯 위치 쌍과 다자 관계를 제공합니다. 버전은 `2.0.0`입니다.
+년·월·일·시의 여섯 위치 쌍과 다자 관계를 제공합니다. 버전은 `3.0.0`입니다.
 관계 총계와 기후 분류를 제거했고, 개별 관계 점수·중복 집계 필드도 반환하지 않습니다.
 
 - `rule_version`: 관계 매트릭스 응답 계약 버전.
-- `summary_list`: 관계별 요약 목록.
-- `matrix`: 위치별 관계와 관찰 근거.
+- `matrix`: 위치별 관계와 관찰 근거. 설명은 각 항목의 `description` 사용.
+
+설명을 복제하던 `summary_list`는 제거했습니다.
 
 | 필드 | 의미 |
 | --- | --- |

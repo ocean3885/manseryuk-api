@@ -74,7 +74,8 @@ class CharacterDetailsTests(unittest.TestCase):
         original = 'natal.chart.year.branch'
         future = 'sewoon.year_2026.year.branch'
         node = deepcopy(graph['characters'][original])
-        node.update(context_id='sewoon.year_2026', relation_ids=[], transmission_relation_ids=[])
+        node.update(context_id='sewoon.year_2026', relation_ids=[], transmission_relation_ids=[],
+                    analysis={'calculation_status': 'not_evaluated'})
         graph['characters'][future] = node
         row = dict(relation_id='fixture:cross_scope', type='same_branch',
                    participants=[original, future], context_ids=['natal.chart', 'sewoon.year_2026'],
@@ -91,7 +92,8 @@ class CharacterDetailsTests(unittest.TestCase):
         daewoon = 'daewoon.period_0.cycle.branch'
         node = deepcopy(graph['characters'][original])
         node.update(context_id='daewoon.period_0', position='cycle',
-                    relation_ids=['fixture:group'], transmission_relation_ids=[])
+                    relation_ids=['fixture:group'], transmission_relation_ids=[],
+                    analysis={'calculation_status': 'not_evaluated'})
         graph['characters'][daewoon] = node
         group = deepcopy(row)
         group.update(relation_id='fixture:group', type='trine',

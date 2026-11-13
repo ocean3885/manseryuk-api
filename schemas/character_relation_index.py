@@ -51,8 +51,8 @@ class CharacterNode(_ContractModel):
 class StemRootingState(_ContractModel):
     root_impact_status: Literal['not_evaluated'] = 'not_evaluated'
     root_impact_score: None = None
-    original_status: Literal['실(實)', '허(虛)', '허투(虛透)']
-    current_status: Literal['실(實)', '허(虛)', '허투(虛透)', '변허(變虛)']
+    original_status: Literal['실(實)', '허투(虛透)']
+    current_status: Literal['실(實)', '허투(虛透)']
     root_score: float
     has_same_pillar_root: bool
     remaining_score: float
@@ -83,6 +83,11 @@ class StemRootingState(_ContractModel):
                 or (self.has_same_pillar_root and self.root_score <= 0)
                 or (not self.has_same_pillar_root and self.root_score != 0)):
             raise ValueError('동주 통근 여부와 근거가 맞지 않습니다.')
+        if (self.remaining_score != self.root_score
+                or self.current_status != self.original_status
+                or self.original_status != ('실(實)' if self.has_same_pillar_root else '허투(虛透)')
+                or self.affected_root_branch_ids):
+            raise ValueError('통근 영향 미평가 상태에서는 점수·허실을 변경할 수 없습니다.')
         return self
 
 
@@ -232,6 +237,12 @@ class CharacterRelationIndex(_ContractModel):
                 raise ValueError(f'{char_id}: 글자 종류가 맞지 않습니다.')
             if (node.stem_state is None) == char_id.endswith('.stem'):
                 raise ValueError(f'{char_id}: 천간 상태의 위치가 맞지 않습니다.')
+            if node.stem_state is not None:
+                root = node.stem_state
+                own_branch = char_id.replace('.stem', '.branch')
+                if (root.root_branch_ids != ([own_branch] if root.has_same_pillar_root else [])
+                        or own_branch in root.external_support_branch_ids):
+                    raise ValueError(f'{char_id}: 동주 통근과 타주 지원 위치가 맞지 않습니다.')
         ids = [relation.relation_id for relation in self.relations]
         if len(ids) != len(set(ids)):
             raise ValueError('중복 관계 ID가 있습니다.')

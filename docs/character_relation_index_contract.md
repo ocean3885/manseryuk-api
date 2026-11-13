@@ -2,6 +2,25 @@
 
 > 현행 조회 스키마는 `1.7-draft`, 허실 원본 규칙은 `4.0.0`입니다. `stem_state.root_impact_status=not_evaluated`, `root_impact_score=null`이며 관계로 인한 자동 점수 제외는 하지 않습니다. 관계는 중앙 목록 및 지지 글자의 `relation_ids`에서 조회합니다. 아래 이전 버전의 손상·변허 설명보다 [현행 계약](root_relation_separation.md)을 우선합니다.
 
+## 현행 최소 계약 — 2026-11-13
+
+- API는 `GET /relation-index`, 조회 스키마는 `1.7-draft`다.
+- 원국 여덟 글자와 중앙 관계·참조, 천간의 동주 통근·타주 지원을 제공한다.
+- `stem_state`의 상태는 실·허투이며 원상태/현재 상태와 원점수/잔여 점수가 같다.
+  실제 영향은 미평가이고 영향받은 뿌리 목록은 비어 있다.
+- 동주 뿌리는 같은 위치의 지지이며 타주 지원에 동주 지지를 넣을 수 없다.
+- 고의 역할·신살 근거·요약 등 전체 원국 자료는 루트와 `/character-details`의 범위를 따른다.
+  관계 인덱스에 중복 복사하지 않는다.
+- 실제 원국 조회 6건에서 루트와 관계·통근 값이 일치하는지 확인했고,
+  잘못된 미평가 통근 변화를 거부하도록 검증을 보강했다.
+
+[현재 조회 정합성 검사와 결과](api_projection_audit.md)를 함께 읽는다.
+
+## 이전 설계·검증 기록
+
+아래 `1.6-draft` 예시와 변허·손상·이전 테스트 수는 당시 단계의 기록이다.
+**현재 반환 예시로 사용하지 않는다.** 현행 상태·점수 정책은 위 계약을 우선한다.
+
 작성일: 2026-11-03. [탐지 구현 현황](interaction_detection_implementation_audit.md)과 [실제 원국 조회 비교](eight_character_relation_lookup_example.md)를 바탕으로 만든 **탐지 단계의 독립 계약**이다. [계약 모델](../schemas/character_relation_index.py)과 [읽기 전용 조립기](../services/character_relation_index.py)를 마련했다. 현재 별도 `GET /relation-index` 경로에서 제공한다. 기존 통근 점수·허실 상태는 출처와 함께 읽어오지만 관계별 새 세력 변화량·손상량·빈주 귀속은 계산하지 않는다.
 
 ## 자료 형태와 조회 방식

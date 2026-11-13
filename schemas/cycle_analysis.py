@@ -36,7 +36,25 @@ class CycleAnalysis(CharacterDetails):
         if set(self.contexts) != expected:
             raise ValueError('선택한 운과 응답 소속이 일치하지 않습니다.')
         for context_id in expected - {'natal.chart'}:
+            if self.contexts[context_id].calculation_status != chosen.cycle_relations_status:
+                raise ValueError('선택 운의 후보 탐지 상태와 소속 계산 상태가 다릅니다.')
             nodes = {key for key, node in self.characters.items() if node.context_id == context_id}
             if nodes != {f'{context_id}.cycle.stem', f'{context_id}.cycle.branch'}:
                 raise ValueError('선택한 운의 천간·지지가 필요합니다.')
+        if chosen.daewoon_status == 'selected':
+            context = self.contexts[f'daewoon.period_{chosen.daewoon_index}']
+            metadata = context.selection
+            start = metadata.get('selection_start_year')
+            end = metadata.get('selection_end_year_exclusive')
+            if (type(metadata.get('index')) is not int or metadata['index'] != chosen.daewoon_index
+                    or type(start) is not int or type(end) is not int or start >= end
+                    or metadata.get('period_basis') != chosen.period_basis
+                    or (chosen.mode == 'sewoon' and not start <= chosen.sewoon_year < end)):
+                raise ValueError('대운 선택 번호·연도 범위·소속 메타데이터가 다릅니다.')
+        if chosen.mode == 'sewoon':
+            metadata = self.contexts[f'sewoon.year_{chosen.sewoon_year}'].selection
+            if (type(metadata.get('year')) is not int or metadata['year'] != chosen.sewoon_year
+                    or metadata.get('year_basis') != chosen.sewoon_basis
+                    or metadata.get('age_basis') != 'counting_age'):
+                raise ValueError('세운 선택 연도·기준과 소속 메타데이터가 다릅니다.')
         return self

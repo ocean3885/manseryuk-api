@@ -22,7 +22,7 @@ def pairs(result, kind):
 class InteractionMatrixTests(unittest.TestCase):
     def test_empty_matrix_does_not_invent_a_climate(self):
         result = matrix('子子子子')
-        self.assertEqual(result, {'rule_version': '2.0.0', 'summary_list': [], 'matrix': []})
+        self.assertEqual(result, {'rule_version': '3.0.0', 'matrix': []})
         self.assertEqual(InteractionsInfo.model_validate(result).model_dump(), result)
 
     def test_break_and_clash_are_active_at_adjacent_and_distant_positions(self):
@@ -139,7 +139,7 @@ class InteractionMatrixTests(unittest.TestCase):
         for kind, stems, branches, expected_elements in cases:
             with self.subTest(kind=kind):
                 result = matrix(branches, stems)
-                self.assertEqual(result['rule_version'], '2.0.0')
+                self.assertEqual(result['rule_version'], '3.0.0')
                 encoded = InteractionsInfo.model_validate(result).model_dump()
                 items = [r for r in encoded['matrix'] if r['type'] == kind]
                 self.assertEqual({r['candidate_element'] for r in items},

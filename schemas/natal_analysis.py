@@ -276,8 +276,14 @@ class TransmittedStem(HiddenStemInfo, TransmissionSource):
     stem_idx: PillarIndex
 
 
+class StorehouseInfo(RawContract):
+    stored_element: Literal['木', '火', '金', '水']
+    role: Literal['비겁고', '식상고', '재고', '관성고', '인성고']
+
+
 class RawBranchAnalysis(RawContract):
     char: str
+    storehouse: StorehouseInfo | None
     jijanggan: list[str]
     transmitted: list[TransmittedStem]
     hidden: list[HiddenStemInfo]

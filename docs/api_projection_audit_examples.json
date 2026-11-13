@@ -1,0 +1,359 @@
+{
+  "description": "실제 달력 DB를 사용한 고정 회귀 입력의 조회 정합성 요약. 응답 본문 전체가 아니며 변경 전후 정상 응답은 동일하다.",
+  "birth_cases": 6,
+  "successful_http_calls": 42,
+  "unchanged_response_bodies": 42,
+  "rejected_defects": [
+    "invalid_storehouse",
+    "unevaluated_root_loss",
+    "missing_natal_rooting",
+    "inconsistent_cycle_selection_metadata"
+  ],
+  "cases": [
+    {
+      "input": {
+        "year": 1995,
+        "month": "5",
+        "day": "12",
+        "hour": 14,
+        "min": 30,
+        "sl": "sol",
+        "gen": "남"
+      },
+      "root_summary_keys": [
+        "branch_interactions",
+        "stem_interactions",
+        "rooting_summary"
+      ],
+      "storehouses": {
+        "year": null,
+        "month": null,
+        "day": null,
+        "hour": {
+          "stored_element": "木",
+          "role": "식상고"
+        }
+      },
+      "index_characters": 8,
+      "index_relations": 20,
+      "natal_characters": 8,
+      "natal_relations": 20,
+      "cycles": [
+        {
+          "selector": {
+            "daewoon_index": 0
+          },
+          "characters": 10,
+          "relations": 28
+        },
+        {
+          "selector": {
+            "daewoon_index": 9
+          },
+          "characters": 10,
+          "relations": 30
+        },
+        {
+          "selector": {
+            "sewoon_year": 1995
+          },
+          "characters": 10,
+          "relations": 33
+        },
+        {
+          "selector": {
+            "sewoon_year": 2007
+          },
+          "characters": 12,
+          "relations": 46
+        }
+      ]
+    },
+    {
+      "input": {
+        "year": 1990,
+        "month": "1",
+        "day": "8",
+        "hour": 18,
+        "min": 0,
+        "sl": "sol",
+        "gen": "남"
+      },
+      "root_summary_keys": [
+        "branch_interactions",
+        "stem_interactions",
+        "rooting_summary"
+      ],
+      "storehouses": {
+        "year": null,
+        "month": {
+          "stored_element": "金",
+          "role": "인성고"
+        },
+        "day": null,
+        "hour": null
+      },
+      "index_characters": 8,
+      "index_relations": 24,
+      "natal_characters": 8,
+      "natal_relations": 24,
+      "cycles": [
+        {
+          "selector": {
+            "daewoon_index": 0
+          },
+          "characters": 10,
+          "relations": 33
+        },
+        {
+          "selector": {
+            "daewoon_index": 9
+          },
+          "characters": 10,
+          "relations": 32
+        },
+        {
+          "selector": {
+            "sewoon_year": 1990
+          },
+          "characters": 10,
+          "relations": 36
+        },
+        {
+          "selector": {
+            "sewoon_year": 2001
+          },
+          "characters": 12,
+          "relations": 47
+        }
+      ]
+    },
+    {
+      "input": {
+        "year": 2023,
+        "month": "2",
+        "day": "1",
+        "hour": 0,
+        "min": 0,
+        "sl": "lun_y",
+        "gen": "여"
+      },
+      "root_summary_keys": [
+        "branch_interactions",
+        "stem_interactions",
+        "rooting_summary"
+      ],
+      "storehouses": {
+        "year": null,
+        "month": null,
+        "day": null,
+        "hour": null
+      },
+      "index_characters": 8,
+      "index_relations": 23,
+      "natal_characters": 8,
+      "natal_relations": 23,
+      "cycles": [
+        {
+          "selector": {
+            "daewoon_index": 0
+          },
+          "characters": 10,
+          "relations": 34
+        },
+        {
+          "selector": {
+            "daewoon_index": 9
+          },
+          "characters": 10,
+          "relations": 34
+        },
+        {
+          "selector": {
+            "sewoon_year": 2023
+          },
+          "characters": 10,
+          "relations": 32
+        },
+        {
+          "selector": {
+            "sewoon_year": 2037
+          },
+          "characters": 12,
+          "relations": 34
+        }
+      ]
+    },
+    {
+      "input": {
+        "year": 2000,
+        "month": "2",
+        "day": "29",
+        "hour": 23,
+        "min": 59,
+        "sl": "sol",
+        "gen": "남"
+      },
+      "root_summary_keys": [
+        "branch_interactions",
+        "stem_interactions",
+        "rooting_summary"
+      ],
+      "storehouses": {
+        "year": {
+          "stored_element": "水",
+          "role": "관성고"
+        },
+        "month": null,
+        "day": null,
+        "hour": null
+      },
+      "index_characters": 8,
+      "index_relations": 19,
+      "natal_characters": 8,
+      "natal_relations": 19,
+      "cycles": [
+        {
+          "selector": {
+            "daewoon_index": 0
+          },
+          "characters": 10,
+          "relations": 25
+        },
+        {
+          "selector": {
+            "daewoon_index": 9
+          },
+          "characters": 10,
+          "relations": 27
+        },
+        {
+          "selector": {
+            "sewoon_year": 2000
+          },
+          "characters": 10,
+          "relations": 28
+        },
+        {
+          "selector": {
+            "sewoon_year": 2011
+          },
+          "characters": 12,
+          "relations": 38
+        }
+      ]
+    },
+    {
+      "input": {
+        "year": 1990,
+        "month": "1",
+        "day": "1",
+        "hour": 12,
+        "min": 0,
+        "sl": "sol",
+        "gen": "여"
+      },
+      "root_summary_keys": [
+        "branch_interactions",
+        "stem_interactions",
+        "rooting_summary"
+      ],
+      "storehouses": {
+        "year": null,
+        "month": null,
+        "day": null,
+        "hour": null
+      },
+      "index_characters": 8,
+      "index_relations": 22,
+      "natal_characters": 8,
+      "natal_relations": 22,
+      "cycles": [
+        {
+          "selector": {
+            "daewoon_index": 0
+          },
+          "characters": 10,
+          "relations": 32
+        },
+        {
+          "selector": {
+            "daewoon_index": 9
+          },
+          "characters": 10,
+          "relations": 32
+        },
+        {
+          "selector": {
+            "sewoon_year": 1990
+          },
+          "characters": 10,
+          "relations": 35
+        },
+        {
+          "selector": {
+            "sewoon_year": 2001
+          },
+          "characters": 12,
+          "relations": 46
+        }
+      ]
+    },
+    {
+      "input": {
+        "year": 2023,
+        "month": "2",
+        "day": "1",
+        "hour": 0,
+        "min": 0,
+        "sl": "lun",
+        "gen": "남"
+      },
+      "root_summary_keys": [
+        "branch_interactions",
+        "stem_interactions",
+        "rooting_summary"
+      ],
+      "storehouses": {
+        "year": null,
+        "month": null,
+        "day": null,
+        "hour": null
+      },
+      "index_characters": 8,
+      "index_relations": 19,
+      "natal_characters": 8,
+      "natal_relations": 19,
+      "cycles": [
+        {
+          "selector": {
+            "daewoon_index": 0
+          },
+          "characters": 10,
+          "relations": 30
+        },
+        {
+          "selector": {
+            "daewoon_index": 9
+          },
+          "characters": 10,
+          "relations": 31
+        },
+        {
+          "selector": {
+            "sewoon_year": 2023
+          },
+          "characters": 10,
+          "relations": 28
+        },
+        {
+          "selector": {
+            "sewoon_year": 2038
+          },
+          "characters": 12,
+          "relations": 43
+        }
+      ]
+    }
+  ]
+}
