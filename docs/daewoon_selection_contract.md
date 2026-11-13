@@ -18,7 +18,25 @@
 | `period_basis` | `legacy_start_year_half_open` |
 | `selection_status` | `selected`, `before_first_period`, `after_last_period`, `unavailable` |
 
-선택된 대운이 없으면 `current=null`이다. 첫 대운 이전과 마지막 대운 이후를 구분하며, 목록 자체가 없으면 `unavailable`이다. `current.age`는 기존처럼 현재연도−출생연도로 유지하고, 대운 선택 조건으로 쓰지 않는다. 시작 연도가 증가하지 않는 목록은 공통 함수가 거부한다.
+선택된 대운이 없으면 `current=null`이다. 첫 대운 이전과 마지막 대운 이후를 구분하며, 목록 자체가 없으면 `unavailable`이다. `current.age`는 현재연도−출생연도+1인 세는나이로 제공하고 `age_basis=counting_age`를 명시한다. 대운 선택 조건으로 쓰지 않는다. 시작 연도가 증가하지 않는 목록은 공통 함수가 거부한다.
+
+## 시작 나이 계산과 자료 부족
+
+2026-11-13: 순행은 출생일 뒤의 가장 가까운 절기를 오름차순으로, 역행은 앞의
+가장 가까운 절기를 내림차순으로 조회한다. SQL 결과의 암묵적인 순서에 의존하지 않는다.
+기존 출생일 레코드 번호 ±35 범위(경계 제외), 당일 절기 제외, 일수 차÷3의 소수 한 자리
+반올림을 유지한다. 절입·출생 시각을 쓰는 정밀 정책으로 바꾼 것은 아니다.
+
+필요한 방향의 절기 자료가 없으면 `start_age=null`,
+`start_age_status=term_data_unavailable`, `list=[]`, `current=null`,
+`selection_status=unavailable`로 반환한다. 기존 임의 대체값 1.0을 제거했다.
+실제로 3일 간격으로 계산된 1.0은 `start_age_status=calculated`로 구분한다.
+DB 시작일의 역행·마지막 날의 순행 등이 자료 부족 사례다.
+원국·달력·세운 목록은 계속 제공하며 대운 번호 조회는 `daewoon_unavailable` 400이다.
+
+소수 `start_age/end_age`는 날짜 간격 기반 대운수다. 운 화면의 `age`가 세는나이로
+통일됐다는 이유로 시작 나이·기존 선택 연도·기간 경계를 변경하지 않는다.
+기본 응답의 `meta.reference_date`와 `daewoon.selection_year`는 같은 서버 날짜를 사용한다.
 
 ## 세운 조회
 

@@ -15,6 +15,18 @@ DB = Path(__file__).resolve().parents[1] / 'manseryuk.db'
 
 
 class ErrorHandlerTests(unittest.TestCase):
+    def test_retired_summary_endpoint_is_not_exposed(self):
+        with TestClient(app) as client:
+            spec = client.get('/openapi.json').json()
+            self.assertNotIn('/analysis-summary', spec['paths'])
+            for path in ('/', '/character-details', '/cycle-analysis', '/relation-index'):
+                self.assertIn(path, spec['paths'])
+            for params in ({}, QUERY, {**QUERY, 'sewoon_year': 2007}):
+                response = client.get('/analysis-summary', params=params)
+                self.assertEqual(response.status_code, 404)
+                self.assertEqual(response.json()['code'], 'http_404')
+                ApiErrorResponse.model_validate(response.json())
+
     def test_framework_errors_and_openapi_use_common_schema(self):
         with TestClient(app) as client:
             cases = [('/missing-route', 404), ('/character-details', 422)]

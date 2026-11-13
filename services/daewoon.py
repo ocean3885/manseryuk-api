@@ -59,29 +59,25 @@ def getDaewoon(gen, ygan, mgan, mji):
         return ["순행", [], []]
 
 
-def daewoonNum(birth_no: int, direction: str, db: Session):
+def daewoonNum(birth_no: int, direction: str, db: Session) -> float | None:
     JEOLGI = ["입춘", "경칩", "청명", "입하", "망종", "소서",
               "입추", "백로", "한로", "입동", "대설", "소한"]
     
     start_spot = birth_no - 35
     
-    # DB 레코드 검색 시 JEOLGI 절기 항목만 SQL IN 절로 직접 필터링
-    jeolgi_dates = db.query(CalendaData).filter(
+    # Keep the existing date-only window and same-day exclusion policy.
+    query = db.query(CalendaData).filter(
         CalendaData.cd_no > start_spot,
         CalendaData.cd_no < start_spot + 70,
         CalendaData.cd_kterms.in_(JEOLGI)
-    ).all()
-    
+    )
     if direction == "순행":
-        for jeolgi_date in jeolgi_dates:
-            if birth_no < jeolgi_date.cd_no:
-                return round((jeolgi_date.cd_no - birth_no) / 3, 1)
-    else:  # direction == "역행"
-        for jeolgi_date in reversed(jeolgi_dates):
-            if birth_no > jeolgi_date.cd_no:
-                return round((birth_no - jeolgi_date.cd_no) / 3, 1)
-    
-    return 1.0
+        term = query.filter(CalendaData.cd_no > birth_no).order_by(CalendaData.cd_no.asc()).first()
+    elif direction == "역행":
+        term = query.filter(CalendaData.cd_no < birth_no).order_by(CalendaData.cd_no.desc()).first()
+    else:
+        raise ValueError('대운 방향은 순행 또는 역행이어야 합니다.')
+    return round(abs(term.cd_no - birth_no) / 3, 1) if term is not None else None
 
     
 def get_time_gan(day_gan_kr: str, time_ji: str) -> str:
@@ -118,10 +114,10 @@ def build_daewoon(
     ji_list = direction_data[2]
 
     daewoon_list = []
-    current_age = current_year - birth_year
+    current_age = current_year - birth_year + 1
     current_daewoon = None
 
-    for i in range(len(gan_list)):
+    for i in range(len(gan_list) if start_age is not None else 0):
         item_start_age = round(start_age + (i * 10), 1)
         item_end_age = round(item_start_age + 9.9, 1)
 
@@ -160,7 +156,8 @@ def build_daewoon(
         item.update(selection_start_year=start, selection_end_year_exclusive=end)
     selected, selection_status = select_daewoon_year(daewoon_list, current_year)
     if selected is not None:
-        current_daewoon = {**selected, 'year': current_year, 'age': current_age}
+        current_daewoon = {**selected, 'year': current_year, 'age': current_age,
+                           'age_basis': 'counting_age'}
 
     return {
         "direction": direction,
@@ -168,6 +165,7 @@ def build_daewoon(
         "selection_status": selection_status,
         "period_basis": PERIOD_BASIS,
         "start_age": start_age,
+        "start_age_status": 'calculated' if start_age is not None else 'term_data_unavailable',
         "current": current_daewoon,
         "list": daewoon_list
     }

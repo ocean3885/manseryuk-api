@@ -27,8 +27,6 @@ def error_response(request: Request, status_code, code, message, errors, detail,
     if request.url.path == '/cycle-analysis':
         example += '&sewoon_year=2026'
         usage += ' daewoon_index 또는 sewoon_year 중 하나만 지정하세요.'
-    elif request.url.path == '/analysis-summary':
-        usage += ' 원국만 조회하거나, daewoon_index 또는 sewoon_year 중 하나를 추가하세요.'
     body = ApiErrorResponse(code=code, message=message, errors=errors, detail=detail,
                             correct_usage=usage, example=example, required_fields=required)
     return JSONResponse(status_code=status_code, content=body.model_dump(mode='json'), headers=headers)

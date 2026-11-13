@@ -11,23 +11,8 @@ from schemas.cycle_analysis import CycleAnalysis
 from services.cycle_analysis import assemble_cycle_analysis
 from core.api_errors import selection_error
 from schemas.api_error import ApiErrorResponse
-from schemas.analysis_summary import AnalysisSummary
-from services.analysis_summary import assemble_analysis_summary
 
 router = APIRouter(responses={code: {'model': ApiErrorResponse} for code in (400, 404, 422, 500)})
-
-
-@router.get('/analysis-summary', response_model=AnalysisSummary)
-def get_analysis_summary(
-    year: int, month: str, day: str, hour: int, min: int, sl: str, gen: str,
-    daewoon_index: int | None = None, sewoon_year: int | None = None,
-    db: Session = Depends(get_db),
-):
-    """원국 구조 또는 선택한 운의 추가 관계를 근거에 연결해 요약한다."""
-    if daewoon_index is not None and sewoon_year is not None:
-        raise selection_error()
-    response = get_calenda_data(year, month, day, hour, min, sl, gen, db)
-    return assemble_analysis_summary(response, daewoon_index=daewoon_index, sewoon_year=sewoon_year)
 
 
 @router.get('/cycle-analysis', response_model=CycleAnalysis)

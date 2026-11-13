@@ -219,7 +219,7 @@ def get_jijanggan_details(day_stem_ch: str, branch_input: str) -> list:
     return result
 
 
-def generate_future_cycles(birth_year: int, daeun: float, day_stem_ch: str = "") -> list:
+def generate_future_cycles(birth_year: int, daeun: float | None, day_stem_ch: str = "") -> list:
     """
     100년간의 세운을 프론트엔드 렌더링에 최적화된 객체 리스트로 생성
     """
@@ -244,38 +244,7 @@ def generate_future_cycles(birth_year: int, daeun: float, day_stem_ch: str = "")
         result.append({
             "year": cur_year,
             "age": cur_age,
-            "gan": gan_detail,
-            "ji": ji_detail,
-            "unseong": unseong
-        })
-        
-    return result
-
-
-def generate_baby_cycles(birth_year: int, day_stem_ch: str = "") -> list:
-    """
-    1세부터 10세까지의 소운(아기 운세)을 객체 리스트로 생성
-    """
-    heavenly_stems = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
-    earthly_branches = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
-    
-    base_year = 1984
-    result = []
-    
-    for i in range(10):
-        cur_year = birth_year + i
-        cur_age = i + 1
-        offset = (cur_year - base_year) % 60
-        stem_ch = heavenly_stems[offset % 10]
-        branch_ch = earthly_branches[offset % 12]
-        
-        gan_detail = get_stem_detail(day_stem_ch, stem_ch)
-        ji_detail = get_branch_detail(day_stem_ch, branch_ch)
-        unseong = UNSEONG_DATA.get(day_stem_ch, {}).get(branch_ch, "") if day_stem_ch else ""
-        
-        result.append({
-            "year": cur_year,
-            "age": cur_age,
+            "age_basis": "counting_age",
             "gan": gan_detail,
             "ji": ji_detail,
             "unseong": unseong

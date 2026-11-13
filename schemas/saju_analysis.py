@@ -82,6 +82,7 @@ class LunarDate(BaseModel):
     year: int
     month: str
     day: str
+    is_leap_month: bool
 
 
 class CalendarInfo(BaseModel):
@@ -98,6 +99,7 @@ class CurrentDaewoon(BaseModel):
     index: int
     year: int
     age: int
+    age_basis: Literal['counting_age'] = 'counting_age'
 
     gan: str
     ji: str
@@ -139,7 +141,8 @@ class Daewoon(BaseModel):
     selection_status: Literal['selected', 'before_first_period', 'after_last_period', 'unavailable']
     period_basis: Literal['legacy_start_year_half_open']
     direction: str
-    start_age: float
+    start_age: Optional[float]
+    start_age_status: Literal['calculated', 'term_data_unavailable']
 
     current: Optional[CurrentDaewoon]
 
@@ -147,23 +150,25 @@ class Daewoon(BaseModel):
 
 
 class CycleItem(BaseModel):
-    """세운 / 소운 단일 연도 상세 항목"""
+    """달력 연도 기준 세운 항목"""
     year: int
     age: int
+    age_basis: Literal['counting_age'] = 'counting_age'
     gan: StemDetail
     ji: BranchDetail
     unseong: Optional[str] = None
 
 
 class CyclesInfo(BaseModel):
-    """운세 사이클 (세운 100년, 소운 10년)"""
+    """세운 100년과 그중 어린 시절 첫 10년"""
     future_100: List[CycleItem]  # 100년 세운 객체 리스트
-    baby_10: List[CycleItem]     # 소운 10년 객체 리스트
+    childhood_10: List[CycleItem]
 
 
 class MetaInfo(BaseModel):
     """사용자 메타 정보"""
     gender: str
+    reference_date: str
     ddi: Optional[str] = None  # 띠
     birth_date_solar: Optional[str] = None  # YYYY-MM-DD
     birth_time: Optional[str] = None        # HH:MM
@@ -374,6 +379,8 @@ class BinZhuDynamics(BaseModel):
 
 
 class FiveElementsInfo(BaseModel):
+    distribution_basis: Literal['eight_visible_characters']
+    score_meaning: Literal['provisional_weighted_index']
     counts: Dict[str, int]
     percentages: Dict[str, float]
     scores: Dict[str, float]

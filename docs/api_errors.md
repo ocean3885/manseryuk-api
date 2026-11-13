@@ -37,7 +37,7 @@
 | 400 | `invalid_cycle_selection` | 대운 번호·세운 연도 중 하나만 지정해야 함 |
 | 400 | `daewoon_index_out_of_range` | 대운 번호가 제공 범위 밖 |
 | 400 | `sewoon_year_out_of_range` | 세운 연도가 제공 범위 밖 |
-| 400 | `daewoon_unavailable` | 세운 연도에 대응하는 대운이 없음 |
+| 400 | `daewoon_unavailable` | 시작 절기 자료 부족 또는 세운 연도에 대응하는 대운이 없음 |
 | 404 | `calendar_date_not_found` | 요청한 양력·음력 평달·윤달 레코드 없음 |
 | 422 | `request_validation_error` | 필수 인자 누락·자료형 오류 |
 | 500 이상 | `internal_error` | 서버 처리 실패 |

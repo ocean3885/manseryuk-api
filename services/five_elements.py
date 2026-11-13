@@ -18,7 +18,7 @@ BRANCH_ELEMENT_MAP = {
 
 def analyze_five_elements(stems: List[str], branches: List[str], tonggeun_results: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
-    오행(五行: 목, 화, 토, 금, 수) 분포 및 비율, 강도 점수, 과다/결핍 분석 엔진
+    대표 오행의 글자 수·비율과 기존 잠정 가중 지표를 제공한다. 실제 세력·보완 필요성은 판정하지 않는다.
     """
     counts = {'목': 0, '화': 0, '토': 0, '금': 0, '수': 0}
     scores = {'목': 0.0, '화': 0.0, '토': 0.0, '금': 0.0, '수': 0.0}
@@ -51,18 +51,9 @@ def analyze_five_elements(stems: List[str], branches: List[str], tonggeun_result
     dominant_list = [elem for elem, count in counts.items() if count >= 3 or percentages[elem] >= 35.0]
     deficient_list = [elem for elem, count in counts.items() if count == 0]
 
-    dominant_str = ", ".join([f"{e}({counts[e]}개)" for e in dominant_list]) if dominant_list else "골고루 균형"
-    deficient_str = ", ".join(deficient_list) if deficient_list else "없음 (모두 보유)"
-
-    # 6. 설명 텍스트
-    if dominant_list and deficient_list:
-        summary_text = f"{dominant_str} 기운이 가장 우세하며, {deficient_str} 기운이 결핍되어 있어 오행의 보완이 필요합니다."
-    elif dominant_list:
-        summary_text = f"{dominant_str} 기운이 발달하여 주도적인 성향을 띱니다."
-    elif deficient_list:
-        summary_text = f"전반적으로 완만하나 {deficient_str} 기운이 부족하여 후천적 보완이 유리합니다."
-    else:
-        summary_text = "목화토금수 5개 오행이 사주에 골고루 갖추어진 원만한 오행구족(五行具足) 구조입니다."
+    # Report counts only: neither weighted power dominance nor advice is evaluated here.
+    distribution = ', '.join(f'{element} {count}개' for element, count in counts.items())
+    summary_text = f'원국 8글자의 대표 오행 분포는 {distribution}입니다. 비율은 글자 수 기준이며 실제 세력의 비율이 아닙니다.'
 
     return {
         "counts": counts,
@@ -70,5 +61,7 @@ def analyze_five_elements(stems: List[str], branches: List[str], tonggeun_result
         "scores": scores,
         "dominant": dominant_list,
         "deficient": deficient_list,
-        "summary": summary_text
+        "summary": summary_text,
+        "distribution_basis": "eight_visible_characters",
+        "score_meaning": "provisional_weighted_index",
     }

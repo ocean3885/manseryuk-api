@@ -148,7 +148,7 @@ def analyze_palja_integrated(stems, branches):
         
         # 지지 주요 형충회합 요약 추출
         branch_label_map = {
-            'six_haps_all': '육합',
+            'six_haps': '육합',
             'chungs': '충',
             'cheons': '천(穿)',
             'breaks': '파',
@@ -161,23 +161,14 @@ def analyze_palja_integrated(stems, branches):
             'punishments': '형'
         }
         for rel_key, rel_val in branch_relations.items():
-            if rel_key == 'six_haps':  # 단일 결과는 호환용, 요약은 전체 목록 사용
-                continue
             label = branch_label_map.get(rel_key, rel_key)
-            if rel_val and isinstance(rel_val, dict):
-                target_char = rel_val.get('with', '')
-                rel_type = rel_val.get('type', '')
+            for item in rel_val:
+                target_char = item.get('with', '')
+                rel_type = item.get('type', '')
+                if not target_char and 'branches' in item:
+                    target_char = "".join(item['branches'])
                 type_str = f", {rel_type}" if rel_type else ""
                 collected_branch_rels.append(f"{position_names[i]}지 {label}({target_char}{type_str})")
-            elif rel_val and isinstance(rel_val, list):
-                for item in rel_val:
-                    if isinstance(item, dict):
-                        target_char = item.get('with', '')
-                        rel_type = item.get('type', '')
-                        if not target_char and 'branches' in item:
-                            target_char = "".join(item['branches'])
-                        type_str = f", {rel_type}" if rel_type else ""
-                        collected_branch_rels.append(f"{position_names[i]}지 {label}({target_char}{type_str})")
 
         # 천간 주요 관계 요약 추출
         stem_label_map = {

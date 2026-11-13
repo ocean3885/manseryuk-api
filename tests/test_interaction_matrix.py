@@ -4,7 +4,7 @@ import unittest
 
 from schemas.saju_analysis import BranchDynamics, InteractionsInfo
 from services.branch_dynamics import analyze_branch_dynamics
-from services.branch_relations import check_six_hap, check_six_haps, check_three_hap, check_square_hap, get_relations_for_branch
+from services.branch_relations import check_six_haps, check_three_hap, check_square_hap, get_relations_for_branch
 from services.constants import SIX_HAPS
 from services.interaction_matrix import build_interaction_matrix
 
@@ -102,14 +102,13 @@ class InteractionMatrixTests(unittest.TestCase):
                                       if item['type'] == '천(穿)'], ['천(穿)'])
                     self.assertFalse(any('害' in item['type'] for item in items))
 
-    def test_six_hap_keeps_legacy_single_and_adds_all_partners(self):
+    def test_six_hap_returns_all_partners_in_one_list(self):
         branches = list('子丑丑子')
         all_haps = check_six_haps('子', 0, branches, '甲')
         self.assertEqual([r['with_index'] for r in all_haps], [1, 2])
-        self.assertEqual(check_six_hap('子', 0, branches, '甲'), all_haps[0])
         relations = get_relations_for_branch('子', 0, branches, list('甲甲甲甲'))
-        self.assertEqual(relations['six_haps'], all_haps[0])
-        self.assertEqual(relations['six_haps_all'], all_haps)
+        self.assertEqual(relations['six_haps'], all_haps)
+        self.assertNotIn('six_haps_all', relations)
         self.assertEqual(matrix(branches)['harmony_score'], 5.1)
 
     def test_six_hap_hidden_stem_candidates_survive_schema(self):

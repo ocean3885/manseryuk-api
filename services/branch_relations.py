@@ -2,8 +2,27 @@ from itertools import combinations
 from services.relation_rules import (SIX_HAPS, CHUNGS, CHEONS, BREAKS, THREE_HAPS,
     HALF_HAPS, GONG_HAPS, HIDDEN_STEM_HAPS, SQUARE_HAPS, PUNISHMENTS,
     THREE_PUNISHMENTS, STEM_COMBINATIONS, THREE_HAPS_KING,
-    THREE_HAP_CONDITIONS, SIX_HAP_CONDITIONS)
+    THREE_HAP_CONDITIONS, SIX_HAP_CONDITIONS, PAIR_PRESENCE_ACTIVE_RULE_ID,
+    ADJACENT_SELF_PUNISHMENT_RULE_ID, TRIPLE_PUNISHMENT_PRESENCE_RULE_ID)
 from services.calculator import get_ten_star_branch
+
+
+def _condition_branch(index, branches, day_stem):
+    """조건에 관여한 실제 위치·글자·십성을 함께 제공한다."""
+    pillar = ('year', 'month', 'day', 'hour')[index]
+    label = ('년지', '월지', '일지', '시지')[index]
+    char = branches[index]
+    ten_god = get_ten_star_branch(day_stem, char)
+    return {'index': index, 'pillar': pillar, 'char': char, 'ten_god': ten_god,
+            'display_name': f'{label} {char}({ten_god})'}
+
+
+def _condition_clash(member_index, clash_index, branches, day_stem, context):
+    affected = _condition_branch(member_index, branches, day_stem)
+    cause = _condition_branch(clash_index, branches, day_stem)
+    return {'affected': affected, 'cause': cause,
+            'description': (f"{cause['display_name']} ↔ {affected['display_name']}: "
+                            f"{context}입니다.")}
 
 
 def check_six_haps(target_branch, target_index, all_branches, day_stem):
@@ -27,11 +46,16 @@ def check_six_haps(target_branch, target_index, all_branches, day_stem):
                     if ((member_branch, clash_branch) not in CHUNGS and
                             (clash_branch, member_branch) not in CHUNGS):
                         continue
+                    location = ('between' if min(target_index, i) < clash_index < max(target_index, i)
+                                else 'outside')
+                    location_label = '육합 두 글자 사이' if location == 'between' else '육합 조합 바깥'
                     adjacent_clashes.append({
                         'member_index': member_index,
                         'clashing_index': clash_index,
-                        'location': ('between' if min(target_index, i) < clash_index < max(target_index, i)
-                                     else 'outside'),
+                        'location': location,
+                        'location_label': location_label,
+                        **_condition_clash(member_index, clash_index, all_branches,
+                                           day_stem, f'{location_label}의 인접 충'),
                     })
             if any(clash['location'] == 'between' for clash in adjacent_clashes):
                 reason = 'intervening_adjacent_clash'
@@ -39,6 +63,7 @@ def check_six_haps(target_branch, target_index, all_branches, day_stem):
                 reason = 'external_adjacent_clash'
             else:
                 reason = None
+            status = SIX_HAP_CONDITIONS[reason] if reason else 'active'
             results.append({
                 'my': target_branch,
                 'my_index': target_index,
@@ -46,21 +71,24 @@ def check_six_haps(target_branch, target_index, all_branches, day_stem):
                 'with': other_branch,
                 'with_index': i,
                 'with_ten_star': get_ten_star_branch(day_stem, other_branch),
-                'element': element,
+                'candidate_element': element,
                 'type': '근합' if is_adjacent else '원합',
-                'strength': 1.0 if is_adjacent else 0.5,
+                'distance': abs(i - target_index),
+                'distance_weight': 1.0 if is_adjacent else (0.7 if abs(i - target_index) == 2 else 0.5),
+                'proximity_coefficient': 1.0 if is_adjacent else 0.5,
                 'is_adjacent': is_adjacent,
-                'activation_status': SIX_HAP_CONDITIONS[reason] if reason else 'active',
+                'activation_status': status,
+                'activation_rule_id': PAIR_PRESENCE_ACTIVE_RULE_ID if not reason else None,
                 'status_reasons': [reason] if reason else [],
-                'condition_evidence': {'adjacent_clashes': adjacent_clashes},
+                'impact_status': 'not_evaluated',
+                'condition_evidence': {
+                    'summary': ' '.join(
+                        [clash['description'] for clash in adjacent_clashes] or
+                        ['육합 성립을 제한하는 인접 충이 확인되지 않았습니다.']),
+                    'adjacent_clashes': adjacent_clashes,
+                },
             })
     return results
-
-
-def check_six_hap(target_branch, target_index, all_branches, day_stem):
-    """기존 단일 육합 응답 호환용. 전체 결과는 check_six_haps 사용."""
-    results = check_six_haps(target_branch, target_index, all_branches, day_stem)
-    return results[0] if results else None
 
 
 def _group_members(group_branches, target_index, all_branches, day_stem):
@@ -94,10 +122,13 @@ def check_chung(target_branch, target_index, all_branches, day_stem):
                 'with_index': i,
                 'with_ten_star': get_ten_star_branch(day_stem, other_branch),
                 'distance': distance,
-                'strength': strength,
-                'is_adjacent': (distance == 1)
+                'distance_weight': strength,
+                'is_adjacent': (distance == 1),
+                'activation_status': 'active',
+                'activation_rule_id': PAIR_PRESENCE_ACTIVE_RULE_ID,
+                'status_reasons': [], 'impact_status': 'not_evaluated',
             })
-    return results if results else None
+    return results
 
 
 def check_cheon(target_branch, target_index, all_branches, day_stem):
@@ -121,10 +152,13 @@ def check_cheon(target_branch, target_index, all_branches, day_stem):
                 'with_index': i,
                 'with_ten_star': get_ten_star_branch(day_stem, other_branch),
                 'distance': distance,
-                'strength': strength,
-                'is_adjacent': (distance == 1)
+                'distance_weight': strength,
+                'is_adjacent': (distance == 1),
+                'activation_status': 'active',
+                'activation_rule_id': PAIR_PRESENCE_ACTIVE_RULE_ID,
+                'status_reasons': [], 'impact_status': 'not_evaluated',
             })
-    return results if results else None
+    return results
 
 
 def check_break(target_branch, target_index, all_branches, day_stem):
@@ -148,10 +182,13 @@ def check_break(target_branch, target_index, all_branches, day_stem):
                 'with_index': i,
                 'with_ten_star': get_ten_star_branch(day_stem, other_branch),
                 'distance': distance,
-                'strength': strength,
-                'is_adjacent': (distance == 1)
+                'distance_weight': strength,
+                'is_adjacent': (distance == 1),
+                'activation_status': 'active',
+                'activation_rule_id': PAIR_PRESENCE_ACTIVE_RULE_ID,
+                'status_reasons': [], 'impact_status': 'not_evaluated',
             })
-    return results if results else None
+    return results
 
 
 def _half_hap_matches(target_branch, target_index, other_branch, all_branches,
@@ -170,9 +207,12 @@ def _half_hap_matches(target_branch, target_index, other_branch, all_branches,
         'with_ten_star': get_ten_star_branch(day_stem, other_branch),
         'missing': missing,
         'fallback_from': fallback_from,
-        'element': element,
+        'candidate_element': element,
         'type': f"{rule['type']} ({'생+왕' if rule['type'] == '전반합' else '왕+성'})",
-        'strength': rule['strength'],
+        'structure_coefficient': rule['strength'],
+        'distance': abs(target_index - other_pos),
+        'activation_status': 'potential',
+        'status_reasons': [], 'impact_status': 'not_evaluated',
         'is_adjacent': abs(target_index - other_pos) == 1,
     } for other_pos, branch in enumerate(all_branches) if branch == other_branch]
 
@@ -207,7 +247,8 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
                 status_reasons.append('duplicate_middle')
             outside_indices = set(range(len(all_branches))) - set(participant_indices)
             adjacent_clashes = [
-                {'middle_index': i, 'clashing_index': j}
+                {'middle_index': i, 'clashing_index': j,
+                 **_condition_clash(i, j, all_branches, day_stem, '삼합 중신의 인접 충')}
                 for i in middle_indices for j in sorted(outside_indices)
                 if abs(i - j) == 1 and
                 ((middle, all_branches[j]) in CHUNGS or
@@ -218,7 +259,10 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
             adjacent_wing_clashes = [
                 {'wing_index': wing_index,
                  'wing_role': 'birth' if all_branches[wing_index] == b1 else 'tomb',
-                 'clashing_index': j}
+                 'clashing_index': j,
+                 **_condition_clash(wing_index, j, all_branches, day_stem,
+                                    '삼합 생지의 인접 충' if all_branches[wing_index] == b1
+                                    else '삼합 성지의 인접 충')}
                 for wing_index in participant_indices
                 if all_branches[wing_index] in (b1, b3)
                 for j in sorted(outside_indices)
@@ -235,6 +279,14 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
                     status = 'suppressed'
                     break
                 status = THREE_HAP_CONDITIONS[reason]
+            middle_members = [_condition_branch(i, all_branches, day_stem)
+                              for i in middle_indices]
+            observations = []
+            if len(middle_members) > 1:
+                names = ' · '.join(member['display_name'] for member in middle_members)
+                observations.append(f'{names}에 삼합 중신이 중복되어 있습니다.')
+            observations.extend(clash['description'] for clash in
+                                [*adjacent_clashes, *adjacent_wing_clashes])
             
             three_haps.append({
                 'my': target_branch,
@@ -244,13 +296,16 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
                 'participant_indices': participant_indices,
                 'formation_indices': formation_indices,
                 'with_branches': with_branches,
-                'element': element,
-                'strength': candidate_strength if status == 'potential' else 0.0,
-                'candidate_strength': candidate_strength,
+                'candidate_element': element,
+                'structure_coefficient': candidate_strength,
                 'activation_status': status,
                 'status_reasons': status_reasons,
+                'impact_status': 'not_evaluated',
                 'condition_evidence': {
+                    'summary': ' '.join(observations or
+                        ['삼합 중신의 중복과 구성 지지의 인접 충이 확인되지 않았습니다.']),
                     'middle_indices': middle_indices,
+                    'middle_members': middle_members,
                     'adjacent_clashes': adjacent_clashes,
                     'adjacent_wing_clashes': adjacent_wing_clashes,
                 },
@@ -274,6 +329,10 @@ def check_three_hap(target_branch, target_index, all_branches, day_stem):
                             'clashed_index': clash['wing_index'],
                             'clashing_index': clash['clashing_index'],
                             'reason': f"adjacent_{clash['wing_role']}_clash",
+                            'affected': clash['affected'],
+                            'cause': clash['cause'],
+                            'description': (clash['description'] +
+                                            ' 완전한 삼합은 억제되고, 남은 중신과 날개의 반합 후보를 기록합니다.'),
                         },
                     ))
             
@@ -303,9 +362,10 @@ def check_gong_hap(target_branch, target_index, all_branches, day_stem):
             'my_ten_star': get_ten_star_branch(day_stem, target_branch),
             'with': other_branch, 'with_index': i,
             'with_ten_star': get_ten_star_branch(day_stem, other_branch),
-            'missing': rule['missing'], 'element': rule['element'],
+            'missing': rule['missing'], 'candidate_element': rule['element'],
             'is_adjacent': abs(i - target_index) == 1,
-            'strength': None, 'activation_status': 'candidate_only',
+            'activation_status': 'candidate_only', 'status_reasons': [],
+            'impact_status': 'not_evaluated',
         })
     return results
 
@@ -335,7 +395,8 @@ def check_hidden_stem_hap(target_branch, target_index, all_branches, day_stem):
                 for first, second in stem_pairs
             ],
             'is_adjacent': abs(i - target_index) == 1,
-            'strength': None, 'activation_status': 'candidate_only',
+            'activation_status': 'candidate_only', 'status_reasons': [],
+            'impact_status': 'not_evaluated',
         })
     return results
 
@@ -353,24 +414,14 @@ def check_square_hap(target_branch, target_index, all_branches, day_stem):
         others_exist = [other for other in others if other in all_branches]
         
         if len(others_exist) == 2:
-            # 방합 완성 (3개 모두 존재)
-            positions = []
-            for idx, branch in enumerate(all_branches):
-                if branch in (b1, b2, b3):
-                    positions.append(idx)
-            positions.sort()
-            
-            # 거리 계산 (첫 지지와 마지막 지지 간격)
-            distance = positions[-1] - positions[0]
-            is_adjacent = (distance <= 2)
-            
-            # strength: 방합 고유 파워 부스트에 위치 기반 가중치 적용
-            strength = info['power_boost'] if is_adjacent else info['power_boost'] * 0.6
-            
-            # with_branches 리스트 생성
             participant_indices, formation_indices, with_branches = _group_members(
                 (b1, b2, b3), target_index, all_branches, day_stem
             )
+            # Evaluate real three-position formations, not the union of repeated glyphs.
+            formation_distances = [formation[-1] - formation[0] for formation in formation_indices]
+            distance = min(formation_distances)
+            is_adjacent = any(span == 2 for span in formation_distances)
+            proximity_coefficient = 1.0 if is_adjacent else 0.6
             
             results.append({
                 'my': target_branch,
@@ -380,14 +431,19 @@ def check_square_hap(target_branch, target_index, all_branches, day_stem):
                 'participant_indices': participant_indices,
                 'formation_indices': formation_indices,
                 'with_branches': with_branches,    # 상대 두 지지 상세 정보
-                'element': info['element'],
+                'candidate_element': info['element'],
                 'season': info['season'],
-                'strength': strength,
+                'base_coefficient': info['power_boost'],
+                'proximity_coefficient': proximity_coefficient,
+                'potential_index': round(info['power_boost'] * proximity_coefficient, 4),
+                'formation_distances': formation_distances,
+                'activation_status': 'potential', 'status_reasons': [],
+                'impact_status': 'not_evaluated',
                 'is_adjacent': is_adjacent,
                 'distance': distance
             })
     
-    return results if results else None
+    return results
 
 
 def check_three_punishment(target_branch, target_index, all_branches, day_stem):
@@ -408,6 +464,9 @@ def check_three_punishment(target_branch, target_index, all_branches, day_stem):
             'formation_indices': formations,
             'with_branches': others,
             'is_adjacent': any(indices[-1] - indices[0] == 2 for indices in formations),
+            'activation_status': 'active',
+            'activation_rule_id': TRIPLE_PUNISHMENT_PRESENCE_RULE_ID,
+            'status_reasons': [], 'impact_status': 'not_evaluated',
         })
     return results
 
@@ -437,9 +496,14 @@ def check_punishment(target_branch, target_index, all_branches, day_stem):
                 'with_index': i,
                 'with_ten_star': get_ten_star_branch(day_stem, other_branch),
                 'distance': distance,
-                'strength': final_strength,
+                'distance_weight': strength,
+                'base_coefficient': 0.9,
+                'potential_index': round(final_strength, 4),
                 'is_adjacent': is_adjacent,
-                'type': '지세형'
+                'type': '지세형',
+                'activation_status': 'active',
+                'activation_rule_id': PAIR_PRESENCE_ACTIVE_RULE_ID,
+                'status_reasons': [], 'impact_status': 'not_evaluated',
             })
         
         # 자형 (辰-辰, 午-午, 酉-酉, 亥-亥)
@@ -453,9 +517,15 @@ def check_punishment(target_branch, target_index, all_branches, day_stem):
                 'with_index': i,
                 'with_ten_star': get_ten_star_branch(day_stem, other_branch),
                 'distance': distance,
-                'strength': final_strength,
+                'distance_weight': strength,
+                'base_coefficient': 0.7,
+                'potential_index': round(final_strength, 4),
                 'is_adjacent': is_adjacent,
-                'type': '자형'
+                'type': '자형',
+                'activation_status': 'active' if is_adjacent else 'candidate_only',
+                'activation_rule_id': ADJACENT_SELF_PUNISHMENT_RULE_ID if is_adjacent else None,
+                'status_reasons': ['adjacent_self_punishment' if is_adjacent else 'nonadjacent_self_punishment_candidate'],
+                'impact_status': 'not_evaluated',
             })
     
     # 중복 제거 (같은 상대, 같은 형 타입이 두 번 들어갈 가능성은 거의 없으나 안전하게)
@@ -487,8 +557,7 @@ def get_relations_for_branch(target_branch, target_index, all_branches, all_stem
     three_haps, half_haps = check_three_hap(target_branch, target_index, all_branches, day_stem)
     
     relations = {
-        'six_haps': check_six_hap(target_branch, target_index, all_branches, day_stem),
-        'six_haps_all': check_six_haps(target_branch, target_index, all_branches, day_stem),
+        'six_haps': check_six_haps(target_branch, target_index, all_branches, day_stem),
         'chungs': check_chung(target_branch, target_index, all_branches, day_stem),
         'cheons': check_cheon(target_branch, target_index, all_branches, day_stem),
         'breaks': check_break(target_branch, target_index, all_branches, day_stem),

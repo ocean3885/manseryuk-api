@@ -40,7 +40,7 @@ class RelationRulesTests(unittest.TestCase):
     def test_wu_wei_six_hap_uses_earth_candidate(self):
         branches = list('午未申亥')
         self.assertEqual(SIX_HAPS[('午', '未')], '土')
-        self.assertEqual(check_six_haps('午', 0, branches, '甲')[0]['element'], '土')
+        self.assertEqual(check_six_haps('午', 0, branches, '甲')[0]['candidate_element'], '土')
         result = build_interaction_matrix(list('甲甲甲甲'), branches, '甲')
         pair = next(r for r in result['matrix']
                     if r['type'] == '육합(六合)' and
@@ -159,9 +159,12 @@ class RelationRulesTests(unittest.TestCase):
                         self.assertEqual(group['condition_evidence']['middle_pillars'],
                                          ['month', 'day'])
                     elif expected_reason == 'adjacent_middle_clash':
-                        self.assertEqual(group['condition_evidence']['adjacent_clashes'],
-                                         [{'middle_pillar': 'day',
-                                           'clashing_pillar': 'hour'}])
+                        clashes = group['condition_evidence']['adjacent_clashes']
+                        self.assertEqual(len(clashes), 1)
+                        self.assertEqual(clashes[0]['middle_pillar'], 'day')
+                        self.assertEqual(clashes[0]['clashing_pillar'], 'hour')
+                        self.assertEqual(clashes[0]['affected']['char'], middle)
+                        self.assertEqual(clashes[0]['cause']['char'], opponents[middle])
                     dynamics = analyze_branch_dynamics(
                         list('甲甲甲甲'), branches, result['matrix'])
                     matched = next(g for g in dynamics['groups']
@@ -200,13 +203,17 @@ class RelationRulesTests(unittest.TestCase):
                     self.assertEqual(len(half), 1)
                     self.assertEqual(half[0]['participants'], pair)
                     self.assertEqual(half[0]['score'], score)
-                    self.assertEqual(half[0]['condition_evidence']['fallback_from'], {
+                    fallback = half[0]['condition_evidence']['fallback_from']
+                    expected = {
                         'group_branches': [birth, middle, tomb],
                         'clashed_branch': birth if clashed == 'month' else tomb,
                         'clashed_pillar': clashed,
                         'clashing_pillar': 'year' if clashed == 'month' else 'hour',
                         'reason': reason,
-                    })
+                    }
+                    self.assertEqual({key: fallback[key] for key in expected}, expected)
+                    self.assertEqual(fallback['affected']['pillar'], clashed)
+                    self.assertEqual(fallback['cause']['pillar'], expected['clashing_pillar'])
                     dynamics = analyze_branch_dynamics(
                         list('甲甲甲甲'), branches, result['matrix'])
                     self.assertEqual(next(g for g in dynamics['groups']
@@ -391,7 +398,7 @@ class RelationRulesTests(unittest.TestCase):
     def test_stem_combination_reads_central_rule(self):
         self.assertEqual(STEM_COMBINATIONS[('甲', '己')], '土')
         matches = check_stem_combination('甲', 0, ['甲', '己', '丙', '丁'], '丙')
-        self.assertEqual(matches[0]['combined_element'], '土')
+        self.assertEqual(matches[0]['candidate_element'], '土')
 
     def test_conditional_self_combination_reads_central_rule(self):
         self.assertEqual(JAHAB_MAP[('丙', '戌')]['required'], ('지세형', '未'))
@@ -402,7 +409,7 @@ class RelationRulesTests(unittest.TestCase):
         self.assertTrue(active['active'])
         blocked = check_jahab('丙', '戌', 0, [{
             'with': '辰', 'with_index': 1, 'distance': 1,
-            'strength': 1.0, 'is_adjacent': True,
+            'distance_weight': 1.0, 'is_adjacent': True,
         }], [{'type': '지세형', 'with': '未'}])
         self.assertFalse(blocked['active'])
         self.assertTrue(blocked['condition_met'])

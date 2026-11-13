@@ -23,7 +23,7 @@ from services.xu_shi import analyze_xu_shi_dynamics
 STEM_MATRIX_TYPES = {'천간합(天干合)': 'combine', '천간충(天干沖)': 'clash'}
 STEM_ANALYSIS_KEYS = {'combine': 'combinations', 'clash': 'conflict'}
 BRANCH_ANALYSIS_KEYS = {
-    'six_haps_all': '육합(六合)', 'chungs': '충(沖)',
+    'six_haps': '육합(六合)', 'chungs': '충(沖)',
     'cheons': '천(穿)', 'breaks': '파(破)',
     'punishments': '형(刑)', 'half_haps': '반합(半合)',
     'gong_haps': '공합(拱合)', 'hidden_stem_haps': '암합(暗合)',
@@ -78,11 +78,13 @@ def _branch_matrix_ids(matrix, branches):
 
 def _check_branch_analysis(matrix, analysis, branches):
     expected = Counter()
+    originals = {}
     for item in matrix:
         if item['category'] != '지지' or item['relation_scope'] != 'pairwise':
             continue
         left, right = (PILLARS.index(pillar) for pillar in item['participants'])
         expected[(item['type'], left, right)] += 2
+        originals[(item['type'], left, right)] = item
     observed = Counter()
     for index, pillar in enumerate(PILLARS):
         relations = analysis['pillars'][pillar]['branch']['relations']
@@ -94,6 +96,11 @@ def _check_branch_analysis(matrix, analysis, branches):
                         or item['with'] != branches[other]):
                     raise ValueError(f'{pillar}: 지지 관계의 위치·글자가 다릅니다.')
                 left, right = sorted((index, other))
+                original = originals.get((kind, left, right))
+                if original is None or any(item.get(field) != original.get(field)
+                                           for field in ('activation_status', 'status_reasons',
+                                                         'candidate_element')):
+                    raise ValueError(f'{pillar}: 지지 관계의 성립 상태·사유·후보 오행이 다릅니다.')
                 observed[(kind, left, right)] += 1
     if observed != expected:
         raise ValueError('지지 매트릭스와 글자별 관계 후보가 다릅니다.')
@@ -101,7 +108,7 @@ def _check_branch_analysis(matrix, analysis, branches):
 
 def _stem_matrix_rows(matrix, analysis, stems):
     rows = []
-    by_kind = {'combine': set(), 'clash': set()}
+    by_kind = {'combine': {}, 'clash': {}}
     for item in matrix:
         if item['category'] != '천간':
             continue
@@ -109,10 +116,10 @@ def _stem_matrix_rows(matrix, analysis, stems):
         if kind is None:
             raise ValueError(f"모르는 천간 관계 유형: {item['type']}")
         left, right = item['participants']
-        by_kind[kind].add((left, right))
+        by_kind[kind][(left, right)] = item
         rows.append(_row(
             f'stem:{kind}:{left}:{right}', kind,
-            [f'{left}.stem', f'{right}.stem'], 'detected',
+            [f'{left}.stem', f'{right}.stem'], item['activation_status'],
             [_ref('interaction_matrix', relation_id=item['relation_id'])],
             element=item.get('candidate_element'),
         ))
@@ -126,9 +133,14 @@ def _stem_matrix_rows(matrix, analysis, stems):
                         or match['my'] != stems[index]
                         or match['with'] != stems[other_index]):
                     raise ValueError(f'{pillar}: 천간 상대의 위치·글자가 다릅니다.')
-                observed.append((PILLARS[min(index, other_index)],
-                                 PILLARS[max(index, other_index)]))
-        expected = by_kind[kind]
+                pair = (PILLARS[min(index, other_index)], PILLARS[max(index, other_index)])
+                original = by_kind[kind].get(pair)
+                if original is None or any(match.get(field) != original.get(field)
+                                           for field in ('activation_status', 'status_reasons',
+                                                         'candidate_element')):
+                    raise ValueError(f'{pillar}: 천간 관계의 성립 상태·사유·후보 오행이 다릅니다.')
+                observed.append(pair)
+        expected = set(by_kind[kind])
         if set(observed) != expected or any(observed.count(pair) != 2 for pair in expected):
             raise ValueError(f'천간 {kind}의 매트릭스와 글자별 분석 결과가 다릅니다.')
     return rows
@@ -303,7 +315,7 @@ def _same_pillar_rows(stems, branches, analysis, dynamics):
             f'same_pillar:self_combine:{pillar}', 'self_combine',
             [f'{pillar}.stem', f'{pillar}.branch'], status,
             [_ref('analysis_details', location=f'analysis.details.{pillar}.jahab')],
-            reason=reason, element=jahab['combined_element'],
+            reason=reason, element=jahab['candidate_element'],
         ))
     return rows
 

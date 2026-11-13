@@ -2,6 +2,8 @@
 
 갱신일: 2026-11-13. 현행 API 계약을 먼저 읽고, 과거 설계의 다음 작업을 현재 개발 지시로 사용하지 않는다.
 
+최근 작업과 재개 지점은 [2026-11-13 작업 재개 기록](current_work_handoff.md)을 참조한다.
+
 ## 현행 API 계약
 
 | 문서 | 기준 |
@@ -12,12 +14,16 @@
 | [통근과 관계 영향 분리](root_relation_separation.md) | 동주 허실 v4, 관계 영향 미평가 |
 | [원국 관계 조회](character_relation_index_contract.md) | `/relation-index`, 현행 `1.7-draft` |
 | [글자별 통합 조회](character_details_contract.md) | `/character-details`, 소속·글자·중앙 관계 |
+| [글자별 원자료 관계](raw_character_relations_contract.md) | `stem.relations`·`branch.relations` 배열·상태·후보·수치 의미 |
 | [상태·사유·근거 감사](relation_activation_audit.md) | 판정 범위·근거 연결·미평가 항목 |
 | [관계별 자연어 표시](relation_presentation_contract.md) | 근거·십성이 연결된 제목·본문·사유·평가 범위 |
 | [운 선택 조회](cycle_analysis_contract.md) | `/cycle-analysis`, 대운 또는 세운 선택 |
 | [운 관계 탐지](cycle_relation_detection.md) | 소속 간 쌍별·다자 후보와 투간 |
 | [운 관계 감사](cycle_relation_audit.md) | 누락·중복·조회 일관성·재조립 검증 |
-| [선택 비교·구조 요약](analysis_summary_contract.md) | `/analysis-summary`, 추가·유지 관계와 근거 연결 문장 |
+
+`/analysis-summary`는 2026-11-13 제거했다. 관계·설명은 `/character-details`와
+`/cycle-analysis`에서 조회한다. 전용 카드·순서·비교 기능은 이전하지 않았으며,
+기본 `/` 응답의 `analysis.summary`는 유지한다.
 
 ## 현재 우선 원칙
 

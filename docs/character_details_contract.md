@@ -6,6 +6,11 @@
 [근거 계약 및 판정 범위](relation_activation_audit.md),
 [자연어 표시 계약](relation_presentation_contract.md)을 함께 참조한다.
 
+2026-11-13 원자료 관계 구조 정리: `characters[*].analysis.relations`도
+[글자별 원자료 관계 계약](raw_character_relations_contract.md)을 따른다.
+`six_haps` 배열 통일, `candidate_element` 이름 변경, `strength` 분리와 빈 배열
+통일은 기존 프론트엔드 호환을 유지하지 않는 변경이다. 중앙 관계 ID는 유지한다.
+
 ## 현재 API
 
 `GET /character-details`는 기존 `/`와 동일한 `year`, `month`, `day`, `hour`, `min`, `sl`, `gen`을 받는다. 원국 계산을 한 번 실행하고 기존 관계 조회 조립기를 거쳐 통합 결과를 만든다. 기존 `/`, `/relation-index`는 유지한다. 새로운 명리 규칙이나 대운·세운 관계 계산을 추가한 것은 아니다.
@@ -35,7 +40,37 @@
 
 대운·세운 어댑터를 추가할 때에는 그 어댑터의 안정적인 관계 ID를 생성한다. 원국↔대운, 원국↔세운, 대운↔세운 및 세 소속이 함께 참여하는 다자 관계를 모두 같은 `UnifiedRelation`으로 표현할 수 있다. `context_ids`는 참여 글자의 실제 소속 집합과 일치해야 한다. 소속이 다른 글자들을 기존 네 기둥 전용 계산기에 그대로 넣지 않는다. 별도의 탐지 어댑터가 검증된 규칙을 사용하여 공통 계약으로 옮겨야 한다.
 
-## 글자 하나의 화면 구성
+## 프론트엔드 사용 기준
+
+| 표시 내용 | 사용할 데이터 |
+| --- | --- |
+| 달력·성별 등 메타, 원국 표, 대운·세운 선택 목록 | `/`의 `calendar`, `meta`, `four_pillars`, `daewoon`, `cycles` |
+| 원국 글자 상세 | `/character-details`의 `characters[ID]` |
+| 선택 운의 글자·관계 상세 | `/cycle-analysis`의 `characters[ID]`, `relations[ID]` |
+| 한글·한자·오행·음양·십성·색상 | `characters[ID].attributes` |
+| 지장간·운성·신살 | `characters[ID].pillar_attributes` (기둥 단위 정보) |
+| 관계 제목·배지·본문·이유 | `relations[ID].presentation` |
+| 통근과 타주 지원 | `characters[ID].rooting` 및 그 `reason`, `evidence` |
+| 계산·미평가 범위 | `coverage`, 운의 `selection`, 글자의 `analysis.calculation_status` |
+
+관계 화면은 `relation_ids`로 중앙 `relations`를 조회하고 `presentation`을 표시한다.
+`analysis`는 글자별 원본 분석 자료이므로 그 안의 숫자 인덱스·관계 문장을
+새 관계 표시와 섞어 재조립하지 않는다. 같은 관계의 제목·이유를 중복 표시할 필요는 없다.
+
+`rooting=null`만 보고 "통근 없음"으로 표시하지 않는다. 지지는 통근 대상이 아니고,
+운 천간은 현재 통근 미평가다. 원국 천간의 동주 통근 여부는
+`has_same_pillar_root`로 확인한다. 운에 없는 신살 등 선택적 항목도
+명시적인 빈 결과와 미제공/미평가를 구분한다.
+
+`presentation.explanation_status=partial`일 때는 제공된 제목·상태·설명만 표시한다.
+`missing_evidence_codes`는 개발용 누락 정보이며 최종 사용자에게 원문 코드나
+추정한 판정 이유를 표시하지 않는다. `complete`도 현재 평가 범위 안의 설명 완결성을
+뜻하며, 실제 영향까지 전부 평가했다는 의미는 아니다.
+
+2026-11-13 제거한 `/analysis-summary`의 카드 묶음·표시 순서·추가/기존 비교는
+이 응답에 추가하지 않는다. 화면 배치와 목록 선택은 기존 글자·관계 참조를 이용한다.
+
+### 글자 선택 순서
 
 1. `characters[선택한 ID]`의 `attributes`에서 오행·음양·십신·표시 색상 등을 읽는다.
 2. `pillar_attributes`에서 지장간·운성·신살 등 기둥 공통 정보를 읽는다. 이는 기둥 정보이며 각 글자에 독립 신살이 계산됐다는 뜻은 아니다.

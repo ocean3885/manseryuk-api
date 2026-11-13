@@ -18,8 +18,6 @@ from services.stem_relations import (
 )
 from services.relation_rules import (
     get_pair_action_rule, HARMONY_SCORE_TYPES, HARMONY_GROUP_COVERS_PAIR,
-    PAIR_PRESENCE_ACTIVE_RULE_ID, TRIPLE_PUNISHMENT_PRESENCE_RULE_ID,
-    ADJACENT_SELF_PUNISHMENT_RULE_ID,
 )
 
 POSITION_NAMES = ['년', '월', '일', '시']
@@ -73,8 +71,9 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "is_adjacent": (dist == 1),
                             "weight": weight,
                             "score": score,
-                            "activation_status": "active",
-                            "activation_rule_id": PAIR_PRESENCE_ACTIVE_RULE_ID,
+                            "activation_status": c['activation_status'],
+                            "activation_rule_id": c['activation_rule_id'],
+                            "status_reasons": c['status_reasons'],
                             "description": desc
                         })
 
@@ -92,7 +91,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     for candidate in effect.get('hidden_stem_candidates', [])
                 ]
                 desc = (f"{name_from}지({b1})-{name_to}지({b2}) "
-                        f"육합({six_hap['element']} 후보): " +
+                        f"육합({six_hap['candidate_element']} 후보): " +
                         ('결합 성립' if status == 'active' else '인접 충으로 작용 유보'))
                 summary_list.append(desc)
                 matrix.append({
@@ -104,15 +103,16 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     "is_adjacent": (dist == 1),
                     "weight": weight,
                     "score": score,
-                    "candidate_element": six_hap['element'],
+                    "candidate_element": six_hap['candidate_element'],
                     "transformed_element": None,
                     "activation_status": status,
-                    "activation_rule_id": (PAIR_PRESENCE_ACTIVE_RULE_ID
-                                           if status == 'active' else None),
+                    "activation_rule_id": six_hap['activation_rule_id'],
                     "status_reasons": six_hap['status_reasons'],
                     "condition_evidence": {
+                        'summary': six_hap['condition_evidence']['summary'],
                         'adjacent_clashes': [
-                            {'member_pillar': PILLAR_KEYS[clash['member_index']],
+                            {**clash,
+                             'member_pillar': PILLAR_KEYS[clash['member_index']],
                              'clashing_pillar': PILLAR_KEYS[clash['clashing_index']],
                              'location': clash['location']}
                             for clash in six_hap['condition_evidence']['adjacent_clashes']
@@ -140,8 +140,9 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "is_adjacent": (dist == 1),
                             "weight": weight,
                             "score": score,
-                            "activation_status": "active",
-                            "activation_rule_id": PAIR_PRESENCE_ACTIVE_RULE_ID,
+                            "activation_status": c['activation_status'],
+                            "activation_rule_id": c['activation_rule_id'],
+                            "status_reasons": c['status_reasons'],
                             "description": desc
                         })
 
@@ -151,7 +152,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                 for p in punishments:
                     if p.get('with_index') == j:
                         is_self_punishment = p.get('type') == '자형'
-                        candidate_only = is_self_punishment and dist != 1
+                        candidate_only = p['activation_status'] == 'candidate_only'
                         # 자형의 독립 강도는 미정이다. 기존 긴장 총점에 합산하지 않는다.
                         score = 0.0 if is_self_punishment else 1.5 * weight
                         tension_score += score
@@ -169,15 +170,9 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "is_adjacent": (dist == 1),
                             "weight": weight,
                             "score": score,
-                            "activation_status": ('candidate_only' if candidate_only else 'active'),
-                            "activation_rule_id": (None if candidate_only else
-                                                   ADJACENT_SELF_PUNISHMENT_RULE_ID
-                                                   if is_self_punishment else
-                                                   PAIR_PRESENCE_ACTIVE_RULE_ID),
-                            "status_reasons": (["nonadjacent_self_punishment_candidate"]
-                                               if candidate_only else
-                                               ["adjacent_self_punishment"]
-                                               if is_self_punishment else []),
+                            "activation_status": p['activation_status'],
+                            "activation_rule_id": p['activation_rule_id'],
+                            "status_reasons": p['status_reasons'],
                             "description": desc
                         })
 
@@ -199,8 +194,9 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "is_adjacent": (dist == 1),
                             "weight": weight,
                             "score": score,
-                            "activation_status": "active",
-                            "activation_rule_id": PAIR_PRESENCE_ACTIVE_RULE_ID,
+                            "activation_status": b['activation_status'],
+                            "activation_rule_id": b['activation_rule_id'],
+                            "status_reasons": b['status_reasons'],
                             "description": desc
                         })
 
@@ -210,7 +206,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                 for hh in half_haps:
                     if hh.get('with_index') == j:
                         h_type = hh.get('type', '반합')
-                        h_elem = hh.get('element', '')
+                        h_elem = hh['candidate_element']
                         fallback = hh.get('fallback_from')
                         base_score = 1.3 if '전반합' in h_type else (1.1 if '후반합' in h_type else 0.6)
                         score = round(base_score * weight, 2)
@@ -230,9 +226,12 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "score": score,
                             "candidate_element": h_elem,
                             "transformed_element": None,
-                            "activation_status": "potential",
+                            "activation_status": hh['activation_status'],
+                            "status_reasons": hh['status_reasons'],
                             "condition_evidence": ({
+                                'summary': fallback['description'],
                                 'fallback_from': {
+                                    **fallback,
                                     'group_branches': fallback['group_branches'],
                                     'clashed_branch': fallback['clashed_branch'],
                                     'clashed_pillar': PILLAR_KEYS[fallback['clashed_index']],
@@ -254,9 +253,9 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     'category': '지지', 'type': '공합(拱合)', 'name': f'{b1}{b2}공합',
                     'from_pillar': pos_from, 'to_pillar': pos_to,
                     'is_adjacent': dist == 1, 'weight': weight, 'score': 0.0,
-                    'candidate_element': gong['element'],
+                    'candidate_element': gong['candidate_element'],
                     'missing_branch': gong['missing'],
-                    'activation_status': 'candidate_only', 'description': desc,
+                    'activation_status': gong['activation_status'], 'status_reasons': gong['status_reasons'], 'description': desc,
                 })
 
             # (8) 암합: 두 지지의 지장간 천간합. 합화 오행을 확정하지 않는다.
@@ -270,7 +269,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     'from_pillar': pos_from, 'to_pillar': pos_to,
                     'is_adjacent': dist == 1, 'weight': weight, 'score': 0.0,
                     'hidden_stem_pairs': hidden_hap['hidden_stem_pairs'],
-                    'activation_status': 'candidate_only', 'description': desc,
+                    'activation_status': hidden_hap['activation_status'], 'status_reasons': hidden_hap['status_reasons'], 'description': desc,
                 })
 
     # 2. 천간 간 조합 분석
@@ -292,7 +291,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     if h.get('with_index') == j:
                         score = 1.8 * weight
                         desc = (f"{name_from}간({s1})-{name_to}간({s2}) "
-                                f"천간합 후보({h['combined_element']}): 유화 및 의기투합")
+                                f"천간합 후보({h['candidate_element']}): 유화 및 의기투합")
                         summary_list.append(desc)
                         matrix.append({
                             "category": "천간",
@@ -303,7 +302,9 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "is_adjacent": (dist == 1),
                             "weight": weight,
                             "score": score,
-                            "candidate_element": h['combined_element'],
+                            "candidate_element": h['candidate_element'],
+                            "activation_status": h['activation_status'],
+                            "status_reasons": h['status_reasons'],
                             "transformed_element": None,
                             "description": desc
                         })
@@ -326,6 +327,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                             "is_adjacent": (dist == 1),
                             "weight": weight,
                             "score": score,
+                            "activation_status": c['activation_status'],
+                            "status_reasons": c['status_reasons'],
                             "description": desc
                         })
 
@@ -351,8 +354,9 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                 'weight': 1.0,
                 # 각 쌍의 천·충·육합 또는 지세형·충과 중복 가산하지 않는다.
                 'score': 0.0,
-                'activation_status': 'active',
-                'activation_rule_id': TRIPLE_PUNISHMENT_PRESENCE_RULE_ID,
+                'activation_status': group['activation_status'],
+                'activation_rule_id': group['activation_rule_id'],
+                'status_reasons': group['status_reasons'],
                 'description': desc,
             })
 
@@ -360,7 +364,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
     for i in range(4):
         three_haps, _ = check_three_hap(branches[i], i, branches, day_stem)
         for th in three_haps:
-            elem = th.get('element', '')
+            elem = th['candidate_element']
             if elem not in seen_three_haps:
                 seen_three_haps.add(elem)
                 status = th['activation_status']
@@ -385,15 +389,19 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                     "activation_status": status,
                     "status_reasons": th['status_reasons'],
                     "condition_evidence": {
+                        'summary': th['condition_evidence']['summary'],
+                        'middle_members': th['condition_evidence']['middle_members'],
                         'middle_pillars': [PILLAR_KEYS[p] for p in
                                            th['condition_evidence']['middle_indices']],
                         'adjacent_clashes': [
-                            {'middle_pillar': PILLAR_KEYS[pair['middle_index']],
+                            {**pair,
+                             'middle_pillar': PILLAR_KEYS[pair['middle_index']],
                              'clashing_pillar': PILLAR_KEYS[pair['clashing_index']]}
                             for pair in th['condition_evidence']['adjacent_clashes']
                         ],
                         'adjacent_wing_clashes': [
-                            {'wing_pillar': PILLAR_KEYS[pair['wing_index']],
+                            {**pair,
+                             'wing_pillar': PILLAR_KEYS[pair['wing_index']],
                              'wing_role': pair['wing_role'],
                              'clashing_pillar': PILLAR_KEYS[pair['clashing_index']]}
                             for pair in th['condition_evidence']['adjacent_wing_clashes']
@@ -407,7 +415,7 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
         square_haps = check_square_hap(branches[i], i, branches, day_stem)
         if square_haps and isinstance(square_haps, list):
             for sq in square_haps:
-                elem = sq.get('element', '')
+                elem = sq['candidate_element']
                 season = sq.get('season', '')
                 if elem not in seen_square_haps:
                     seen_square_haps.add(elem)
@@ -426,7 +434,8 @@ def build_interaction_matrix(stems: List[str], branches: List[str], day_stem: st
                         "score": 3.5,
                         "candidate_element": elem,
                         "transformed_element": None,
-                        "activation_status": "potential",
+                        "activation_status": sq['activation_status'],
+                        "status_reasons": sq['status_reasons'],
                         "description": desc
                     })
 

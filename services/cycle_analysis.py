@@ -23,6 +23,9 @@ def assemble_cycle_analysis(response, *, daewoon_index=None, sewoon_year=None):
         if selection_status in ('unavailable', 'after_last_period'):
             raise ApiError(400, 'daewoon_unavailable', '해당 연도를 포함하는 대운이 없습니다.', field='sewoon_year')
     else:
+        if not periods:
+            raise ApiError(400, 'daewoon_unavailable', '대운 시작 시기를 계산할 자료가 부족합니다.',
+                           field='daewoon_index')
         selected = next((item for item in periods if item['index'] == daewoon_index), None)
         if selected is None:
             raise ApiError(400, 'daewoon_index_out_of_range', '제공되는 대운 번호 범위를 벗어났습니다.',
@@ -57,7 +60,7 @@ def assemble_cycle_analysis(response, *, daewoon_index=None, sewoon_year=None):
     if annual is not None:
         add_context('sewoon', f'year_{annual["year"]}', f'{annual["year"]} 세운',
                     annual['gan'], annual['ji'],
-                    {'year': annual['year'], 'age': annual['age'],
+                    {'year': annual['year'], 'age': annual['age'], 'age_basis': annual['age_basis'],
                      'year_basis': 'calendar_year_ganzhi_no_ipchun'}, annual['unseong'])
     graph['selection'] = dict(
         mode='sewoon' if annual is not None else 'daewoon',

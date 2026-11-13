@@ -7,7 +7,9 @@
 
 - `/character-details`: `relations[ID].presentation`
 - `/cycle-analysis`: 같은 위치. 원국 설명은 동일하며 운은 후보/사실 탐지 범위를 설명한다.
-- `/analysis-summary`: `graph.relations[ID].presentation`. 기존 요약 카드 묶음·문장은 유지한다.
+
+`/analysis-summary`는 제거했다. 별도 요약 카드나 그 기능의 이전 없이 위 두 API의
+관계별 표시 정보를 사용한다. 기본 `/`의 `analysis.summary`는 별개로 유지한다.
 
 LLM이나 외부 호출 없이 등록 규칙과 기존 근거로 생성한다. 사주를 다시 계산하지 않는다.
 전체 구조·글자 선택 화면은 별도 표시 설계 범위이며 이번에는 관계 한 건의 설명을 완성한다.
@@ -29,6 +31,12 @@ reasons 항목은 code, category, text, character_ids, relation_ids, evidence_in
 category는 decision(판정), notice(주의), scope(평가 범위), structure(구성 관계)다.
 프론트엔드는 code로 문장을 조립할 필요 없이 text를 표시하고, ID로 관련 글자를 강조한다.
 evidence_indices는 해당 관계의 evidence 배열 위치이며 내부 규칙 경로를 사용자에게 출력할 필요는 없다.
+
+원국의 `evidence[*].details.condition_evidence`에도 `summary`, 충 당사자의
+`affected`·`cause` 및 `description`, 삼합 중신의 `middle_members`를 제공한다.
+원자료를 직접 확인할 때에도 위치·글자·십성·판정 이유를 읽을 수 있다.
+자세한 구조는 [원자료 관계 계약](raw_character_relations_contract.md)을 따른다.
+이 근거 표시 확장은 기존 `presentation`의 설명 규칙과 판정을 바꾸지 않는다.
 
 화면은 title → status_label → description → reasons[].text 순으로 표시할 수 있다.
 실패 사유가 아닌 notice를 "성립하지 않은 이유"에 넣지 않는다.

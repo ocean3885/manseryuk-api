@@ -40,16 +40,19 @@ def check_stem_combination(target_stem, target_index, all_stems, day_stem):
                 'with_index': i,
                 'with_ten_star': with_ten_star,
                 'distance': distance,
-                'strength': strength,
+                'distance_weight': strength,
                 'is_adjacent': (distance == 1),
-                'combined_element': combined_element
+                'candidate_element': combined_element,
+                'activation_status': 'detected',
+                'status_reasons': [],
+                'impact_status': 'not_evaluated',
             })
-    return results if results else None
+    return results
 
 def check_stem_restrain(target_stem, target_index, all_stems, day_stem):
     """
     천간 극(克) 관계 확인 - 내가 극하는 대상과 나를 극하는 대상 분리 반환
-    :return: {'restrain_to': [...], 'restrain_me': [...]} 또는 빈 딕셔너리
+    :return: 항상 {'restrain_to': [...], 'restrain_me': [...]}를 반환한다.
     """
     result = {
         'restrain_to': [],   # 기준 천간이 극하는 대상들
@@ -92,9 +95,12 @@ def check_stem_restrain(target_stem, target_index, all_stems, day_stem):
             'with_ten_star': with_ten_star,
             'distance': distance,
             'is_adjacent': (distance == 1),
-            'distance_strength': distance_strength,
-            'restrain_base_strength': base_strength,
-            'strength': total_strength,
+            'distance_weight': distance_strength,
+            'base_coefficient': base_strength,
+            'potential_index': round(total_strength, 4),
+            'activation_status': 'detected',
+            'status_reasons': [],
+            'impact_status': 'not_evaluated',
             'my': target_stem,
             'my_index': target_index,
             'my_ten_star': my_ten_star
@@ -105,9 +111,6 @@ def check_stem_restrain(target_stem, target_index, all_stems, day_stem):
         else:
             result['restrain_me'].append(item)
     
-    # 둘 다 비어있으면 None 반환 (또는 빈 딕셔너리, 필요에 따라)
-    if not result['restrain_to'] and not result['restrain_me']:
-        return None
     return result
 
 
@@ -144,11 +147,14 @@ def check_stem_conflict(target_stem, target_index, all_stems, day_stem):
                 'with_index': i,
                 'with_ten_star': with_ten_star,
                 'distance': distance,
-                'strength': strength,
-                'is_adjacent': (distance == 1)
+                'distance_weight': strength,
+                'is_adjacent': (distance == 1),
+                'activation_status': 'detected',
+                'status_reasons': [],
+                'impact_status': 'not_evaluated',
             })
     
-    return results if results else None
+    return results
 
 
 def get_relations_for_stem(target_stem, target_index, all_branches, all_stems):

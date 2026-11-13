@@ -132,7 +132,9 @@ class CharacterDetailsTests(unittest.TestCase):
                 bad = {**QUERY, 'month': 'bad'}
                 self.assertEqual(client.get('/character-details', params=bad).status_code, 400)
                 self.assertEqual(client.get('/character-details').status_code, 422)
-                self.assertEqual(client.get('/', params=QUERY).json()['four_pillars'], self.response['four_pillars'])
+                base = client.get('/', params=QUERY).json()
+                self.assertEqual(base['four_pillars'], self.response['four_pillars'])
+                self.assertEqual(base['analysis']['summary'], self.response['analysis']['summary'])
         finally:
             if previous is None:
                 app.dependency_overrides.pop(get_db, None)
@@ -150,12 +152,11 @@ class CharacterDetailsTests(unittest.TestCase):
                 natal = client.get('/character-details', params=QUERY).json()
                 for path, selector in [('/character-details', {}),
                                        ('/cycle-analysis', {'daewoon_index': 1}),
-                                       ('/cycle-analysis', {'sewoon_year': 2007}),
-                                       ('/analysis-summary', {'sewoon_year': 2007})]:
+                                       ('/cycle-analysis', {'sewoon_year': 2007})]:
                     with self.subTest(path=path, selector=selector):
                         response = client.get(path, params={**QUERY, **selector})
                         self.assertEqual(response.status_code, 200, response.text)
-                        graph = response.json()['graph'] if path == '/analysis-summary' else response.json()
+                        graph = response.json()
                         for rid, row in natal['relations'].items():
                             self.assertEqual(graph['relations'][rid], row)
                         for row in graph['relations'].values():

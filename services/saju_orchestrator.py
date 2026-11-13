@@ -5,7 +5,7 @@ from models.calenda_data import CalendaData
 from services.daewoon import getDaewoon, daewoonNum, get_time_gan, gankr_to_ch, jikr_to_ch, build_daewoon
 from services.calculator import (
     descending_tens, find_ten_god, find_stem_branch_ten_god, 
-    generate_future_cycles, generate_baby_cycles, determine_zodiac_hour_str,
+    generate_future_cycles, determine_zodiac_hour_str,
     get_stem_detail, get_branch_detail, get_jijanggan_details
 )
 from services.constants import UNSEONG_DATA
@@ -101,7 +101,8 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
     ai_consultation_prompts.append(f"【사주 기후】 {interaction_data['climate']} (긴장도: {interaction_data['tension_score']}, 조화도: {interaction_data['harmony_score']})")
     ai_consultation_prompts.append(
         f"【원국 허실】 {xu_shi_data['overall_status']} "
-        "원국의 관계 반영 전후 비교이며, 대운·세운에 따른 시기별 변화가 아닙니다. "
+        "원국 동주 통근과 관련 관계를 구분한 조회이며, 관계 적용 후 통근 변화는 계산하지 않았습니다. "
+        "대운·세운에 따른 시기별 변화가 아닙니다. "
         "십성의 상징 해석은 참고로 구분하고, 능력·성과·직업 적합성으로 단정하지 마세요."
     )
     ai_consultation_prompts.extend(bin_zhu_data['ai_prompt_bullets'])
@@ -111,15 +112,16 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
     # ── 대운 계산 ──
     daewoon         = getDaewoon(gen, year_gan_kr, month_gan_kr, month_ji_kr)
     daewoon_num     = daewoonNum(data.cd_no, daewoon[0], db)
+    today = date.today()
     daewoon_result = build_daewoon(
         direction_data=daewoon,
         start_age=daewoon_num,
         birth_year=data.cd_sy,
+        current_year=today.year,
         day_stem=day_stem_ch
     )
 
     # ── 메타 사용자 정보 계산 ──
-    today = date.today()
     birth_solar_date = date(data.cd_sy, int(data.cd_sm), int(data.cd_sd))
     age_man = today.year - birth_solar_date.year - (
         (today.month, today.day) < (birth_solar_date.month, birth_solar_date.day)
@@ -127,6 +129,7 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
     age_korean = today.year - birth_solar_date.year + 1
     weekday_names = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
     birth_weekday = weekday_names[birth_solar_date.weekday()]
+    annual_cycles = generate_future_cycles(data.cd_sy, daewoon_num, day_stem_ch)
 
     # ── 프론트엔드 최적화 완성형 기둥 구성 ──
     four_pillars_data = {
@@ -169,7 +172,8 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
         # 1. 달력 정보
         "calendar": {
             "solar":       { "year": data.cd_sy, "month": data.cd_sm, "day": data.cd_sd },
-            "lunar":       { "year": data.cd_ly, "month": data.cd_lm, "day": data.cd_ld },
+            "lunar":       { "year": data.cd_ly, "month": data.cd_lm, "day": data.cd_ld,
+                             "is_leap_month": str(data.cd_leap_month) == '1' },
             "solar_plan":  data.cd_sol_plan,
             "lunar_plan":  data.cd_lun_plan,
         },
@@ -212,13 +216,14 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
 
         # 7. 운세 사이클
         "cycles": {
-            "future_100": generate_future_cycles(data.cd_sy, daewoon_num, day_stem_ch),
-            "baby_10":    generate_baby_cycles(data.cd_sy, day_stem_ch),
+            "future_100": annual_cycles,
+            "childhood_10": annual_cycles[:10],
         },
 
         # 8. 기타 메타
         "meta": {
             "gender": gen,
+            "reference_date": today.isoformat(),
             "ddi": data.cd_ddi,
             "birth_date_solar": f"{data.cd_sy:04d}-{int(data.cd_sm):02d}-{int(data.cd_sd):02d}",
             "birth_time": f"{hour:02d}:{min:02d}",

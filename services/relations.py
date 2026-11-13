@@ -23,7 +23,7 @@ def check_jahab(stem, branch, idx, chung_list, punish_list):
         'exists': True,                     # 항상 존재 (해당 일주 자체는 자합 후보)
         'active': False,                    # 현재 조건 충족 여부
         'hidden_stem': jinfo['hidden'],
-        'combined_element': jinfo['element'],
+        'candidate_element': jinfo['element'],
         'is_conditional': jinfo['conditional'],
     }
     
@@ -60,12 +60,12 @@ def check_jahab(stem, branch, idx, chung_list, punish_list):
         result['inactive_reason'] = 'required_punishment_missing'
     
     if chung_list:
-        strongest_chung = max(chung_list, key=lambda x: x.get('strength', 0))
+        strongest_chung = max(chung_list, key=lambda x: x['distance_weight'])
         result['chung_impact'] = {
             'with_branch': strongest_chung['with'],
             'with_index': strongest_chung['with_index'],
             'distance': strongest_chung['distance'],
-            'strength': strongest_chung['strength'],
+            'distance_weight': strongest_chung['distance_weight'],
             'is_adjacent': strongest_chung['is_adjacent']
         }
     else:
