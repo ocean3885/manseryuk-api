@@ -9,6 +9,10 @@ import sys
 import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from core.environment import load_environment
+
+load_environment()
+
 from core.interpretation_database import CALENDAR_DATABASE, DEFAULT_DATABASE, seed_database, find_rule
 from schemas.interpretation_rule import InterpretationQuery
 from services.interpretation_catalog import generate_catalog

@@ -24,6 +24,13 @@ API 키·허용 도메인·모델 이용 가능 여부는 환경과 시점에 �
 
 ## 환경 설정
 
+프로젝트 루트(`main.py`와 같은 폴더)의 `.env`를 CLI와 API 시작 시 자동으로 읽는다.
+`.env.example`을 복사해 서버에서 키를 입력하면 별도의 dotenv 실행 명령이 필요 없다.
+서버 환경변수 > `.env` 순서로 적용하며, 파일이 없어도 오류가 나지 않는다.
+`.env` 변경 후 API 프로세스를 재시작한다. CLI는 다음 실행부터 읽는다.
+명시적인 `--model` 옵션은 여전히 `GEMINI_MODEL`보다 우선한다.
+
+
 - 비밀값: `GEMINI_API_KEY`. 명령 인자로 키 값을 받거나 코드·JSON에 저장하지 않는다.
 - 모델: `--model` → 환경변수 `GEMINI_MODEL` → 기본 `gemini-2.5-flash-lite` 순서로 선택한다.
 - API 호스트: `generativelanguage.googleapis.com`. 실행환경에서 HTTPS 접속이 허용되어야 한다.

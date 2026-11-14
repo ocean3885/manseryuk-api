@@ -1,3 +1,7 @@
+from core.environment import load_environment
+
+load_environment()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import root

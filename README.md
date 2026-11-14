@@ -386,3 +386,20 @@ LLM 시스템 프롬프트 또는 RAG 컨텍스트에 그대로 주입할 수 �
   }
 }
 ```
+
+## 배포 환경변수
+
+프로젝트 루트(main.py와 같은 폴더)에 `.env.example`을 복사해 `.env`를 만든다.
+API와 `scripts/interpretation_rules.py` 실행 시 이 파일을 자동으로 읽는다.
+실행 작업 디렉터리와 무관하며, 서버에 이미 설정된 환경변수를 덮어쓰지 않는다.
+파일이 없어도 기존 실행 방식은 유지한다. 값을 수정한 뒤 API 프로세스를 재시작한다.
+Docker에서는 파일을 컨테이너의 프로젝트 루트에 마운트하거나 환경변수로 주입한다.
+`.env`는 Git 제외이며 `.env.example`에는 실제 키를 넣지 않는다.
+
+```dotenv
+GEMINI_API_KEY=서버에만_저장할_키
+GEMINI_MODEL=gemini-3.1-flash-lite
+```
+
+일반 API·display에는 Gemini 키가 필요 없다. 키는 실험용 해설 생성 명령에서 사용한다.
+Gemini API 호스트 `generativelanguage.googleapis.com`의 아웃바운드 HTTPS 허용도 필요하다.
