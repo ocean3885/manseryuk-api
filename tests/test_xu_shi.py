@@ -28,6 +28,19 @@ def analyze(score, roots, interactions=(), repeat=False):
     return analyze_xu_shi_dynamics(list('甲丙戊庚'), BRANCHES, '戊', tgs, list(interactions))
 
 
+class MeaningScopeTests(unittest.TestCase):
+    def test_same_pillar_without_root_does_not_deny_external_support(self):
+        from services.analysis import analyze_advanced_tonggeun
+        stems, branches = list('甲甲甲甲'), list('酉寅酉酉')
+        roots = analyze_advanced_tonggeun(stems, branches)
+        result = analyze_xu_shi_dynamics(stems, branches, '甲', roots, [])
+        year = result['pillars']['year']
+        self.assertEqual(year['current_status'], '허투(虛透)')
+        self.assertTrue(roots[0]['타주지원정보'])
+        self.assertIn('동주 지지에는 통근이 없는', year['meaning'])
+        self.assertIn('타주 지지의 지원 여부는 별도', year['meaning'])
+
+
 class XuShiTests(unittest.TestCase):
     def test_relations_are_preserved_without_assuming_root_damage(self):
         stems, branches = list('甲甲甲甲'), list('寅酉酉酉')

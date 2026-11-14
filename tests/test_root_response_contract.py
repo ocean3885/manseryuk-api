@@ -162,14 +162,18 @@ class RootResponseContractTests(unittest.TestCase):
         self.assertIn(f'동주 통근 {rooted}개', summary['rooting_summary'])
         self.assertIn(f'동주 무근 {4 - rooted}개', summary['rooting_summary'])
         self.assertNotIn('summary_list', advanced['interactions'])
-        prompts = [p for p in advanced['ai_consultation_prompts'] if p.startswith('【주요 상호작용】')]
-        self.assertEqual(prompts, [f"【주요 상호작용】 {r['description']}" for r in matrix[:3]])
+        prompts = [p for p in advanced['ai_consultation_prompts'] if p.startswith('【관계 목록 중 최대 3개 · 중요도 순위 아님】')]
+        self.assertEqual(prompts, [f"【관계 목록 중 최대 3개 · 중요도 순위 아님】 {r['description']}" for r in matrix[:3]])
 
     def test_special_star_basis_and_count_labels_survive_http(self):
         body = self.get()
         advanced = body['advanced_analysis']
         stars = advanced['special_stars']
         self.assertTrue(stars)
+        star_prompts = [p for p in advanced['ai_consultation_prompts'] if '신살·길신 목록' in p]
+        self.assertEqual(len(star_prompts), 1)
+        self.assertIn('중요도 순위 아님', star_prompts[0])
+        self.assertFalse(any('【주요' in p for p in advanced['ai_consultation_prompts']))
         for item in stars:
             self.assertTrue(item['basis'])
             self.assertTrue(item['rule_id'].startswith('special_star:'))

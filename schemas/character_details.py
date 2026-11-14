@@ -97,6 +97,27 @@ class CycleCharacterAnalysis(TypedDict):
     root_impact_status: NotRequired[Literal['not_evaluated']]
 
 
+class DisplayItem(Contract):
+    text: str
+    character_ids: list[str] = Field(default_factory=list)
+    relation_ids: list[str] = Field(default_factory=list)
+    detail_lines: list[str] = Field(default_factory=list)
+
+
+class DisplayGroup(Contract):
+    key: str
+    title: str
+    items: list[DisplayItem]
+
+
+class CharacterDisplay(Contract):
+    version: Literal['1.0.0']
+    title: str
+    subtitle: str
+    relation_groups: list[DisplayGroup]
+    sections: list[DisplayGroup]
+
+
 class CharacterDetail(Contract):
     context_id: str
     position: str = Field(pattern=r'^[A-Za-z0-9_]+$')
@@ -108,6 +129,7 @@ class CharacterDetail(Contract):
     rooting: 'Rooting | None' = None
     relation_ids: list[str]
     transmission_relation_ids: list[str]
+    display: CharacterDisplay | None = None
 
 
 class Rooting(Contract):

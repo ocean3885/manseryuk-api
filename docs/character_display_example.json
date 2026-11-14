@@ -1,0 +1,1488 @@
+{
+  "input": {
+    "year": 1995,
+    "month": 5,
+    "day": 12,
+    "hour": 14,
+    "min": 30,
+    "sl": "sol",
+    "gen": "남",
+    "sewoon_year": 2026
+  },
+  "selection": {
+    "mode": "sewoon",
+    "daewoon_index": 2,
+    "sewoon_year": 2026,
+    "daewoon_status": "selected",
+    "period_basis": "legacy_start_year_half_open",
+    "sewoon_basis": "calendar_year_ganzhi_no_ipchun",
+    "cycle_relations_status": "candidates_detected",
+    "cycle_relation_rule_version": "1.0.0-draft"
+  },
+  "characters": {
+    "natal.chart.year.stem": {
+      "version": "1.0.0",
+      "title": "원국 년간 乙",
+      "subtitle": "목 · 음 · 식신",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "년지 亥 · 생 ←",
+              "character_ids": [
+                "natal.chart.year.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:same_pillar:element:year"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 원국 년간 乙"
+              ]
+            },
+            {
+              "text": "월간 辛 · 충",
+              "character_ids": [
+                "natal.chart.month.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:stem:clash:year:month"
+              ],
+              "detail_lines": []
+            },
+            {
+              "text": "일지 卯 · 투간 ←",
+              "character_ids": [
+                "natal.chart.day.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:cross_layer:transmission:day:year"
+              ],
+              "detail_lines": [
+                "원국 일지 卯 → 원국 년간 乙 · 지장간 乙"
+              ]
+            },
+            {
+              "text": "시간 己 · 극 →",
+              "character_ids": [
+                "natal.chart.hour.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:stem:control:year:hour"
+              ],
+              "detail_lines": [
+                "원국 년간 乙 → 원국 시간 己"
+              ]
+            },
+            {
+              "text": "시지 未 · 투간 ←",
+              "character_ids": [
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:cross_layer:transmission:hour:year"
+              ],
+              "detail_lines": [
+                "원국 시지 未 → 원국 년간 乙 · 지장간 乙"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "daewoon.period_2",
+          "title": "대운 戊寅",
+          "items": [
+            {
+              "text": "천간 戊 · 극 →",
+              "character_ids": [
+                "daewoon.period_2.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:stem:control:daewoon.period_2.cycle.stem|natal.chart.year.stem"
+              ],
+              "detail_lines": [
+                "원국 년간 乙 → 대운 천간 戊"
+              ]
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "key": "rooting",
+          "title": "통근",
+          "items": [
+            {
+              "text": "동주 통근 · 없음",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "타주 지원 · 일지 卯 · 시지 未",
+              "character_ids": [
+                "natal.chart.day.branch",
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        }
+      ]
+    },
+    "natal.chart.year.branch": {
+      "version": "1.0.0",
+      "title": "원국 년지 亥",
+      "subtitle": "수 · 음 · 겁재",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "년간 乙 · 생 →",
+              "character_ids": [
+                "natal.chart.year.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:same_pillar:element:year"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 원국 년간 乙"
+              ]
+            },
+            {
+              "text": "월지 巳 · 충 · 극 →",
+              "character_ids": [
+                "natal.chart.month.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:clash:year:month",
+                "natal.chart:branch:control:year:month"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 원국 월지 巳"
+              ]
+            },
+            {
+              "text": "일지 卯 · 생 →",
+              "character_ids": [
+                "natal.chart.day.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:generate:year:day"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 원국 일지 卯"
+              ]
+            },
+            {
+              "text": "일지 卯 + 시지 未 · 삼합",
+              "character_ids": [
+                "natal.chart.day.branch",
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:group:trine:hai_mao_wei"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 + 원국 일지 卯 + 원국 시지 未"
+              ]
+            },
+            {
+              "text": "시지 未 · 극 ←",
+              "character_ids": [
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:control:year:hour"
+              ],
+              "detail_lines": [
+                "원국 시지 未 → 원국 년지 亥"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "daewoon.period_2",
+          "title": "대운 戊寅",
+          "items": [
+            {
+              "text": "천간 戊 · 투간 →",
+              "character_ids": [
+                "daewoon.period_2.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.year.branch"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 대운 천간 戊 · 지장간 戊"
+              ]
+            },
+            {
+              "text": "지지 寅 · 육합 · 생 →",
+              "character_ids": [
+                "daewoon.period_2.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:combine:daewoon.period_2.cycle.branch|natal.chart.year.branch",
+                "cycle:branch:generate:daewoon.period_2.cycle.branch|natal.chart.year.branch"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 대운 지지 寅"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "sewoon.year_2026",
+          "title": "세운 2026 丙午",
+          "items": [
+            {
+              "text": "지지 午 · 극 → · 암합",
+              "character_ids": [
+                "sewoon.year_2026.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:control:natal.chart.year.branch|sewoon.year_2026.cycle.branch",
+                "cycle:branch:hidden_combine:natal.chart.year.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 세운 지지 午"
+              ]
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "key": "hidden_stems",
+          "title": "지장간",
+          "items": [
+            {
+              "text": "戊 정관 → 대운 천간 戊",
+              "character_ids": [
+                "daewoon.period_2.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.year.branch"
+              ],
+              "detail_lines": []
+            },
+            {
+              "text": "甲 상관 · 원국 미투간",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "壬 겁재 · 원국 미투간",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        },
+        {
+          "key": "pillar",
+          "title": "기둥 정보",
+          "items": [
+            {
+              "text": "운성 · 제왕",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        }
+      ]
+    },
+    "natal.chart.month.stem": {
+      "version": "1.0.0",
+      "title": "원국 월간 辛",
+      "subtitle": "금 · 음 · 편인",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "년간 乙 · 충",
+              "character_ids": [
+                "natal.chart.year.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:stem:clash:year:month"
+              ],
+              "detail_lines": []
+            },
+            {
+              "text": "월지 巳 · 극 ← · 자합",
+              "character_ids": [
+                "natal.chart.month.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:same_pillar:element:month",
+                "natal.chart:same_pillar:self_combine:month"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 → 원국 월간 辛"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "sewoon.year_2026",
+          "title": "세운 2026 丙午",
+          "items": [
+            {
+              "text": "천간 丙 · 천간합",
+              "character_ids": [
+                "sewoon.year_2026.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:stem:combine:natal.chart.month.stem|sewoon.year_2026.cycle.stem"
+              ],
+              "detail_lines": []
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "key": "rooting",
+          "title": "통근",
+          "items": [
+            {
+              "text": "동주 통근 · 없음",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        }
+      ]
+    },
+    "natal.chart.month.branch": {
+      "version": "1.0.0",
+      "title": "원국 월지 巳",
+      "subtitle": "화 · 음 · 정재",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "년지 亥 · 충 · 극 ←",
+              "character_ids": [
+                "natal.chart.year.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:clash:year:month",
+                "natal.chart:branch:control:year:month"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 원국 월지 巳"
+              ]
+            },
+            {
+              "text": "월간 辛 · 극 → · 자합",
+              "character_ids": [
+                "natal.chart.month.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:same_pillar:element:month",
+                "natal.chart:same_pillar:self_combine:month"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 → 원국 월간 辛"
+              ]
+            },
+            {
+              "text": "일지 卯 · 생 ←",
+              "character_ids": [
+                "natal.chart.day.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:generate:month:day"
+              ],
+              "detail_lines": [
+                "원국 일지 卯 → 원국 월지 巳"
+              ]
+            },
+            {
+              "text": "시지 未 · 생 →",
+              "character_ids": [
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:generate:month:hour"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 → 원국 시지 未"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "daewoon.period_2",
+          "title": "대운 戊寅",
+          "items": [
+            {
+              "text": "천간 戊 · 투간 →",
+              "character_ids": [
+                "daewoon.period_2.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.month.branch"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 → 대운 천간 戊 · 지장간 戊"
+              ]
+            },
+            {
+              "text": "지지 寅 · 생 ← · 천",
+              "character_ids": [
+                "daewoon.period_2.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:generate:daewoon.period_2.cycle.branch|natal.chart.month.branch",
+                "cycle:branch:pierce:daewoon.period_2.cycle.branch|natal.chart.month.branch"
+              ],
+              "detail_lines": [
+                "대운 지지 寅 → 원국 월지 巳"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "sewoon.year_2026",
+          "title": "세운 2026 丙午",
+          "items": [
+            {
+              "text": "천간 丙 · 투간 →",
+              "character_ids": [
+                "sewoon.year_2026.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:natal.chart.month.branch|sewoon.year_2026.cycle.stem"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 → 세운 천간 丙 · 지장간 丙"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "mixed",
+          "title": "복합 관계",
+          "items": [
+            {
+              "text": "원국 시지 未 + 세운 지지 午 · 방합",
+              "character_ids": [
+                "natal.chart.hour.branch",
+                "sewoon.year_2026.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:group:square:natal.chart.hour.branch|natal.chart.month.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 + 원국 시지 未 + 세운 지지 午"
+              ]
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "key": "hidden_stems",
+          "title": "지장간",
+          "items": [
+            {
+              "text": "戊 정관 → 대운 천간 戊",
+              "character_ids": [
+                "daewoon.period_2.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.month.branch"
+              ],
+              "detail_lines": []
+            },
+            {
+              "text": "庚 정인 · 원국 미투간",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "丙 정재 → 세운 천간 丙",
+              "character_ids": [
+                "sewoon.year_2026.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:natal.chart.month.branch|sewoon.year_2026.cycle.stem"
+              ],
+              "detail_lines": []
+            }
+          ]
+        },
+        {
+          "key": "pillar",
+          "title": "기둥 정보",
+          "items": [
+            {
+              "text": "운성 · 태",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "신살 · 천을귀인 · 역마살",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        }
+      ]
+    },
+    "natal.chart.day.stem": {
+      "version": "1.0.0",
+      "title": "원국 일간 癸",
+      "subtitle": "수 · 음 · 일간",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "일지 卯 · 생 →",
+              "character_ids": [
+                "natal.chart.day.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:same_pillar:element:day"
+              ],
+              "detail_lines": [
+                "원국 일간 癸 → 원국 일지 卯"
+              ]
+            },
+            {
+              "text": "시간 己 · 극 ←",
+              "character_ids": [
+                "natal.chart.hour.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:stem:control:day:hour"
+              ],
+              "detail_lines": [
+                "원국 시간 己 → 원국 일간 癸"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "daewoon.period_2",
+          "title": "대운 戊寅",
+          "items": [
+            {
+              "text": "천간 戊 · 천간합",
+              "character_ids": [
+                "daewoon.period_2.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:stem:combine:daewoon.period_2.cycle.stem|natal.chart.day.stem"
+              ],
+              "detail_lines": []
+            }
+          ]
+        },
+        {
+          "key": "sewoon.year_2026",
+          "title": "세운 2026 丙午",
+          "items": [
+            {
+              "text": "천간 丙 · 극 →",
+              "character_ids": [
+                "sewoon.year_2026.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:stem:control:natal.chart.day.stem|sewoon.year_2026.cycle.stem"
+              ],
+              "detail_lines": [
+                "원국 일간 癸 → 세운 천간 丙"
+              ]
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "key": "rooting",
+          "title": "통근",
+          "items": [
+            {
+              "text": "동주 통근 · 없음",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "타주 지원 · 년지 亥",
+              "character_ids": [
+                "natal.chart.year.branch"
+              ],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        }
+      ]
+    },
+    "natal.chart.day.branch": {
+      "version": "1.0.0",
+      "title": "원국 일지 卯",
+      "subtitle": "목 · 음 · 식신",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "년간 乙 · 투간 →",
+              "character_ids": [
+                "natal.chart.year.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:cross_layer:transmission:day:year"
+              ],
+              "detail_lines": [
+                "원국 일지 卯 → 원국 년간 乙 · 지장간 乙"
+              ]
+            },
+            {
+              "text": "년지 亥 · 생 ←",
+              "character_ids": [
+                "natal.chart.year.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:generate:year:day"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 원국 일지 卯"
+              ]
+            },
+            {
+              "text": "년지 亥 + 시지 未 · 삼합",
+              "character_ids": [
+                "natal.chart.year.branch",
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:group:trine:hai_mao_wei"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 + 원국 일지 卯 + 원국 시지 未"
+              ]
+            },
+            {
+              "text": "월지 巳 · 생 →",
+              "character_ids": [
+                "natal.chart.month.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:generate:month:day"
+              ],
+              "detail_lines": [
+                "원국 일지 卯 → 원국 월지 巳"
+              ]
+            },
+            {
+              "text": "일간 癸 · 생 ←",
+              "character_ids": [
+                "natal.chart.day.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:same_pillar:element:day"
+              ],
+              "detail_lines": [
+                "원국 일간 癸 → 원국 일지 卯"
+              ]
+            },
+            {
+              "text": "시지 未 · 극 → · 반합",
+              "character_ids": [
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:control:day:hour",
+                "natal.chart:branch:half_combine:day:hour"
+              ],
+              "detail_lines": [
+                "원국 일지 卯 → 원국 시지 未"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "sewoon.year_2026",
+          "title": "세운 2026 丙午",
+          "items": [
+            {
+              "text": "지지 午 · 파 · 생 →",
+              "character_ids": [
+                "sewoon.year_2026.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:break:natal.chart.day.branch|sewoon.year_2026.cycle.branch",
+                "cycle:branch:generate:natal.chart.day.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "원국 일지 卯 → 세운 지지 午"
+              ]
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "key": "hidden_stems",
+          "title": "지장간",
+          "items": [
+            {
+              "text": "甲 상관 · 원국 미투간",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "乙 식신 → 년간 乙",
+              "character_ids": [
+                "natal.chart.year.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:cross_layer:transmission:day:year"
+              ],
+              "detail_lines": []
+            }
+          ]
+        },
+        {
+          "key": "pillar",
+          "title": "기둥 정보",
+          "items": [
+            {
+              "text": "운성 · 장생",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "신살 · 천을귀인 · 문창귀인",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        }
+      ]
+    },
+    "natal.chart.hour.stem": {
+      "version": "1.0.0",
+      "title": "원국 시간 己",
+      "subtitle": "토 · 음 · 편관",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "년간 乙 · 극 ←",
+              "character_ids": [
+                "natal.chart.year.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:stem:control:year:hour"
+              ],
+              "detail_lines": [
+                "원국 년간 乙 → 원국 시간 己"
+              ]
+            },
+            {
+              "text": "일간 癸 · 극 →",
+              "character_ids": [
+                "natal.chart.day.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:stem:control:day:hour"
+              ],
+              "detail_lines": [
+                "원국 시간 己 → 원국 일간 癸"
+              ]
+            },
+            {
+              "text": "시지 未 · 동오행 · 투간 ←",
+              "character_ids": [
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:cross_layer:transmission:hour:hour",
+                "natal.chart:same_pillar:element:hour"
+              ],
+              "detail_lines": [
+                "원국 시지 未 → 원국 시간 己 · 지장간 己"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "sewoon.year_2026",
+          "title": "세운 2026 丙午",
+          "items": [
+            {
+              "text": "지지 午 · 투간 ←",
+              "character_ids": [
+                "sewoon.year_2026.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:natal.chart.hour.stem|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "세운 지지 午 → 원국 시간 己 · 지장간 己"
+              ]
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "key": "rooting",
+          "title": "통근",
+          "items": [
+            {
+              "text": "동주 통근 · 있음",
+              "character_ids": [
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "타주 지원 · 월지 巳",
+              "character_ids": [
+                "natal.chart.month.branch"
+              ],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        }
+      ]
+    },
+    "natal.chart.hour.branch": {
+      "version": "1.0.0",
+      "title": "원국 시지 未",
+      "subtitle": "토 · 음 · 편관",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "년간 乙 · 투간 →",
+              "character_ids": [
+                "natal.chart.year.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:cross_layer:transmission:hour:year"
+              ],
+              "detail_lines": [
+                "원국 시지 未 → 원국 년간 乙 · 지장간 乙"
+              ]
+            },
+            {
+              "text": "년지 亥 · 극 →",
+              "character_ids": [
+                "natal.chart.year.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:control:year:hour"
+              ],
+              "detail_lines": [
+                "원국 시지 未 → 원국 년지 亥"
+              ]
+            },
+            {
+              "text": "년지 亥 + 일지 卯 · 삼합",
+              "character_ids": [
+                "natal.chart.year.branch",
+                "natal.chart.day.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:group:trine:hai_mao_wei"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 + 원국 일지 卯 + 원국 시지 未"
+              ]
+            },
+            {
+              "text": "월지 巳 · 생 ←",
+              "character_ids": [
+                "natal.chart.month.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:generate:month:hour"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 → 원국 시지 未"
+              ]
+            },
+            {
+              "text": "일지 卯 · 극 ← · 반합",
+              "character_ids": [
+                "natal.chart.day.branch"
+              ],
+              "relation_ids": [
+                "natal.chart:branch:control:day:hour",
+                "natal.chart:branch:half_combine:day:hour"
+              ],
+              "detail_lines": [
+                "원국 일지 卯 → 원국 시지 未"
+              ]
+            },
+            {
+              "text": "시간 己 · 동오행 · 투간 →",
+              "character_ids": [
+                "natal.chart.hour.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:cross_layer:transmission:hour:hour",
+                "natal.chart:same_pillar:element:hour"
+              ],
+              "detail_lines": [
+                "원국 시지 未 → 원국 시간 己 · 지장간 己"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "daewoon.period_2",
+          "title": "대운 戊寅",
+          "items": [
+            {
+              "text": "지지 寅 · 극 ←",
+              "character_ids": [
+                "daewoon.period_2.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:control:daewoon.period_2.cycle.branch|natal.chart.hour.branch"
+              ],
+              "detail_lines": [
+                "대운 지지 寅 → 원국 시지 未"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "sewoon.year_2026",
+          "title": "세운 2026 丙午",
+          "items": [
+            {
+              "text": "지지 午 · 육합 · 생 ←",
+              "character_ids": [
+                "sewoon.year_2026.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:combine:natal.chart.hour.branch|sewoon.year_2026.cycle.branch",
+                "cycle:branch:generate:natal.chart.hour.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "세운 지지 午 → 원국 시지 未"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "mixed",
+          "title": "복합 관계",
+          "items": [
+            {
+              "text": "원국 월지 巳 + 세운 지지 午 · 방합",
+              "character_ids": [
+                "natal.chart.month.branch",
+                "sewoon.year_2026.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:group:square:natal.chart.hour.branch|natal.chart.month.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 + 원국 시지 未 + 세운 지지 午"
+              ]
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "key": "storehouse",
+          "title": "고",
+          "items": [
+            {
+              "text": "식상고 · 저장 오행 木",
+              "character_ids": [
+                "natal.chart.year.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:cross_layer:transmission:hour:year"
+              ],
+              "detail_lines": [
+                "지장간 乙 · 식신",
+                "투간 → 원국 년간 乙"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "hidden_stems",
+          "title": "지장간",
+          "items": [
+            {
+              "text": "丁 편재 · 원국 미투간",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "乙 식신 → 년간 乙",
+              "character_ids": [
+                "natal.chart.year.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:cross_layer:transmission:hour:year"
+              ],
+              "detail_lines": []
+            },
+            {
+              "text": "己 편관 → 시간 己",
+              "character_ids": [
+                "natal.chart.hour.stem"
+              ],
+              "relation_ids": [
+                "natal.chart:cross_layer:transmission:hour:hour"
+              ],
+              "detail_lines": []
+            }
+          ]
+        },
+        {
+          "key": "pillar",
+          "title": "기둥 정보",
+          "items": [
+            {
+              "text": "운성 · 묘",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "신살 · 화개살",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        }
+      ]
+    },
+    "daewoon.period_2.cycle.stem": {
+      "version": "1.0.0",
+      "title": "대운 천간 戊",
+      "subtitle": "토 · 양 · 정관",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "년간 乙 · 극 ←",
+              "character_ids": [
+                "natal.chart.year.stem"
+              ],
+              "relation_ids": [
+                "cycle:stem:control:daewoon.period_2.cycle.stem|natal.chart.year.stem"
+              ],
+              "detail_lines": [
+                "원국 년간 乙 → 대운 천간 戊"
+              ]
+            },
+            {
+              "text": "년지 亥 · 투간 ←",
+              "character_ids": [
+                "natal.chart.year.branch"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.year.branch"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 대운 천간 戊 · 지장간 戊"
+              ]
+            },
+            {
+              "text": "월지 巳 · 투간 ←",
+              "character_ids": [
+                "natal.chart.month.branch"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.month.branch"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 → 대운 천간 戊 · 지장간 戊"
+              ]
+            },
+            {
+              "text": "일간 癸 · 천간합",
+              "character_ids": [
+                "natal.chart.day.stem"
+              ],
+              "relation_ids": [
+                "cycle:stem:combine:daewoon.period_2.cycle.stem|natal.chart.day.stem"
+              ],
+              "detail_lines": []
+            }
+          ]
+        }
+      ],
+      "sections": []
+    },
+    "daewoon.period_2.cycle.branch": {
+      "version": "1.0.0",
+      "title": "대운 지지 寅",
+      "subtitle": "목 · 양 · 상관",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "년지 亥 · 육합 · 생 ←",
+              "character_ids": [
+                "natal.chart.year.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:combine:daewoon.period_2.cycle.branch|natal.chart.year.branch",
+                "cycle:branch:generate:daewoon.period_2.cycle.branch|natal.chart.year.branch"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 대운 지지 寅"
+              ]
+            },
+            {
+              "text": "월지 巳 · 생 → · 천",
+              "character_ids": [
+                "natal.chart.month.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:generate:daewoon.period_2.cycle.branch|natal.chart.month.branch",
+                "cycle:branch:pierce:daewoon.period_2.cycle.branch|natal.chart.month.branch"
+              ],
+              "detail_lines": [
+                "대운 지지 寅 → 원국 월지 巳"
+              ]
+            },
+            {
+              "text": "시지 未 · 극 →",
+              "character_ids": [
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:control:daewoon.period_2.cycle.branch|natal.chart.hour.branch"
+              ],
+              "detail_lines": [
+                "대운 지지 寅 → 원국 시지 未"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "sewoon.year_2026",
+          "title": "세운 2026 丙午",
+          "items": [
+            {
+              "text": "천간 丙 · 투간 →",
+              "character_ids": [
+                "sewoon.year_2026.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.stem"
+              ],
+              "detail_lines": [
+                "대운 지지 寅 → 세운 천간 丙 · 지장간 丙"
+              ]
+            },
+            {
+              "text": "지지 午 · 생 → · 반합",
+              "character_ids": [
+                "sewoon.year_2026.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:generate:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.branch",
+                "cycle:branch:half_combine:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "대운 지지 寅 → 세운 지지 午"
+              ]
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "key": "hidden_stems",
+          "title": "지장간",
+          "items": [
+            {
+              "text": "戊 정관",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "丙 정재 → 세운 천간 丙",
+              "character_ids": [
+                "sewoon.year_2026.cycle.stem"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.stem"
+              ],
+              "detail_lines": []
+            },
+            {
+              "text": "甲 상관",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        },
+        {
+          "key": "pillar",
+          "title": "기둥 정보",
+          "items": [
+            {
+              "text": "운성 · 목욕",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        }
+      ]
+    },
+    "sewoon.year_2026.cycle.stem": {
+      "version": "1.0.0",
+      "title": "세운 천간 丙",
+      "subtitle": "화 · 양 · 정재",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "월간 辛 · 천간합",
+              "character_ids": [
+                "natal.chart.month.stem"
+              ],
+              "relation_ids": [
+                "cycle:stem:combine:natal.chart.month.stem|sewoon.year_2026.cycle.stem"
+              ],
+              "detail_lines": []
+            },
+            {
+              "text": "월지 巳 · 투간 ←",
+              "character_ids": [
+                "natal.chart.month.branch"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:natal.chart.month.branch|sewoon.year_2026.cycle.stem"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 → 세운 천간 丙 · 지장간 丙"
+              ]
+            },
+            {
+              "text": "일간 癸 · 극 ←",
+              "character_ids": [
+                "natal.chart.day.stem"
+              ],
+              "relation_ids": [
+                "cycle:stem:control:natal.chart.day.stem|sewoon.year_2026.cycle.stem"
+              ],
+              "detail_lines": [
+                "원국 일간 癸 → 세운 천간 丙"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "daewoon.period_2",
+          "title": "대운 戊寅",
+          "items": [
+            {
+              "text": "지지 寅 · 투간 ←",
+              "character_ids": [
+                "daewoon.period_2.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.stem"
+              ],
+              "detail_lines": [
+                "대운 지지 寅 → 세운 천간 丙 · 지장간 丙"
+              ]
+            }
+          ]
+        }
+      ],
+      "sections": []
+    },
+    "sewoon.year_2026.cycle.branch": {
+      "version": "1.0.0",
+      "title": "세운 지지 午",
+      "subtitle": "화 · 양 · 편재",
+      "relation_groups": [
+        {
+          "key": "natal.chart",
+          "title": "원국",
+          "items": [
+            {
+              "text": "년지 亥 · 극 ← · 암합",
+              "character_ids": [
+                "natal.chart.year.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:control:natal.chart.year.branch|sewoon.year_2026.cycle.branch",
+                "cycle:branch:hidden_combine:natal.chart.year.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "원국 년지 亥 → 세운 지지 午"
+              ]
+            },
+            {
+              "text": "월지 巳 + 시지 未 · 방합",
+              "character_ids": [
+                "natal.chart.month.branch",
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [
+                "cycle:group:square:natal.chart.hour.branch|natal.chart.month.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "원국 월지 巳 + 원국 시지 未 + 세운 지지 午"
+              ]
+            },
+            {
+              "text": "일지 卯 · 파 · 생 ←",
+              "character_ids": [
+                "natal.chart.day.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:break:natal.chart.day.branch|sewoon.year_2026.cycle.branch",
+                "cycle:branch:generate:natal.chart.day.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "원국 일지 卯 → 세운 지지 午"
+              ]
+            },
+            {
+              "text": "시간 己 · 투간 →",
+              "character_ids": [
+                "natal.chart.hour.stem"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:natal.chart.hour.stem|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "세운 지지 午 → 원국 시간 己 · 지장간 己"
+              ]
+            },
+            {
+              "text": "시지 未 · 육합 · 생 →",
+              "character_ids": [
+                "natal.chart.hour.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:combine:natal.chart.hour.branch|sewoon.year_2026.cycle.branch",
+                "cycle:branch:generate:natal.chart.hour.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "세운 지지 午 → 원국 시지 未"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "daewoon.period_2",
+          "title": "대운 戊寅",
+          "items": [
+            {
+              "text": "지지 寅 · 생 ← · 반합",
+              "character_ids": [
+                "daewoon.period_2.cycle.branch"
+              ],
+              "relation_ids": [
+                "cycle:branch:generate:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.branch",
+                "cycle:branch:half_combine:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": [
+                "대운 지지 寅 → 세운 지지 午"
+              ]
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "key": "hidden_stems",
+          "title": "지장간",
+          "items": [
+            {
+              "text": "丙 정재",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            },
+            {
+              "text": "己 편관 → 원국 시간 己",
+              "character_ids": [
+                "natal.chart.hour.stem"
+              ],
+              "relation_ids": [
+                "cycle:cross_layer:transmission:natal.chart.hour.stem|sewoon.year_2026.cycle.branch"
+              ],
+              "detail_lines": []
+            },
+            {
+              "text": "丁 편재",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        },
+        {
+          "key": "pillar",
+          "title": "기둥 정보",
+          "items": [
+            {
+              "text": "운성 · 절",
+              "character_ids": [],
+              "relation_ids": [],
+              "detail_lines": []
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

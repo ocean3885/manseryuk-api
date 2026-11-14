@@ -5,6 +5,7 @@ from services.five_elements import BRANCH_ELEMENT_MAP
 from services import relation_rules as rules
 from services.character_evidence import attach_participant_details
 from services.relation_presentation import attach_relation_presentations
+from services.character_display import attach_character_displays
 
 CYCLE_RELATION_RULE_VERSION = '1.0.0-draft'
 BRANCH_REPEAT_PRESENCE = 'distinct_positions_same_branch'
@@ -132,3 +133,5 @@ def attach_cycle_relations(graph):
         graph['coverage']['not_evaluated_mechanisms'] + [
         'cycle_relation_activation', 'cycle_relation_competition', 'cycle_power_effects',
         'cycle_rooting', 'cycle_internal_relations', 'cross_context_stem_branch_element']))
+
+    attach_character_displays(graph)

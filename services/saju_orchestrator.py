@@ -97,7 +97,7 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
     ai_consultation_prompts.append(f"【오행 분포】 {five_elements_data['summary']}")
     if special_stars_data:
         stars_summary = ", ".join([f"{st['name']}({st['position']})" for st in special_stars_data[:3]])
-        ai_consultation_prompts.append(f"【주요 신살 및 길신】 {stars_summary}")
+        ai_consultation_prompts.append(f"【신살·길신 목록 중 최대 3개 · 중요도 순위 아님】 {stars_summary}")
     ai_consultation_prompts.append(
         f"【원국 허실】 {xu_shi_data['overall_status']} "
         "원국 동주 통근과 관련 관계를 구분한 조회이며, 관계 적용 후 통근 변화는 계산하지 않았습니다. "
@@ -105,7 +105,7 @@ def get_full_saju_data(year: int, month: str, day: str, hour: int, min: int, sl:
         "십성의 상징 해석은 참고로 구분하고, 능력·성과·직업 적합성으로 단정하지 마세요."
     )
     for relation in interaction_data['matrix'][:3]:
-        ai_consultation_prompts.append(f"【주요 상호작용】 {relation['description']}")
+        ai_consultation_prompts.append(f"【관계 목록 중 최대 3개 · 중요도 순위 아님】 {relation['description']}")
 
     # ── 대운 계산 ──
     daewoon         = getDaewoon(gen, year_gan_kr, month_gan_kr, month_ji_kr)

@@ -1,0 +1,219 @@
+{
+  "scope": "실제 API 표본의 사실 연결 예시. 고 크기·개고·실제 작용 미평가.",
+  "counts": {
+    "http_requests": 24,
+    "storehouses": 3,
+    "transmission_links": 33
+  },
+  "examples": [
+    {
+      "input": {
+        "year": 1995,
+        "month": "5",
+        "day": "12",
+        "hour": 14,
+        "min": 30,
+        "sl": "sol",
+        "gen": "남"
+      },
+      "pillar": "hour",
+      "branch": "未",
+      "branch_ten_star_note": "지지 본기 십성과 저장 오행 지장간의 십성을 구분한다",
+      "storehouse": {
+        "stored_element": "木",
+        "role": "식상고"
+      },
+      "jijanggan": [
+        "丁",
+        "乙",
+        "己"
+      ],
+      "transmitted": [
+        {
+          "stem": "乙",
+          "stem_pos": "중기",
+          "stem_ten_star": "식신",
+          "from": "未",
+          "from_idx": 3,
+          "from_ten_star": "편관",
+          "stem_idx": 0
+        },
+        {
+          "stem": "己",
+          "stem_pos": "정기",
+          "stem_ten_star": "편관",
+          "from": "未",
+          "from_idx": 3,
+          "from_ten_star": "편관",
+          "stem_idx": 3
+        }
+      ],
+      "hidden": [
+        {
+          "stem": "丁",
+          "stem_pos": "초기",
+          "stem_ten_star": "편재"
+        }
+      ],
+      "transmission_relations": [
+        {
+          "relation_id": "natal.chart:cross_layer:transmission:hour:hour",
+          "hidden_stem": "己",
+          "direction": {
+            "from_character": "natal.chart.hour.branch",
+            "to_character": "natal.chart.hour.stem",
+            "basis": "hidden_stem_match"
+          }
+        },
+        {
+          "relation_id": "natal.chart:cross_layer:transmission:hour:year",
+          "hidden_stem": "乙",
+          "direction": {
+            "from_character": "natal.chart.hour.branch",
+            "to_character": "natal.chart.year.stem",
+            "basis": "hidden_stem_match"
+          }
+        }
+      ]
+    },
+    {
+      "input": {
+        "year": 1990,
+        "month": "1",
+        "day": "8",
+        "hour": 18,
+        "min": 0,
+        "sl": "sol",
+        "gen": "남"
+      },
+      "pillar": "month",
+      "branch": "丑",
+      "branch_ten_star_note": "지지 본기 십성과 저장 오행 지장간의 십성을 구분한다",
+      "storehouse": {
+        "stored_element": "金",
+        "role": "인성고"
+      },
+      "jijanggan": [
+        "癸",
+        "辛",
+        "己"
+      ],
+      "transmitted": [
+        {
+          "stem": "癸",
+          "stem_pos": "초기",
+          "stem_ten_star": "비견",
+          "from": "丑",
+          "from_idx": 1,
+          "from_ten_star": "편관",
+          "stem_idx": 2
+        },
+        {
+          "stem": "辛",
+          "stem_pos": "중기",
+          "stem_ten_star": "편인",
+          "from": "丑",
+          "from_idx": 1,
+          "from_ten_star": "편관",
+          "stem_idx": 3
+        },
+        {
+          "stem": "己",
+          "stem_pos": "정기",
+          "stem_ten_star": "편관",
+          "from": "丑",
+          "from_idx": 1,
+          "from_ten_star": "편관",
+          "stem_idx": 0
+        }
+      ],
+      "hidden": [],
+      "transmission_relations": [
+        {
+          "relation_id": "natal.chart:cross_layer:transmission:month:day",
+          "hidden_stem": "癸",
+          "direction": {
+            "from_character": "natal.chart.month.branch",
+            "to_character": "natal.chart.day.stem",
+            "basis": "hidden_stem_match"
+          }
+        },
+        {
+          "relation_id": "natal.chart:cross_layer:transmission:month:hour",
+          "hidden_stem": "辛",
+          "direction": {
+            "from_character": "natal.chart.month.branch",
+            "to_character": "natal.chart.hour.stem",
+            "basis": "hidden_stem_match"
+          }
+        },
+        {
+          "relation_id": "natal.chart:cross_layer:transmission:month:year",
+          "hidden_stem": "己",
+          "direction": {
+            "from_character": "natal.chart.month.branch",
+            "to_character": "natal.chart.year.stem",
+            "basis": "hidden_stem_match"
+          }
+        }
+      ]
+    },
+    {
+      "input": {
+        "year": 2000,
+        "month": "2",
+        "day": "29",
+        "hour": 23,
+        "min": 59,
+        "sl": "sol",
+        "gen": "남"
+      },
+      "pillar": "year",
+      "branch": "辰",
+      "branch_ten_star_note": "지지 본기 십성과 저장 오행 지장간의 십성을 구분한다",
+      "storehouse": {
+        "stored_element": "水",
+        "role": "관성고"
+      },
+      "jijanggan": [
+        "乙",
+        "癸",
+        "戊"
+      ],
+      "transmitted": [
+        {
+          "stem": "戊",
+          "stem_pos": "정기",
+          "stem_ten_star": "상관",
+          "from": "辰",
+          "from_idx": 0,
+          "from_ten_star": "상관",
+          "stem_idx": 1
+        }
+      ],
+      "hidden": [
+        {
+          "stem": "乙",
+          "stem_pos": "초기",
+          "stem_ten_star": "편인"
+        },
+        {
+          "stem": "癸",
+          "stem_pos": "중기",
+          "stem_ten_star": "편관"
+        }
+      ],
+      "transmission_relations": [
+        {
+          "relation_id": "natal.chart:cross_layer:transmission:year:month",
+          "hidden_stem": "戊",
+          "direction": {
+            "from_character": "natal.chart.year.branch",
+            "to_character": "natal.chart.month.stem",
+            "basis": "hidden_stem_match"
+          }
+        }
+      ]
+    }
+  ]
+}

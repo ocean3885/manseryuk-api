@@ -1,0 +1,2056 @@
+{
+  "input": {
+    "year": 1995,
+    "month": "5",
+    "day": "12",
+    "hour": 14,
+    "min": 30,
+    "sl": "sol",
+    "gen": "남"
+  },
+  "selection": {
+    "mode": "sewoon",
+    "daewoon_index": 2,
+    "sewoon_year": 2026,
+    "daewoon_status": "selected",
+    "period_basis": "legacy_start_year_half_open",
+    "sewoon_basis": "calendar_year_ganzhi_no_ipchun",
+    "cycle_relations_status": "candidates_detected",
+    "cycle_relation_rule_version": "1.0.0-draft"
+  },
+  "characters": {
+    "natal.chart.year.stem": {
+      "char": "乙",
+      "kind": "stem",
+      "context_id": "natal.chart",
+      "relation_ids": [
+        "natal.chart:cross_layer:transmission:day:year",
+        "natal.chart:cross_layer:transmission:hour:year",
+        "natal.chart:same_pillar:element:year",
+        "natal.chart:stem:clash:year:month",
+        "natal.chart:stem:control:year:hour",
+        "cycle:stem:control:daewoon.period_2.cycle.stem|natal.chart.year.stem"
+      ],
+      "transmission_relation_ids": [
+        "natal.chart:cross_layer:transmission:day:year",
+        "natal.chart:cross_layer:transmission:hour:year"
+      ]
+    },
+    "natal.chart.year.branch": {
+      "char": "亥",
+      "kind": "branch",
+      "context_id": "natal.chart",
+      "relation_ids": [
+        "natal.chart:branch:clash:year:month",
+        "natal.chart:branch:control:year:hour",
+        "natal.chart:branch:control:year:month",
+        "natal.chart:branch:generate:year:day",
+        "natal.chart:group:trine:hai_mao_wei",
+        "natal.chart:same_pillar:element:year",
+        "cycle:branch:combine:daewoon.period_2.cycle.branch|natal.chart.year.branch",
+        "cycle:branch:control:natal.chart.year.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:generate:daewoon.period_2.cycle.branch|natal.chart.year.branch",
+        "cycle:branch:hidden_combine:natal.chart.year.branch|sewoon.year_2026.cycle.branch",
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.year.branch"
+      ],
+      "transmission_relation_ids": [
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.year.branch"
+      ]
+    },
+    "natal.chart.month.stem": {
+      "char": "辛",
+      "kind": "stem",
+      "context_id": "natal.chart",
+      "relation_ids": [
+        "natal.chart:same_pillar:element:month",
+        "natal.chart:same_pillar:self_combine:month",
+        "natal.chart:stem:clash:year:month",
+        "cycle:stem:combine:natal.chart.month.stem|sewoon.year_2026.cycle.stem"
+      ],
+      "transmission_relation_ids": []
+    },
+    "natal.chart.month.branch": {
+      "char": "巳",
+      "kind": "branch",
+      "context_id": "natal.chart",
+      "relation_ids": [
+        "natal.chart:branch:clash:year:month",
+        "natal.chart:branch:control:year:month",
+        "natal.chart:branch:generate:month:day",
+        "natal.chart:branch:generate:month:hour",
+        "natal.chart:same_pillar:element:month",
+        "natal.chart:same_pillar:self_combine:month",
+        "cycle:branch:generate:daewoon.period_2.cycle.branch|natal.chart.month.branch",
+        "cycle:branch:pierce:daewoon.period_2.cycle.branch|natal.chart.month.branch",
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.month.branch",
+        "cycle:cross_layer:transmission:natal.chart.month.branch|sewoon.year_2026.cycle.stem",
+        "cycle:group:square:natal.chart.hour.branch|natal.chart.month.branch|sewoon.year_2026.cycle.branch"
+      ],
+      "transmission_relation_ids": [
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.month.branch",
+        "cycle:cross_layer:transmission:natal.chart.month.branch|sewoon.year_2026.cycle.stem"
+      ]
+    },
+    "natal.chart.day.stem": {
+      "char": "癸",
+      "kind": "stem",
+      "context_id": "natal.chart",
+      "relation_ids": [
+        "natal.chart:same_pillar:element:day",
+        "natal.chart:stem:control:day:hour",
+        "cycle:stem:combine:daewoon.period_2.cycle.stem|natal.chart.day.stem",
+        "cycle:stem:control:natal.chart.day.stem|sewoon.year_2026.cycle.stem"
+      ],
+      "transmission_relation_ids": []
+    },
+    "natal.chart.day.branch": {
+      "char": "卯",
+      "kind": "branch",
+      "context_id": "natal.chart",
+      "relation_ids": [
+        "natal.chart:branch:control:day:hour",
+        "natal.chart:branch:generate:month:day",
+        "natal.chart:branch:generate:year:day",
+        "natal.chart:branch:half_combine:day:hour",
+        "natal.chart:cross_layer:transmission:day:year",
+        "natal.chart:group:trine:hai_mao_wei",
+        "natal.chart:same_pillar:element:day",
+        "cycle:branch:break:natal.chart.day.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:generate:natal.chart.day.branch|sewoon.year_2026.cycle.branch"
+      ],
+      "transmission_relation_ids": [
+        "natal.chart:cross_layer:transmission:day:year"
+      ]
+    },
+    "natal.chart.hour.stem": {
+      "char": "己",
+      "kind": "stem",
+      "context_id": "natal.chart",
+      "relation_ids": [
+        "natal.chart:cross_layer:transmission:hour:hour",
+        "natal.chart:same_pillar:element:hour",
+        "natal.chart:stem:control:day:hour",
+        "natal.chart:stem:control:year:hour",
+        "cycle:cross_layer:transmission:natal.chart.hour.stem|sewoon.year_2026.cycle.branch"
+      ],
+      "transmission_relation_ids": [
+        "natal.chart:cross_layer:transmission:hour:hour",
+        "cycle:cross_layer:transmission:natal.chart.hour.stem|sewoon.year_2026.cycle.branch"
+      ]
+    },
+    "natal.chart.hour.branch": {
+      "char": "未",
+      "kind": "branch",
+      "context_id": "natal.chart",
+      "relation_ids": [
+        "natal.chart:branch:control:day:hour",
+        "natal.chart:branch:control:year:hour",
+        "natal.chart:branch:generate:month:hour",
+        "natal.chart:branch:half_combine:day:hour",
+        "natal.chart:cross_layer:transmission:hour:hour",
+        "natal.chart:cross_layer:transmission:hour:year",
+        "natal.chart:group:trine:hai_mao_wei",
+        "natal.chart:same_pillar:element:hour",
+        "cycle:branch:combine:natal.chart.hour.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:control:daewoon.period_2.cycle.branch|natal.chart.hour.branch",
+        "cycle:branch:generate:natal.chart.hour.branch|sewoon.year_2026.cycle.branch",
+        "cycle:group:square:natal.chart.hour.branch|natal.chart.month.branch|sewoon.year_2026.cycle.branch"
+      ],
+      "transmission_relation_ids": [
+        "natal.chart:cross_layer:transmission:hour:hour",
+        "natal.chart:cross_layer:transmission:hour:year"
+      ]
+    },
+    "daewoon.period_2.cycle.stem": {
+      "char": "戊",
+      "kind": "stem",
+      "context_id": "daewoon.period_2",
+      "relation_ids": [
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.month.branch",
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.year.branch",
+        "cycle:stem:combine:daewoon.period_2.cycle.stem|natal.chart.day.stem",
+        "cycle:stem:control:daewoon.period_2.cycle.stem|natal.chart.year.stem"
+      ],
+      "transmission_relation_ids": [
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.month.branch",
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.year.branch"
+      ]
+    },
+    "daewoon.period_2.cycle.branch": {
+      "char": "寅",
+      "kind": "branch",
+      "context_id": "daewoon.period_2",
+      "relation_ids": [
+        "cycle:branch:combine:daewoon.period_2.cycle.branch|natal.chart.year.branch",
+        "cycle:branch:control:daewoon.period_2.cycle.branch|natal.chart.hour.branch",
+        "cycle:branch:generate:daewoon.period_2.cycle.branch|natal.chart.month.branch",
+        "cycle:branch:generate:daewoon.period_2.cycle.branch|natal.chart.year.branch",
+        "cycle:branch:generate:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:half_combine:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:pierce:daewoon.period_2.cycle.branch|natal.chart.month.branch",
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.stem"
+      ],
+      "transmission_relation_ids": [
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.stem"
+      ]
+    },
+    "sewoon.year_2026.cycle.stem": {
+      "char": "丙",
+      "kind": "stem",
+      "context_id": "sewoon.year_2026",
+      "relation_ids": [
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.stem",
+        "cycle:cross_layer:transmission:natal.chart.month.branch|sewoon.year_2026.cycle.stem",
+        "cycle:stem:combine:natal.chart.month.stem|sewoon.year_2026.cycle.stem",
+        "cycle:stem:control:natal.chart.day.stem|sewoon.year_2026.cycle.stem"
+      ],
+      "transmission_relation_ids": [
+        "cycle:cross_layer:transmission:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.stem",
+        "cycle:cross_layer:transmission:natal.chart.month.branch|sewoon.year_2026.cycle.stem"
+      ]
+    },
+    "sewoon.year_2026.cycle.branch": {
+      "char": "午",
+      "kind": "branch",
+      "context_id": "sewoon.year_2026",
+      "relation_ids": [
+        "cycle:branch:break:natal.chart.day.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:combine:natal.chart.hour.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:control:natal.chart.year.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:generate:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:generate:natal.chart.day.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:generate:natal.chart.hour.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:half_combine:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.branch",
+        "cycle:branch:hidden_combine:natal.chart.year.branch|sewoon.year_2026.cycle.branch",
+        "cycle:cross_layer:transmission:natal.chart.hour.stem|sewoon.year_2026.cycle.branch",
+        "cycle:group:square:natal.chart.hour.branch|natal.chart.month.branch|sewoon.year_2026.cycle.branch"
+      ],
+      "transmission_relation_ids": [
+        "cycle:cross_layer:transmission:natal.chart.hour.stem|sewoon.year_2026.cycle.branch"
+      ]
+    }
+  },
+  "relations": {
+    "natal.chart:branch:clash:year:month": {
+      "type": "clash",
+      "participants": [
+        "natal.chart.year.branch",
+        "natal.chart.month.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "active",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연지 亥(겁재) · 원국 월지 巳(정재)의 충",
+        "status_label": "성립",
+        "description": "원국 연지 亥(겁재) · 원국 월지 巳(정재) 사이의 충 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "registered_presence",
+            "category": "decision",
+            "text": "등록된 관계의 두 지지가 원국에 함께 있고 현행 성립 조건을 충족합니다.",
+            "character_ids": [
+              "natal.chart.month.branch",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": [
+              0,
+              1
+            ]
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:branch:control:day:hour": {
+      "type": "control",
+      "participants": [
+        "natal.chart.day.branch",
+        "natal.chart.hour.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "potential",
+      "direction": {
+        "from_character": "natal.chart.day.branch",
+        "to_character": "natal.chart.hour.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 일지 卯(식신) · 원국 시지 未(편관)의 극",
+        "status_label": "잠재",
+        "description": "원국 일지 卯(식신) → 원국 시지 未(편관): 오행상 극의 방향입니다.",
+        "reasons": [
+          {
+            "code": "potential_structure",
+            "category": "scope",
+            "text": "등록된 구성 또는 오행 경로가 확인된 잠재 관계입니다. 실제 성립과 적용은 확정하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "natal.chart.hour.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:branch:control:year:hour": {
+      "type": "control",
+      "participants": [
+        "natal.chart.year.branch",
+        "natal.chart.hour.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "potential",
+      "direction": {
+        "from_character": "natal.chart.hour.branch",
+        "to_character": "natal.chart.year.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연지 亥(겁재) · 원국 시지 未(편관)의 극",
+        "status_label": "잠재",
+        "description": "원국 시지 未(편관) → 원국 연지 亥(겁재): 오행상 극의 방향입니다.",
+        "reasons": [
+          {
+            "code": "potential_structure",
+            "category": "scope",
+            "text": "등록된 구성 또는 오행 경로가 확인된 잠재 관계입니다. 실제 성립과 적용은 확정하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.hour.branch",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:branch:control:year:month": {
+      "type": "control",
+      "participants": [
+        "natal.chart.year.branch",
+        "natal.chart.month.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "suppressed",
+      "direction": {
+        "from_character": "natal.chart.year.branch",
+        "to_character": "natal.chart.month.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연지 亥(겁재) · 원국 월지 巳(정재)의 극",
+        "status_label": "억제",
+        "description": "원국 연지 亥(겁재) → 원국 월지 巳(정재): 오행상 극의 방향입니다.",
+        "reasons": [
+          {
+            "code": "active_pair_structure_overrides_element",
+            "category": "decision",
+            "text": "같은 위치 쌍의 충 관계가 성립하여 이 극 관계의 독립 적용을 억제합니다.",
+            "character_ids": [
+              "natal.chart.month.branch",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [
+              "natal.chart:branch:clash:year:month"
+            ],
+            "evidence_indices": [
+              0
+            ]
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:branch:generate:month:day": {
+      "type": "generate",
+      "participants": [
+        "natal.chart.month.branch",
+        "natal.chart.day.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "potential",
+      "direction": {
+        "from_character": "natal.chart.day.branch",
+        "to_character": "natal.chart.month.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 월지 巳(정재) · 원국 일지 卯(식신)의 생",
+        "status_label": "잠재",
+        "description": "원국 일지 卯(식신) → 원국 월지 巳(정재): 오행상 생의 방향입니다.",
+        "reasons": [
+          {
+            "code": "potential_structure",
+            "category": "scope",
+            "text": "등록된 구성 또는 오행 경로가 확인된 잠재 관계입니다. 실제 성립과 적용은 확정하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "natal.chart.month.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:branch:generate:month:hour": {
+      "type": "generate",
+      "participants": [
+        "natal.chart.month.branch",
+        "natal.chart.hour.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "potential",
+      "direction": {
+        "from_character": "natal.chart.month.branch",
+        "to_character": "natal.chart.hour.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 월지 巳(정재) · 원국 시지 未(편관)의 생",
+        "status_label": "잠재",
+        "description": "원국 월지 巳(정재) → 원국 시지 未(편관): 오행상 생의 방향입니다.",
+        "reasons": [
+          {
+            "code": "potential_structure",
+            "category": "scope",
+            "text": "등록된 구성 또는 오행 경로가 확인된 잠재 관계입니다. 실제 성립과 적용은 확정하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.hour.branch",
+              "natal.chart.month.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:branch:generate:year:day": {
+      "type": "generate",
+      "participants": [
+        "natal.chart.year.branch",
+        "natal.chart.day.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "potential",
+      "direction": {
+        "from_character": "natal.chart.year.branch",
+        "to_character": "natal.chart.day.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연지 亥(겁재) · 원국 일지 卯(식신)의 생",
+        "status_label": "잠재",
+        "description": "원국 연지 亥(겁재) → 원국 일지 卯(식신): 오행상 생의 방향입니다.",
+        "reasons": [
+          {
+            "code": "potential_structure",
+            "category": "scope",
+            "text": "등록된 구성 또는 오행 경로가 확인된 잠재 관계입니다. 실제 성립과 적용은 확정하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:branch:half_combine:day:hour": {
+      "type": "half_combine",
+      "participants": [
+        "natal.chart.day.branch",
+        "natal.chart.hour.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "potential",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 일지 卯(식신) · 원국 시지 未(편관)의 반합",
+        "status_label": "잠재",
+        "description": "원국 일지 卯(식신) · 원국 시지 未(편관) 사이의 반합 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "potential_structure",
+            "category": "scope",
+            "text": "등록된 구성 또는 오행 경로가 확인된 잠재 관계입니다. 실제 성립과 적용은 확정하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "natal.chart.hour.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "remaining_half_combine",
+            "category": "structure",
+            "text": "삼합 날개의 인접 충과 함께, 다른 날개와 중신의 반합 후보를 기록합니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "natal.chart.hour.branch"
+            ],
+            "relation_ids": [
+              "natal.chart:branch:clash:year:month",
+              "natal.chart:group:trine:hai_mao_wei"
+            ],
+            "evidence_indices": [
+              1
+            ]
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:cross_layer:transmission:day:year": {
+      "type": "transmission",
+      "participants": [
+        "natal.chart.year.stem",
+        "natal.chart.day.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.day.branch",
+        "to_character": "natal.chart.year.stem",
+        "basis": "hidden_stem_match"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연간 乙(식신) · 원국 일지 卯(식신)의 투간",
+        "status_label": "탐지",
+        "description": "원국 일지 卯(식신)의 지장간 乙이 원국 연간 乙(식신)에 같은 글자로 드러나 투간으로 기록됩니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "natal.chart.year.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:cross_layer:transmission:hour:hour": {
+      "type": "transmission",
+      "participants": [
+        "natal.chart.hour.stem",
+        "natal.chart.hour.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.hour.branch",
+        "to_character": "natal.chart.hour.stem",
+        "basis": "hidden_stem_match"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 시간 己(편관) · 원국 시지 未(편관)의 투간",
+        "status_label": "탐지",
+        "description": "원국 시지 未(편관)의 지장간 己이 원국 시간 己(편관)에 같은 글자로 드러나 투간으로 기록됩니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.hour.branch",
+              "natal.chart.hour.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:cross_layer:transmission:hour:year": {
+      "type": "transmission",
+      "participants": [
+        "natal.chart.year.stem",
+        "natal.chart.hour.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.hour.branch",
+        "to_character": "natal.chart.year.stem",
+        "basis": "hidden_stem_match"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연간 乙(식신) · 원국 시지 未(편관)의 투간",
+        "status_label": "탐지",
+        "description": "원국 시지 未(편관)의 지장간 乙이 원국 연간 乙(식신)에 같은 글자로 드러나 투간으로 기록됩니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.hour.branch",
+              "natal.chart.year.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:group:trine:hai_mao_wei": {
+      "type": "trine",
+      "participants": [
+        "natal.chart.year.branch",
+        "natal.chart.day.branch",
+        "natal.chart.hour.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": null,
+      "formation_candidates": [
+        [
+          "natal.chart.year.branch",
+          "natal.chart.day.branch",
+          "natal.chart.hour.branch"
+        ]
+      ],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연지 亥(겁재) · 원국 일지 卯(식신) · 원국 시지 未(편관)의 삼합",
+        "status_label": "탐지",
+        "description": "원국 연지 亥(겁재) · 원국 일지 卯(식신) · 원국 시지 未(편관) 사이의 삼합 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "adjacent_birth_clash",
+            "category": "structure",
+            "text": "원국 연지 亥(겁재) ↔ 원국 월지 巳(정재)의 인접 충이 삼합 생지에 함께 있습니다.",
+            "character_ids": [
+              "natal.chart.month.branch",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [
+              "natal.chart:branch:clash:year:month"
+            ],
+            "evidence_indices": [
+              0,
+              1
+            ]
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "조합의 존재와 제공된 구성 근거를 확인했으며, 실제 성립과 작용은 확정하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "natal.chart.hour.branch",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:same_pillar:element:day": {
+      "type": "element",
+      "participants": [
+        "natal.chart.day.stem",
+        "natal.chart.day.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.day.stem",
+        "to_character": "natal.chart.day.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 일간 癸(일간) · 원국 일지 卯(식신)의 동주 오행 관계",
+        "status_label": "탐지",
+        "description": "원국 일간 癸(일간) → 원국 일지 卯(식신): 오행상 생하는 방향입니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "natal.chart.day.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:same_pillar:element:hour": {
+      "type": "element",
+      "participants": [
+        "natal.chart.hour.stem",
+        "natal.chart.hour.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 시간 己(편관) · 원국 시지 未(편관)의 동주 오행 관계",
+        "status_label": "탐지",
+        "description": "원국 시간 己(편관) · 원국 시지 未(편관)의 오행은 서로 같습니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.hour.branch",
+              "natal.chart.hour.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:same_pillar:element:month": {
+      "type": "element",
+      "participants": [
+        "natal.chart.month.stem",
+        "natal.chart.month.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.month.branch",
+        "to_character": "natal.chart.month.stem",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 월간 辛(편인) · 원국 월지 巳(정재)의 동주 오행 관계",
+        "status_label": "탐지",
+        "description": "원국 월지 巳(정재) → 원국 월간 辛(편인): 오행상 극하는 방향입니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.month.branch",
+              "natal.chart.month.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:same_pillar:element:year": {
+      "type": "element",
+      "participants": [
+        "natal.chart.year.stem",
+        "natal.chart.year.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.year.branch",
+        "to_character": "natal.chart.year.stem",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연간 乙(식신) · 원국 연지 亥(겁재)의 동주 오행 관계",
+        "status_label": "탐지",
+        "description": "원국 연지 亥(겁재) → 원국 연간 乙(식신): 오행상 생하는 방향입니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.year.branch",
+              "natal.chart.year.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:same_pillar:self_combine:month": {
+      "type": "self_combine",
+      "participants": [
+        "natal.chart.month.stem",
+        "natal.chart.month.branch"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 월간 辛(편인) · 원국 월지 巳(정재)의 자합",
+        "status_label": "탐지",
+        "description": "원국 월간 辛(편인) ↔ 원국 월지 巳(정재)의 지장간 丙: 같은 기둥의 자합 조합이 있습니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "자합 조합의 존재를 확인했으며, 성립 여부와 실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.month.branch",
+              "natal.chart.month.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "self_combine_context",
+            "category": "structure",
+            "text": "원국 연지 亥(겁재) · 원국 월지 巳(정재)의 충 관계가 함께 있습니다.",
+            "character_ids": [
+              "natal.chart.month.branch",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [
+              "natal.chart:branch:clash:year:month"
+            ],
+            "evidence_indices": [
+              0
+            ]
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:stem:clash:year:month": {
+      "type": "clash",
+      "participants": [
+        "natal.chart.year.stem",
+        "natal.chart.month.stem"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연간 乙(식신) · 원국 월간 辛(편인)의 천간 충",
+        "status_label": "탐지",
+        "description": "원국 연간 乙(식신) · 원국 월간 辛(편인) 사이의 천간 충 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.month.stem",
+              "natal.chart.year.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:stem:control:day:hour": {
+      "type": "control",
+      "participants": [
+        "natal.chart.day.stem",
+        "natal.chart.hour.stem"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.hour.stem",
+        "to_character": "natal.chart.day.stem",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 일간 癸(일간) · 원국 시간 己(편관)의 천간 극",
+        "status_label": "탐지",
+        "description": "원국 시간 己(편관) → 원국 일간 癸(일간): 오행상 천간 극의 방향입니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.day.stem",
+              "natal.chart.hour.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "natal.chart:stem:control:year:hour": {
+      "type": "control",
+      "participants": [
+        "natal.chart.year.stem",
+        "natal.chart.hour.stem"
+      ],
+      "context_ids": [
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.year.stem",
+        "to_character": "natal.chart.hour.stem",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연간 乙(식신) · 원국 시간 己(편관)의 천간 극",
+        "status_label": "탐지",
+        "description": "원국 연간 乙(식신) → 원국 시간 己(편관): 오행상 천간 극의 방향입니다.",
+        "reasons": [
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.hour.stem",
+              "natal.chart.year.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:break:natal.chart.day.branch|sewoon.year_2026.cycle.branch": {
+      "type": "break",
+      "participants": [
+        "natal.chart.day.branch",
+        "sewoon.year_2026.cycle.branch"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "candidate_only",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 일지 卯(식신) · 세운 지지 午(편재)의 파",
+        "status_label": "후보",
+        "description": "원국 일지 卯(식신) · 세운 지지 午(편재) 사이의 파 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:combine:daewoon.period_2.cycle.branch|natal.chart.year.branch": {
+      "type": "combine",
+      "participants": [
+        "daewoon.period_2.cycle.branch",
+        "natal.chart.year.branch"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "natal.chart"
+      ],
+      "activation_status": "candidate_only",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연지 亥(겁재) · 대운 지지 寅(상관)의 육합",
+        "status_label": "후보",
+        "description": "원국 연지 亥(겁재) · 대운 지지 寅(상관) 사이의 육합 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:combine:natal.chart.hour.branch|sewoon.year_2026.cycle.branch": {
+      "type": "combine",
+      "participants": [
+        "natal.chart.hour.branch",
+        "sewoon.year_2026.cycle.branch"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "candidate_only",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 시지 未(편관) · 세운 지지 午(편재)의 육합",
+        "status_label": "후보",
+        "description": "원국 시지 未(편관) · 세운 지지 午(편재) 사이의 육합 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.hour.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:control:daewoon.period_2.cycle.branch|natal.chart.hour.branch": {
+      "type": "control",
+      "participants": [
+        "daewoon.period_2.cycle.branch",
+        "natal.chart.hour.branch"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "daewoon.period_2.cycle.branch",
+        "to_character": "natal.chart.hour.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 시지 未(편관) · 대운 지지 寅(상관)의 극",
+        "status_label": "탐지",
+        "description": "대운 지지 寅(상관) → 원국 시지 未(편관): 오행상 극의 방향입니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "natal.chart.hour.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "natal.chart.hour.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:control:natal.chart.year.branch|sewoon.year_2026.cycle.branch": {
+      "type": "control",
+      "participants": [
+        "natal.chart.year.branch",
+        "sewoon.year_2026.cycle.branch"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.year.branch",
+        "to_character": "sewoon.year_2026.cycle.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연지 亥(겁재) · 세운 지지 午(편재)의 극",
+        "status_label": "탐지",
+        "description": "원국 연지 亥(겁재) → 세운 지지 午(편재): 오행상 극의 방향입니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.year.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.year.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:generate:daewoon.period_2.cycle.branch|natal.chart.month.branch": {
+      "type": "generate",
+      "participants": [
+        "daewoon.period_2.cycle.branch",
+        "natal.chart.month.branch"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "daewoon.period_2.cycle.branch",
+        "to_character": "natal.chart.month.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 월지 巳(정재) · 대운 지지 寅(상관)의 생",
+        "status_label": "탐지",
+        "description": "대운 지지 寅(상관) → 원국 월지 巳(정재): 오행상 생의 방향입니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "natal.chart.month.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "natal.chart.month.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:generate:daewoon.period_2.cycle.branch|natal.chart.year.branch": {
+      "type": "generate",
+      "participants": [
+        "daewoon.period_2.cycle.branch",
+        "natal.chart.year.branch"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.year.branch",
+        "to_character": "daewoon.period_2.cycle.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연지 亥(겁재) · 대운 지지 寅(상관)의 생",
+        "status_label": "탐지",
+        "description": "원국 연지 亥(겁재) → 대운 지지 寅(상관): 오행상 생의 방향입니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:generate:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.branch": {
+      "type": "generate",
+      "participants": [
+        "daewoon.period_2.cycle.branch",
+        "sewoon.year_2026.cycle.branch"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "daewoon.period_2.cycle.branch",
+        "to_character": "sewoon.year_2026.cycle.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "대운 지지 寅(상관) · 세운 지지 午(편재)의 생",
+        "status_label": "탐지",
+        "description": "대운 지지 寅(상관) → 세운 지지 午(편재): 오행상 생의 방향입니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:generate:natal.chart.day.branch|sewoon.year_2026.cycle.branch": {
+      "type": "generate",
+      "participants": [
+        "natal.chart.day.branch",
+        "sewoon.year_2026.cycle.branch"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.day.branch",
+        "to_character": "sewoon.year_2026.cycle.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 일지 卯(식신) · 세운 지지 午(편재)의 생",
+        "status_label": "탐지",
+        "description": "원국 일지 卯(식신) → 세운 지지 午(편재): 오행상 생의 방향입니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.day.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:generate:natal.chart.hour.branch|sewoon.year_2026.cycle.branch": {
+      "type": "generate",
+      "participants": [
+        "natal.chart.hour.branch",
+        "sewoon.year_2026.cycle.branch"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "sewoon.year_2026.cycle.branch",
+        "to_character": "natal.chart.hour.branch",
+        "basis": "elemental"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 시지 未(편관) · 세운 지지 午(편재)의 생",
+        "status_label": "탐지",
+        "description": "세운 지지 午(편재) → 원국 시지 未(편관): 오행상 생의 방향입니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.hour.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.hour.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:half_combine:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.branch": {
+      "type": "half_combine",
+      "participants": [
+        "daewoon.period_2.cycle.branch",
+        "sewoon.year_2026.cycle.branch"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "candidate_only",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "대운 지지 寅(상관) · 세운 지지 午(편재)의 반합",
+        "status_label": "후보",
+        "description": "대운 지지 寅(상관) · 세운 지지 午(편재) 사이의 반합 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:hidden_combine:natal.chart.year.branch|sewoon.year_2026.cycle.branch": {
+      "type": "hidden_combine",
+      "participants": [
+        "natal.chart.year.branch",
+        "sewoon.year_2026.cycle.branch"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "candidate_only",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연지 亥(겁재) · 세운 지지 午(편재)의 암합",
+        "status_label": "후보",
+        "description": "원국 연지 亥(겁재) · 세운 지지 午(편재) 사이의 암합 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.year.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:branch:pierce:daewoon.period_2.cycle.branch|natal.chart.month.branch": {
+      "type": "pierce",
+      "participants": [
+        "daewoon.period_2.cycle.branch",
+        "natal.chart.month.branch"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "natal.chart"
+      ],
+      "activation_status": "candidate_only",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 월지 巳(정재) · 대운 지지 寅(상관)의 천",
+        "status_label": "후보",
+        "description": "원국 월지 巳(정재) · 대운 지지 寅(상관) 사이의 천 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "natal.chart.month.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:cross_layer:transmission:daewoon.period_2.cycle.branch|sewoon.year_2026.cycle.stem": {
+      "type": "transmission",
+      "participants": [
+        "daewoon.period_2.cycle.branch",
+        "sewoon.year_2026.cycle.stem"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "daewoon.period_2.cycle.branch",
+        "to_character": "sewoon.year_2026.cycle.stem",
+        "basis": "hidden_stem_match"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "대운 지지 寅(상관) · 세운 천간 丙(정재)의 투간",
+        "status_label": "탐지",
+        "description": "대운 지지 寅(상관)의 지장간 丙이 세운 천간 丙(정재)에 같은 글자로 드러나 투간으로 기록됩니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "sewoon.year_2026.cycle.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.branch",
+              "sewoon.year_2026.cycle.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.month.branch": {
+      "type": "transmission",
+      "participants": [
+        "daewoon.period_2.cycle.stem",
+        "natal.chart.month.branch"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.month.branch",
+        "to_character": "daewoon.period_2.cycle.stem",
+        "basis": "hidden_stem_match"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 월지 巳(정재) · 대운 천간 戊(정관)의 투간",
+        "status_label": "탐지",
+        "description": "원국 월지 巳(정재)의 지장간 戊이 대운 천간 戊(정관)에 같은 글자로 드러나 투간으로 기록됩니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.stem",
+              "natal.chart.month.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.stem",
+              "natal.chart.month.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:cross_layer:transmission:daewoon.period_2.cycle.stem|natal.chart.year.branch": {
+      "type": "transmission",
+      "participants": [
+        "daewoon.period_2.cycle.stem",
+        "natal.chart.year.branch"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.year.branch",
+        "to_character": "daewoon.period_2.cycle.stem",
+        "basis": "hidden_stem_match"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연지 亥(겁재) · 대운 천간 戊(정관)의 투간",
+        "status_label": "탐지",
+        "description": "원국 연지 亥(겁재)의 지장간 戊이 대운 천간 戊(정관)에 같은 글자로 드러나 투간으로 기록됩니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.stem",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.stem",
+              "natal.chart.year.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:cross_layer:transmission:natal.chart.hour.stem|sewoon.year_2026.cycle.branch": {
+      "type": "transmission",
+      "participants": [
+        "natal.chart.hour.stem",
+        "sewoon.year_2026.cycle.branch"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "sewoon.year_2026.cycle.branch",
+        "to_character": "natal.chart.hour.stem",
+        "basis": "hidden_stem_match"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 시간 己(편관) · 세운 지지 午(편재)의 투간",
+        "status_label": "탐지",
+        "description": "세운 지지 午(편재)의 지장간 己이 원국 시간 己(편관)에 같은 글자로 드러나 투간으로 기록됩니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.hour.stem",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.hour.stem",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:cross_layer:transmission:natal.chart.month.branch|sewoon.year_2026.cycle.stem": {
+      "type": "transmission",
+      "participants": [
+        "natal.chart.month.branch",
+        "sewoon.year_2026.cycle.stem"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.month.branch",
+        "to_character": "sewoon.year_2026.cycle.stem",
+        "basis": "hidden_stem_match"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 월지 巳(정재) · 세운 천간 丙(정재)의 투간",
+        "status_label": "탐지",
+        "description": "원국 월지 巳(정재)의 지장간 丙이 세운 천간 丙(정재)에 같은 글자로 드러나 투간으로 기록됩니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.month.branch",
+              "sewoon.year_2026.cycle.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.month.branch",
+              "sewoon.year_2026.cycle.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:group:square:natal.chart.hour.branch|natal.chart.month.branch|sewoon.year_2026.cycle.branch": {
+      "type": "square",
+      "participants": [
+        "natal.chart.hour.branch",
+        "natal.chart.month.branch",
+        "sewoon.year_2026.cycle.branch"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "candidate_only",
+      "direction": null,
+      "formation_candidates": [
+        [
+          "natal.chart.hour.branch",
+          "natal.chart.month.branch",
+          "sewoon.year_2026.cycle.branch"
+        ]
+      ],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 월지 巳(정재) · 원국 시지 未(편관) · 세운 지지 午(편재)의 방합",
+        "status_label": "후보",
+        "description": "원국 월지 巳(정재) · 원국 시지 未(편관) · 세운 지지 午(편재) 사이의 방합 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.hour.branch",
+              "natal.chart.month.branch",
+              "sewoon.year_2026.cycle.branch"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:stem:combine:daewoon.period_2.cycle.stem|natal.chart.day.stem": {
+      "type": "combine",
+      "participants": [
+        "daewoon.period_2.cycle.stem",
+        "natal.chart.day.stem"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "natal.chart"
+      ],
+      "activation_status": "candidate_only",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 일간 癸(일간) · 대운 천간 戊(정관)의 천간합",
+        "status_label": "후보",
+        "description": "원국 일간 癸(일간) · 대운 천간 戊(정관) 사이의 천간합 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.stem",
+              "natal.chart.day.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:stem:combine:natal.chart.month.stem|sewoon.year_2026.cycle.stem": {
+      "type": "combine",
+      "participants": [
+        "natal.chart.month.stem",
+        "sewoon.year_2026.cycle.stem"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "candidate_only",
+      "direction": null,
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 월간 辛(편인) · 세운 천간 丙(정재)의 천간합",
+        "status_label": "후보",
+        "description": "원국 월간 辛(편인) · 세운 천간 丙(정재) 사이의 천간합 관계를 기록했습니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.month.stem",
+              "sewoon.year_2026.cycle.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:stem:control:daewoon.period_2.cycle.stem|natal.chart.year.stem": {
+      "type": "control",
+      "participants": [
+        "daewoon.period_2.cycle.stem",
+        "natal.chart.year.stem"
+      ],
+      "context_ids": [
+        "daewoon.period_2",
+        "natal.chart"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.year.stem",
+        "to_character": "daewoon.period_2.cycle.stem",
+        "basis": "rule_fixed"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 연간 乙(식신) · 대운 천간 戊(정관)의 천간 극",
+        "status_label": "탐지",
+        "description": "원국 연간 乙(식신) → 대운 천간 戊(정관): 오행상 천간 극의 방향입니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.stem",
+              "natal.chart.year.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "daewoon.period_2.cycle.stem",
+              "natal.chart.year.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    },
+    "cycle:stem:control:natal.chart.day.stem|sewoon.year_2026.cycle.stem": {
+      "type": "control",
+      "participants": [
+        "natal.chart.day.stem",
+        "sewoon.year_2026.cycle.stem"
+      ],
+      "context_ids": [
+        "natal.chart",
+        "sewoon.year_2026"
+      ],
+      "activation_status": "detected",
+      "direction": {
+        "from_character": "natal.chart.day.stem",
+        "to_character": "sewoon.year_2026.cycle.stem",
+        "basis": "rule_fixed"
+      },
+      "formation_candidates": [],
+      "presentation": {
+        "rule_version": "1.0.0",
+        "title": "원국 일간 癸(일간) · 세운 천간 丙(정재)의 천간 극",
+        "status_label": "탐지",
+        "description": "원국 일간 癸(일간) → 세운 천간 丙(정재): 오행상 천간 극의 방향입니다.",
+        "reasons": [
+          {
+            "code": "cycle_presence_only_activation_and_impact_not_evaluated",
+            "category": "scope",
+            "text": "원국·대운·세운 사이의 등록 관계를 탐지한 결과입니다. 운 관계의 성립·경합·실제 영향은 평가하지 않았습니다.",
+            "character_ids": [
+              "natal.chart.day.stem",
+              "sewoon.year_2026.cycle.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          },
+          {
+            "code": "detected_fact",
+            "category": "scope",
+            "text": "글자 일치 또는 등록 규칙으로 확인한 관계 사실이며, 실제 영향량을 판정한 결과는 아닙니다.",
+            "character_ids": [
+              "natal.chart.day.stem",
+              "sewoon.year_2026.cycle.stem"
+            ],
+            "relation_ids": [],
+            "evidence_indices": []
+          }
+        ],
+        "explanation_status": "complete",
+        "missing_evidence_codes": []
+      }
+    }
+  }
+}

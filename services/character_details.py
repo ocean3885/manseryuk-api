@@ -4,6 +4,7 @@ from schemas.character_details import CharacterDetails
 from services.character_relation_index import assemble_character_relation_index_from_response
 from services.character_evidence import attach_natal_evidence, attach_participant_details
 from services.relation_presentation import attach_relation_presentations
+from services.character_display import attach_character_displays
 
 
 def assemble_character_details(response):
@@ -58,4 +59,5 @@ def assemble_character_details(response):
     attach_participant_details(graph)
     attach_natal_evidence(graph, response)
     attach_relation_presentations(graph)
+    attach_character_displays(graph)
     return CharacterDetails.model_validate(graph).model_dump(mode='json')

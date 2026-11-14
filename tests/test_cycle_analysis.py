@@ -37,7 +37,7 @@ class CycleAnalysisTests(unittest.TestCase):
             self.assertEqual(len(result['characters']), 10)
             self.assertTrue(all(result['relations'][rid] == row for rid, row in natal['relations'].items()))
             for key, node in natal['characters'].items():
-                self.assertEqual({k: v for k, v in result['characters'][key].items() if k not in ('relation_ids', 'transmission_relation_ids')}, {k: v for k, v in node.items() if k not in ('relation_ids', 'transmission_relation_ids')})
+                self.assertEqual({k: v for k, v in result['characters'][key].items() if k not in ('relation_ids', 'transmission_relation_ids', 'display')}, {k: v for k, v in node.items() if k not in ('relation_ids', 'transmission_relation_ids', 'display')})
             item = self.response['daewoon']['list'][index]
             for kind, field in [('stem', 'gan_detail'), ('branch', 'ji_detail')]:
                 node = result['characters'][f'daewoon.period_{index}.cycle.{kind}']

@@ -64,7 +64,7 @@ def main():
     export.add_argument('--relation-type')
     export.add_argument('--limit', type=int, help='최대 항목 수. 생략하면 전체')
     export.add_argument('--offset', type=int, default=0)
-    generate = commands.add_parser('generate', help='GEMINI_API_KEY로 빈 explanation을 작성해 새 JSON에 저장')
+    generate = commands.add_parser('generate', help='실험용: 빈 explanation을 새 JSON에 작성. 내용 검토 필요, 서비스 미연결')
     generate.add_argument('--input', type=Path, required=True, help='작성용 JSON 또는 이전 생성 결과')
     generate.add_argument('--output', type=Path, required=True, help='새 .json 파일 경로. 기존 파일은 덮어쓰지 않음')
     generate.add_argument('--model', help='기본값: GEMINI_MODEL 또는 ' + DEFAULT_MODEL)

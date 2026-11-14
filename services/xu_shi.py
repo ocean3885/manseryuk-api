@@ -348,5 +348,6 @@ def _generate_xu_shi_meaning(ten_star: str, current: str, root_scope: str) -> st
     }
     if root_scope == 'same_pillar_only':
         interpretations['실(實)'] = '동주 통근이 있는 구조로 살펴볼 수 있습니다. 뿌리 강도는 점수로 따로 확인합니다'
+        interpretations['허투(虛透)'] = '동주 지지에는 통근이 없는 구조로 살펴볼 수 있습니다. 타주 지지의 지원 여부는 별도 정보로 확인합니다'
         interpretations['변허(變虛)'] = '관계 반영 전에는 동주 통근이 있었으나 계산상 뿌리 기여도가 남지 않은 구조로 살펴볼 수 있습니다'
     return f'전통적 해석 참고: {domain}의 영역에서 {interpretations[current]}. 실제 능력·성과나 직업 적합성을 뜻하지 않습니다.'

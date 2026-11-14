@@ -32,8 +32,18 @@
 [해설 DB 계약](interpretation_database_contract.md)에 초기화·565개 패턴·조건 검색·작성본 보존을 정리했다.
 작성용 JSON 내보내기와 전체 565개·검토용 천간극 20개 파일도 같은 문서에서 안내한다.
 사용자 요청으로 [Gemini 해설 작성 명령](interpretation_generation.md)을 추가했다.
-빈 explanation 작성 범위만 허용하며 실제 키·도메인 연결과 작성 품질은 아직 미검증이다.
-DB 가져오기·검토 승인·API 연결은 후속 범위다.
+실제 키·도메인 연결과 표본 생성은 확인했으나, [소량 검토](explanation_pilot_review.md)에서 내용 오류를 확인했다.
+LLM 연결·검증·저장 코드는 보존하며 해설 생성은 실험용이다. 전체 생성·DB 가져오기·검토 승인·API 연결은 보류한다.
+다음 작업 후보는 [후속 작업 검토](next_work_candidates.md)를 참조한다.
+
+최근 [응답 문구·고 연결 검토](response_wording_storehouse_audit.md)에서 동주 무근의 설명 범위와
+앞 3개 목록의 중요도 오해를 수정하고 고·지장간·투간의 실제 연결을 확인했다.
+
+[글자별 원국·대운·세운 목록 점검](character_cycle_listing_audit.md)에서는 실제 666개 관계 그래프의
+역참조·선택 확장·설명 연결을 확인했다. 화면 표시 자체는 별도 확인 대상이다.
+
+글자 상세 화면은 [간결 표시 계약](character_display_contract.md)의 `characters[ID].display`를
+그대로 렌더링할 수 있다. 원국·선택 대운·세운에 같은 형식을 제공한다.
 
 ## 현행 API 계약
 
