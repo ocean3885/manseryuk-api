@@ -520,6 +520,13 @@ class AdvancedAnalysis(BaseModel):
     ai_consultation_prompts: List[str]
 
 
+class DayMonthInterpretation(BaseModel):
+    """일주·월지 조합에 한정된 일반 상징 해설."""
+    day_pillar: str
+    month_branch: str
+    explanation: str
+
+
 class SajuAnalysisResponse(BaseModel):
     """사주 분석 최종 응답 (도메인별 그룹화)"""
     calendar: CalendarInfo
@@ -530,3 +537,4 @@ class SajuAnalysisResponse(BaseModel):
     meta: MetaInfo
     analysis: AnalysisInfo
     advanced_analysis: Optional[AdvancedAnalysis] = None
+    day_month_interpretation: Optional[DayMonthInterpretation] = None

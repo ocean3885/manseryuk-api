@@ -7,8 +7,9 @@ from schemas.interpretation_rule import InterpretationQuery, InterpretationRule,
 
 DEFAULT_DATABASE = Path(__file__).resolve().parents[1] / 'interpretations.db'
 CALENDAR_DATABASE = Path(__file__).resolve().parents[1] / 'manseryuk.db'
-DATABASE_VERSION = 1
+DATABASE_VERSION = 2
 TABLE = 'interpretation_rules'
+DAY_MONTH_TABLE = 'day_month_interpretations'
 
 DDL = '''CREATE TABLE interpretation_rules (
     rule_id TEXT PRIMARY KEY NOT NULL,
@@ -24,6 +25,19 @@ DDL = '''CREATE TABLE interpretation_rules (
 )'''
 INDEX_DDL = '''CREATE INDEX IF NOT EXISTS ix_interpretation_lookup
                ON interpretation_rules(layer, relation_type, participant_pattern, content_status)'''
+DAY_MONTH_DDL = '''CREATE TABLE day_month_interpretations (
+    day_pillar TEXT NOT NULL,
+    month_branch TEXT NOT NULL,
+    explanation TEXT,
+    status TEXT NOT NULL CHECK(status IN ('pending','generating','ready','failed')),
+    attempts INTEGER NOT NULL DEFAULT 0 CHECK(attempts >= 0),
+    retry_after INTEGER NOT NULL DEFAULT 0,
+    model_name TEXT,
+    updated_at INTEGER NOT NULL,
+    PRIMARY KEY(day_pillar, month_branch),
+    CHECK((status='ready' AND explanation IS NOT NULL AND length(trim(explanation))>0) OR
+          (status!='ready' AND explanation IS NULL))
+)'''
 
 
 class AmbiguousInterpretationError(ValueError):
@@ -39,11 +53,42 @@ def _checked_path(database) -> Path:
 
 def _check_database(connection):
     tables = {r[0] for r in connection.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")}
-    if tables != {TABLE} or connection.execute('PRAGMA user_version').fetchone()[0] != DATABASE_VERSION:
+    version = connection.execute('PRAGMA user_version').fetchone()[0]
+    if (version == 1 and tables != {TABLE}) or (version == 2 and tables != {TABLE, DAY_MONTH_TABLE}) or version not in (1, 2):
         raise ValueError('지원하는 해설 DB 스키마가 아닙니다.')
     if [r[1] for r in connection.execute(f'PRAGMA table_info({TABLE})')] != [
             'rule_id', 'layer', 'relation_type', 'participant_pattern', 'conditions_json', 'explanation', 'content_status']:
         raise ValueError('해설 테이블의 열 정의가 다릅니다.')
+    if version == 2 and [r[1] for r in connection.execute(f'PRAGMA table_info({DAY_MONTH_TABLE})')] != [
+            'day_pillar', 'month_branch', 'explanation', 'status', 'attempts',
+            'retry_after', 'model_name', 'updated_at']:
+        raise ValueError('일주·월지 해설 테이블의 열 정의가 다릅니다.')
+    return version
+
+
+def ensure_database(database=DEFAULT_DATABASE):
+    """없는 해설 DB를 만들고 v1을 v2로 이전한다. 기존 작성본은 보존한다."""
+    path = _checked_path(database)
+    if path.is_file():
+        with closing(sqlite3.connect(path.as_uri() + '?mode=ro', uri=True, timeout=10)) as connection:
+            if _check_database(connection) == DATABASE_VERSION:
+                return path
+    with closing(sqlite3.connect(path, timeout=10)) as connection, connection:
+        connection.execute('BEGIN IMMEDIATE')
+        tables = {r[0] for r in connection.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")}
+        version = connection.execute('PRAGMA user_version').fetchone()[0]
+        if not tables and version == 0:
+            connection.execute(DDL)
+            connection.execute(DAY_MONTH_DDL)
+            connection.execute(f'PRAGMA user_version={DATABASE_VERSION}')
+        else:
+            current = _check_database(connection)
+            if current == 1:
+                connection.execute(DAY_MONTH_DDL)
+                connection.execute(f'PRAGMA user_version={DATABASE_VERSION}')
+        connection.execute(INDEX_DDL)
+        _check_database(connection)
+    return path
 
 
 def seed_database(rules, database=DEFAULT_DATABASE) -> dict:
@@ -51,14 +96,9 @@ def seed_database(rules, database=DEFAULT_DATABASE) -> dict:
     identities = [r.rule_id for r in validated]
     if len(identities) != len(set(identities)):
         raise ValueError('시드 규칙 ID가 중복됐습니다.')
-    path = _checked_path(database)
+    path = ensure_database(database)
     with closing(sqlite3.connect(path)) as connection, connection:
-        tables = {r[0] for r in connection.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")}
-        if not tables and connection.execute('PRAGMA user_version').fetchone()[0] == 0:
-            connection.execute(DDL)
-            connection.execute(f'PRAGMA user_version={DATABASE_VERSION}')
         _check_database(connection)
-        connection.execute(INDEX_DDL)
         before = connection.total_changes
         connection.executemany('''INSERT INTO interpretation_rules
             (rule_id,layer,relation_type,participant_pattern,conditions_json,explanation,content_status)

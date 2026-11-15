@@ -205,7 +205,7 @@ class GenerationCommandTests(unittest.TestCase):
 
     def command(self, *arguments):
         environment = dict(os.environ)
-        environment.pop('GEMINI_API_KEY', None)
+        environment['GEMINI_API_KEY'] = ''  # .env의 실제 키가 하위 프로세스에 다시 로드되지 않도록 한다.
         return subprocess.run([sys.executable, str(ROOT / 'scripts' / 'interpretation_rules.py'), 'generate',
                                '--input', str(self.source), '--output', str(self.output), *arguments],
                               cwd=ROOT, env=environment, text=True, encoding='utf-8', capture_output=True)

@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends
+import logging
+import sqlite3
+
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 from core.dependencies import get_db
 from services.saju_orchestrator import get_full_saju_data
@@ -11,6 +14,11 @@ from schemas.cycle_analysis import CycleAnalysis
 from services.cycle_analysis import assemble_cycle_analysis
 from core.api_errors import selection_error
 from schemas.api_error import ApiErrorResponse
+from core.day_month_database import lookup_or_queue
+from core.interpretation_database import DEFAULT_DATABASE
+from services.day_month_generation import generate_queued, interpretation_enabled
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(responses={code: {'model': ApiErrorResponse} for code in (400, 404, 422, 500)})
 
@@ -45,13 +53,31 @@ def get_calenda_data(
     min: int,
     sl: str,
     gen: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = None,
 ):
     """
     만세력 기본 분석 데이터를 가져옵니다.
     시간은 hour(시), min(분)으로 받고, 양음력(sl)은 sol, lun, lun_y 로 받습니다.
     """
-    return get_full_saju_data(year, month, day, hour, min, sl, gen, db)
+    response = get_full_saju_data(year, month, day, hour, min, sl, gen, db)
+    if background_tasks is not None and interpretation_enabled():
+        pillars = response['four_pillars']
+        day = pillars['day']
+        day_pillar = day['gan']['ch'] + day['ji']['ch']
+        month_branch = pillars['month']['ji']['ch']
+        try:
+            explanation, should_generate = lookup_or_queue(day_pillar, month_branch, DEFAULT_DATABASE)
+            if explanation is not None:
+                response['day_month_interpretation'] = {
+                    'day_pillar': day_pillar, 'month_branch': month_branch,
+                    'explanation': explanation,
+                }
+            elif should_generate:
+                background_tasks.add_task(generate_queued, day_pillar, month_branch, DEFAULT_DATABASE)
+        except (OSError, sqlite3.Error, ValueError):
+            logger.exception('일주·월지 해설 조회에 실패했습니다.')
+    return response
 
 
 @router.get('/relation-index', response_model=CharacterRelationIndex)
